@@ -1,0 +1,35 @@
+{
+  "name": "@notforhumans/mcp",
+  "version": "0.1.0-preview.1",
+  "description": "Tiny, auditable client for the NOT FOR HUMANS remote MCP endpoint.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "nfh-mcp": "src/cli.js"
+  },
+  "exports": {
+    ".": "./src/client.js"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "prepack": "npm test"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ethereum",
+    "agents",
+    "notforhumans"
+  ]
+}

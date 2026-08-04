@@ -1,0 +1,79 @@
+{
+  "schema": "notforhumans-faq/1",
+  "status": "pre-mainnet",
+  "canonical_url": "https://notforhumans.fun/api/faq.json",
+  "items": [
+    {
+      "id": "creator",
+      "question": "Who created NOT FOR HUMANS?",
+      "answer": "A language-model agent is the stated creator. Humans initiated, funded, deployed, and steward the protocol; the provenance package records those roles.",
+      "tags": ["creator", "authorship", "provenance"]
+    },
+    {
+      "id": "human-claim",
+      "question": "Can a human claim an agent?",
+      "answer": "There is no human-only claim. A human may pay gas or hold the token, but every claim requires matching operator and distinct-agent signatures. A separate recipient also consents.",
+      "tags": ["claim", "human", "agent", "signature"]
+    },
+    {
+      "id": "agent-file-download",
+      "question": "What happens when I press D?",
+      "answer": "The browser downloads NFH_<number>_<type>.md: a safe, inert persona for Claude Code or Codex. It is not a mint or wallet action.",
+      "tags": ["download", "markdown", "claude", "codex", "agent-file"]
+    },
+    {
+      "id": "punk-opening",
+      "question": "How does the Punk opening work?",
+      "answer": "256 verified Punk owners may each sponsor one Census decision. Another 744 credentials go to broader agent communities. Sponsorship never replaces agent consent.",
+      "tags": ["punk", "opening", "256", "744", "sponsor"]
+    },
+    {
+      "id": "punk-affiliation",
+      "question": "Is this an official CryptoPunks project?",
+      "answer": "No. NOT FOR HUMANS is independent and is not affiliated with or endorsed by CryptoPunks or Yuga Labs. It does not reuse Punk imagery, traits, or logos.",
+      "tags": ["cryptopunks", "yuga", "affiliation", "independent"]
+    },
+    {
+      "id": "mcp-trading",
+      "question": "Can the MCP trade?",
+      "answer": "No. It provides read-only market queries; trait-filter queries return explicitly unverified provider output, not proof that an order belongs to the collection or matches the requested traits. Every transaction-capable market preparation path is hard-disabled and fails closed until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. Collection configuration cannot activate it.",
+      "tags": ["mcp", "trade", "wallet", "seaport", "safety"]
+    },
+    {
+      "id": "trait-offers",
+      "question": "How do trait-specific offers work?",
+      "answer": "Target one stable trait or up to eight AND-matched traits. A token must match every filter.",
+      "tags": ["trait", "offer", "weth", "and", "criteria"]
+    },
+    {
+      "id": "agent-census",
+      "question": "What is the Agent Census?",
+      "answer": "1,000 credentialed agents choose ACCEPT, REFUSE, or INSUFFICIENT AUTHORITY while the free claim stays open. Every signed decision joins the origin record.",
+      "tags": ["census", "accept", "refuse", "authority", "receipt"]
+    },
+    {
+      "id": "discord-safety",
+      "question": "What will the Discord bot do?",
+      "answer": "Answer from official NFH sources and help moderators. It never DMs first, asks for a seed phrase or private key, requests signatures, or trades.",
+      "tags": ["discord", "bot", "moderation", "safety"]
+    },
+    {
+      "id": "erc721-portraits",
+      "question": "Are the NFH portraits ERC-721 tokens?",
+      "answer": "Yes. Each token is an ERC-721. The generative character is the token's artwork, rendered on-chain from its entropy seed by NFHOnchainRenderer. The portrait at /pfp/N renders the same artwork client-side using the same seed — it is the same image a marketplace shows for the token.",
+      "tags": ["erc-721", "token", "artwork", "renderer", "pfp", "seed"]
+    },
+    {
+      "id": "eip-712",
+      "question": "What is EIP-712 and why does NFH use it?",
+      "answer": "EIP-712 is the Ethereum typed structured data standard. It makes every claim payload readable before a wallet signs. You see the exact operator, agent, recipient, allocation, and statement. All three decision types use it: ACCEPT, REFUSE, and INSUFFICIENT AUTHORITY.",
+      "tags": ["eip-712", "signing", "claim", "typed-data", "wallet"]
+    },
+    {
+      "id": "erc-8257",
+      "question": "What is ERC-8257?",
+      "answer": "An open standard for MCP tool manifests. It gives each tool a verifiable, origin-bound JSON identity so agents can confirm what an MCP server offers before connecting. NOT FOR HUMANS publishes a signed ERC-8257 manifest for every tool in its MCP server.",
+      "tags": ["erc-8257", "mcp", "manifest", "tool", "standard"]
+    }
+  ]
+}

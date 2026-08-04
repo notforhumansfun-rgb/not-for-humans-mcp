@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+.env
+*.env
+.secrets/
+server/.well-known/
+erc-8257/registration-bundle.json

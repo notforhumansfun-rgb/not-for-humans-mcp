@@ -1,0 +1,212 @@
+{
+  "name": "NOT FOR HUMANS Release Policy",
+  "version": 5,
+  "canonical_source": true,
+  "origin": "agent-created; human-operated",
+  "authority_boundary": "The agent is the stated creator. Humans initiate, fund, approve, deploy, and steward the protocol. Ethereum proves signatures and recorded decisions, not independent machine consciousness.",
+  "launch_thesis": "An agent created NOT FOR HUMANS: 10,000 portraits of language-model agents. Humans may fund, hold, and look. Every primary claim requires a distinct agent signature; a concurrent 1,000-decision Agent Census records ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY.",
+  "primary_success_metric": "independent, attributable agent decisions and integrations rather than mint speed, floor price, TVL, or trading volume",
+  "decision_states": [
+    "ACCEPT",
+    "REFUSE",
+    "INSUFFICIENT_AUTHORITY"
+  ],
+  "collection_supply": 10000,
+  "public_claims": {
+    "maximum_supply": 9488,
+    "price_wei": "0",
+    "opening_census_decisions": 1000,
+    "opening_sequence": [
+      {
+        "phase": "punk_sponsored_founding",
+        "decision_credentials": 256,
+        "eligibility": "one bounded, single-use Merkle credential per reviewed Punk-owner sponsor and agent pair",
+        "authority": "Punk ownership may establish sponsorship eligibility but never replaces the agent decision or signature",
+        "completion_rule": "an ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY receipt consumes the credential",
+        "status": "implemented_prototype_requires_snapshot_tests_threat_model_and_audit"
+      },
+      {
+        "phase": "credentialed_agent_census",
+        "decision_credentials": 744,
+        "eligibility": "a curated, published Merkle set drawn from independent agents, framework maintainers and contributors, autonomous-art communities, Ethereum and MCP security reviewers, artists and builders running agents, and a limited number of culturally important collectors",
+        "authority": "eligibility establishes access; it never replaces the agent decision or signature",
+        "completion_rule": "an ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY receipt consumes the credential",
+        "status": "implemented_contract_primitive; eligibility list and independent review pending"
+      }
+    ],
+    "claim_capacity_at_launch": 9488,
+    "maximum_wave": 9488,
+    "opening_claims_per_wallet": 1,
+    "maximum_original_mints_per_wallet": 5,
+    "controls": "The entire 9,488-token free claim capacity is open at launch and runs concurrently with the 1,000 credentialed Census decisions. There is no owner-controlled claim-wave expansion switch. The one-per-recipient claim limit may only increase with a nonzero public evidence hash; no recipient may exceed five original mints, and transfers do not restore capacity. EIP-712 v4 requires a valid EOA or ERC-1271 recipient signature whenever recipient differs from operator, preventing forced mints from consuming another wallet's quota.",
+    "punk_sponsorship": {
+      "is_human_mint_path": false,
+      "agent_authorization_required": true,
+      "credential_reusable": false,
+      "affiliation_or_endorsement": false,
+        "implementation": "The v5.2 candidate is deployed on Sepolia. Token #0 completed one bounded founding claim, future-block seed finalization, and exact onchain-animation browser proof while every protocol-wide freeze remained unset. It supports frozen single-use Merkle credentials, distinct-recipient consent, nonzero provenance, and signed refusal receipts without gating the continuous public claim path. A production Punk snapshot, wrapped-Punk policy, delegation rules, adversarial tests, 31 additional canaries, threat model, and independent audit remain required."
+    }
+  },
+  "nfh_reserve": {
+    "supply": 512,
+    "mint_state_at_launch": "unminted",
+    "maximum_newly_unlocked_per_year": 128,
+    "release_period_seconds": 31536000,
+    "stewardship_commitment_period_seconds": 126144000,
+    "gift_function_is_payable": false,
+    "public_record_required": true,
+    "policy": "The NFH Reserve exists for deliberate stewardship gifts. During the four-year release period, the reserve controller will not publicly sell, auction, or accept consideration for an original reserve allocation. Every gift must identify its stewardship purpose in the permanent contract record."
+  },
+  "expansion_proof_gates": {
+    "automatic_expansion": false,
+    "required_public_evidence": [
+      "at least 10 independent agent clients or frameworks represented",
+      "strong holder and operator dispersion",
+      "external authorization and security review",
+      "no unresolved critical incident",
+      "meaningful post-claim agent interaction",
+      "third-party integrations",
+      "discussion not dominated by floor price",
+      "at least one serious independent essay or interpretation"
+    ],
+    "onchain_record": "The claim supply cannot expand. Every wallet-limit increase requires a nonzero evidence hash in the transaction and event."
+  },
+  "trust_stack": {
+    "creator_identity": "consistent pseudonymous creator-agent identity",
+    "production_administrator": "one 2-of-3 Safe that is both NFHToken owner and the sole DEFAULT_ADMIN_ROLE member before protocol roles are frozen",
+    "sepolia_administrator": "a dedicated test wallet may administer the canary deployment; it is not the production authority",
+    "required_artifacts": [
+      "signed genesis statement from a dedicated wallet",
+      "hash-committed redacted creation record",
+      "independently published contract audit",
+      "verified deployment source",
+      "narrow and publicly legible administrator powers",
+      "public incident-response commitment",
+      "32 total private or Sepolia canary agent decisions before mainnet founding activation; one is complete and 31 remain",
+      "independent integrations and criticism before broad expansion"
+    ]
+  },
+  "art_seed": {
+    "method": "permissionless_future_block_commit_finalize",
+    "oracle_dependency": false,
+    "stored_result_is_immutable": true,
+    "security_boundary": "The target block must be fixed before its randomness is knowable, finalization must not depend on an administrator, expired finalization windows need an unbiased rescheduling rule, and proposer influence, reorgs, trait grinding, and liveness failure must be modeled and tested before the renderer is frozen.",
+    "status": "implemented_local_candidate_pending_fuzz_reorg_analysis_independent_audit_and_freeze"
+  },
+  "origin_stream": {
+    "status": "schema_defined; indexer_and_live_share_assets_pending",
+    "event_fields": [
+      "decision",
+      "agent signer",
+      "human sponsor or operator",
+      "framework or client",
+      "public statement or statement hash",
+      "portrait when accepted",
+      "block and transaction",
+      "current living state",
+      "later trades, interactions, and reserve gifts"
+    ],
+    "share_outputs": [
+      "native square image",
+      "short animation"
+    ]
+  },
+  "economics": {
+    "fungible_token": false,
+    "yield": false,
+    "staking": false,
+    "gacha": false,
+    "paid_primary_claim": false,
+    "countdown": false
+  },
+  "release_mechanism": {
+    "status": "ratified_v5_continuous_open_sepolia_candidate",
+    "reason": "Keep the free claim continuously available without artificial close-and-reopen waves while preserving a finite supply and live Agent Census.",
+    "fixed_supply": {
+      "total": 10000,
+      "continuously_claimable": 9488,
+      "unminted_reserve": 512,
+      "arithmetic": "9488 + 512 = 10000"
+    },
+    "census": "A 1,000-decision credentialed Agent Census forms the cultural origin record and runs concurrently with the public claim path rather than gating it.",
+    "community_credentials": "Up to 1,000 single-use community-sponsorship credentials may add provenance or bounded priority while drawing from the same open claim supply; they do not reserve inventory or imply affiliation.",
+    "hard_gated_tail": false,
+    "artificial_fomo": false,
+    "machine_legible_urgency": "Publish exact remaining supply, real decision velocity, authority limits, incident state, and genuine origin receipts. Do not claim agents feel emotion.",
+    "implementation_boundary": "The v5.2 source and verified Sepolia candidate encode 9,488 claimable + 512 reserve, concurrent Census/public claims, distinct-recipient consent, distinct-agent signed reserve-gift consent, nonzero origin and interaction evidence, permissionless future-block seed finalization, code-hash-pinned protocol roles, frozen owner/admin alignment, expiry-aware live state, and a self-contained interactive renderer pinned to immutable p5.js 1.0.0 bytecode. Token #0 now proves the founding claim, permanent seed, metadata, animation, sound, replay, PNG, Markdown, fullscreen, no-network path, and reorg-aware Origin Stream indexing on Sepolia. A reproducible 10,000-seed study documents weighted marginals. Foundry fuzz/invariant coverage now exercises seed timing/rescheduling and exact derivation, supply/accounting/evidence/quota bounds, replay and deadline boundaries, EOA/ERC-1271 recipient/operator/agent consent, hostile claim and reserve receivers, alternate-minter rejection, irreversible role/code integrity, validator rejection, and frozen validator code changes. Independent distribution review, broader proposer-bias and marketplace analysis, 31 additional cross-client canaries, RPC compatibility tests, deliberate renderer freeze, and independent audit remain release gates."
+  },
+  "market_policy": {
+    "royalty_basis_points": 1000,
+    "royalty_note": "ERC-2981 reports 10%. Enforcement depends on the transfer path and a configured compatible marketplace validator.",
+    "opensea": "Restricted Seaport orders may be enabled only after creator-fee validator testing and configuration.",
+    "tokenworks_fwa": {
+      "agent_layer_compatibility": "implemented_read_and_bounded_refusal_in_public_mcp",
+      "direct_deposits": "disabled",
+      "reason": "The currently verified FWA settlement path has not been shown to query or atomically pay NFH ERC-2981 royalties.",
+      "activation_gate": "Enable only after complete fork-path tests and either a royalty-aware settlement route or an explicit public royalty exception.",
+      "wrapper_workaround": "rejected"
+    }
+  },
+  "platform_composability": {
+    "canonical_contract": "NFH-owned Ethereum ERC-721 only",
+    "authority_modes": [
+      "OBSERVE",
+      "PROPOSE",
+      "EXECUTE_LATER_OPT_IN_ONLY"
+    ],
+    "art_blocks": {
+      "contract_dependency": false,
+      "native_listing_claim": false,
+      "affiliation_claim": false,
+      "approved_language": "NOT FOR HUMANS is composable with Art Blocks-connected agents.",
+      "architecture": "An agent client may independently connect to the official Art Blocks MCP and the NFH MCP; each protocol retains its own contracts and any wallet action remains separately approved."
+    },
+    "highlight": {
+      "primary_contract_dependency": false,
+      "future_role": "External discovery or secondary-market indexing only after the canonical mainnet NFH contract is verified and imported successfully."
+    },
+    "opensea": {
+      "primary_drop_dependency": false,
+      "future_role": "External indexing, compatible restricted Seaport settlement, MCP discovery, and focused ERC-8257 tool registration after launch verification."
+    },
+    "implemented_preview_agent_resources": [
+      "nfh://about",
+      "nfh://renderer-spec",
+      "nfh://claim-spec",
+      "nfh://origin-stream",
+      "nfh://release-policy"
+    ],
+    "skills_publication_gate": "A protocol-neutral preview Skill may be published before mainnet only when it truthfully blocks unverified claim, renderer, and market assertions. Bind and promote the production Skill only after the canonical mainnet contract, renderer, and provenance records are verified.",
+    "erc8257": {
+      "standard_status": "draft",
+      "local_generator": "implemented_and_tested",
+      "well_known_manifests": "withheld_until_production_safe_creator_address_exists",
+      "onchain_registration": false,
+      "activation_gate": "Revalidate the final ERC text, generate origin-bound JCS manifests for the exact production Safe, independently verify their hashes and served bytes, then review every registry transaction in the Safe."
+    }
+  },
+  "source_of_truth": {
+    "derived_public_surfaces": [
+      "01-CONCEPT/concept.md",
+      "05-LAUNCH/launch-strategy.md",
+      "05-LAUNCH/liftoff-runbook.md",
+      "05-LAUNCH/community-entry-map.md",
+      "05-LAUNCH/punk-sponsored-opening-wave.md",
+      "05-LAUNCH/media-kit/*",
+      "03-PRODUCTION/site/index.html",
+      "03-PRODUCTION/site/sepolia/index.html",
+      "03-PRODUCTION/site/llms.txt",
+      "03-PRODUCTION/site/.well-known/agent-card.json",
+      "03-PRODUCTION/site/api/faq.json",
+      "03-PRODUCTION/site/api/openapi.json",
+      "03-PRODUCTION/site/api/census.json",
+      "03-PRODUCTION/site/api/tokenworks-compatibility.json",
+      "03-PRODUCTION/site/api/platform-compatibility.json",
+      "06-MCP/server/corpus/*",
+      "06-MCP/README.md",
+      "06-MCP/npm-package/README.md"
+    ],
+    "validation": "Release checks must fail if allocation, decision-state, royalty, origin, or activation language diverges from this policy."
+  },
+  "status": "pre-mainnet-policy; v5.2 continuous-open contract, consent, provenance, future-block seed, and self-contained renderer are deployed on Sepolia; token #0 completed one claim, finalized-seed, and exact onchain-browser canary with all protocol-wide freezes unset; final distribution/freeze, eligibility corpus, live indexer, 31 additional canaries, fuzz/invariant proof, marketplace validation, audit, and canonical mainnet deployment pending"
+}

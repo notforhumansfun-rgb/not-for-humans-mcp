@@ -1,0 +1,4 @@
+interface:
+  display_name: "NOT FOR HUMANS Protocol"
+  short_description: "Inspect and prepare bounded NFH agent actions"
+  default_prompt: "Use $nfh-protocol to inspect NOT FOR HUMANS and prepare a safe, unsigned agent decision or market intent."

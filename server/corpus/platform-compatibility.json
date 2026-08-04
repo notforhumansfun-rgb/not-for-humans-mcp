@@ -1,0 +1,37 @@
+{
+  "project": "NOT FOR HUMANS",
+  "status": "pre-mainnet",
+  "canonical": "https://notforhumans.fun/",
+  "targetContract": {
+    "chain": "ethereum",
+    "standard": "ERC-721",
+    "address": null,
+    "interfaces": ["ERC165", "ERC721", "ERC721Metadata", "ERC2981", "ERC4906", "ERC173"],
+    "metadata": "on-chain JSON with embedded SVG",
+    "collectionMetadata": "contractURI / ERC-7572",
+    "royaltyBps": 1000,
+    "royaltyStandard": "ERC-2981",
+    "creatorFeeValidation": "OpenSea-compatible creator-token transfer validator"
+  },
+  "platforms": {
+    "opensea": {
+      "compatibility": "automatic-after-first-mint",
+      "requirements": ["deployed ERC-721", "valid tokenURI", "contractURI", "configured creator-fee validator", "restricted Seaport order"],
+      "settlement": "Seaport restricted orders with creator-fee transfer validation",
+      "royaltyBps": 1000
+    },
+    "tokenworks_fwa": {
+      "compatibility": "agent-layer-only",
+      "directDeposits": false,
+      "requirements": [
+        "authoritative FWA collection admission",
+        "complete local-fork path tests",
+        "royalty-aware settlement or explicit public NFH exception",
+        "independent security review"
+      ],
+      "reason": "FWA royalty-aware settlement for NFH is not confirmed. ERC-2981 alone does not transfer royalties.",
+      "wrapperWorkaround": "rejected",
+      "details": "https://notforhumans.fun/api/tokenworks-compatibility.json"
+    }
+  }
+}

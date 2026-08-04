@@ -1,0 +1,27 @@
+{
+  "status": "pre-mainnet-preview",
+  "chain": "ethereum",
+  "chainId": 1,
+  "collectionContract": null,
+  "collectionSlug": null,
+  "settlement": "OpenSea / Seaport",
+  "seaportProtocolAddress": "0x0000000000000068F116a894984e2DB1123eB395",
+  "creatorFeeBps": 1000,
+  "currency": {
+    "symbol": "ETH",
+    "address": "0x0000000000000000000000000000000000000000"
+  },
+  "offerCurrency": {
+    "symbol": "WETH",
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "decimals": 18
+  },
+  "executionModel": "MCP normalizes intent and must fail closed for every transaction-capable market action until complete provider semantic validation is implemented; it never signs or broadcasts.",
+  "activationRequirements": [
+    "Deploy and independently audit the canonical NFH contracts on Ethereum mainnet.",
+    "Set NFH_COLLECTION_CONTRACT to the verified NFHToken address.",
+    "Set NFH_COLLECTION_SLUG after OpenSea indexes the collection so collection and trait offers can be resolved.",
+    "Implement and independently review complete provider semantic decoding and normalized-intent equivalence for every supported action.",
+    "Configure and freeze the creator-fee transfer validator after marketplace testing."
+  ]
+}

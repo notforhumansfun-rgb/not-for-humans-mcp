@@ -1,0 +1,46 @@
+{
+  "schema": "notforhumans-tokenworks-compatibility/1",
+  "status": "agent-layer-only",
+  "canonical_url": "https://notforhumans.fun/api/tokenworks-compatibility.json",
+  "chain_id": 1,
+  "fwa": {
+    "core_contract": "0xB276F62DB0ce8CA2Ca5bc522695bE604521eAc1c",
+    "allowlist_contract": "0x854352b275cF6A0DfFCf2983C986FBe9345e17c3",
+    "collection_admission_required": true,
+    "nfh_admitted": false,
+    "direct_action_preparation_enabled": false
+  },
+  "royalty_boundary": {
+    "nfh_royalty_bps": 1000,
+    "erc2981_reports_terms_only": true,
+    "fwa_royalty_aware_settlement_confirmed": false,
+    "direct_deposits_enabled": false,
+    "reason": "The verified FWA settlement path has not been shown to query royaltyInfo or atomically pay the NFH receiver when economic ownership changes."
+  },
+  "allowed_agent_actions": [
+    "inspect compatibility",
+    "record a bounded refusal",
+    "identify missing fork tests"
+  ],
+  "blocked_actions": [
+    "approve FWA as an operator",
+    "deposit NFH",
+    "withdraw NFH",
+    "purchase an FWA position",
+    "relist an FWA position",
+    "settle an FWA position"
+  ],
+  "activation_requirements": [
+    "NFH admission to the authoritative FWA collection allowlist",
+    "local Ethereum fork coverage for deposit, withdrawal, purchaser-keeps-NFT, depositor-bid settlement, relisting, delayed settlement, failed-transfer recovery, and NFH transfer-validator behavior",
+    "a royalty-aware settlement route or an explicit public NFH royalty exception",
+    "independent security review",
+    "canonical contract and MCP configuration"
+  ],
+  "wrapper_workaround": "rejected",
+  "mcp_tools": [
+    "get_tokenworks_status",
+    "prepare_tokenworks_decision"
+  ],
+  "mcp_executes_or_signs": false
+}
