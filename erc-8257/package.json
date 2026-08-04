@@ -1,0 +1,15 @@
+{
+  "name": "@notforhumans/erc-8257-manifests",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build-manifests.mjs",
+    "test": "node build-manifests.test.mjs",
+    "verify:published": "node verify-published.mjs"
+  },
+  "dependencies": {
+    "canonicalize": "3.0.0",
+    "ethers": "6.17.0"
+  }
+}

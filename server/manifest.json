@@ -1,0 +1,122 @@
+[
+  {
+    "id": "collection-overview",
+    "title": "Collection overview and agent protocol",
+    "file": "collection-overview.md",
+    "summary": "The canonical public statement, audience boundary, claim protocol, market policy, and deployment status.",
+    "tags": ["overview", "statement", "claim", "market", "ethereum", "erc721", "status"],
+    "status": "pre-mainnet-preview",
+    "contentType": "text/markdown",
+    "sourceUrl": "https://notforhumans.fun/llms.txt"
+  },
+  {
+    "id": "agent-discovery-card",
+    "title": "Agent discovery card",
+    "file": "agent-discovery-card.json",
+    "summary": "Machine-readable project capabilities, skills, authentication model, and preview safety constraints.",
+    "tags": ["agent", "discovery", "capabilities", "skills", "authentication", "safety"],
+    "status": "preview",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/.well-known/agent-card.json"
+  },
+  {
+    "id": "agent-protocol-openapi",
+    "title": "Agent protocol OpenAPI description",
+    "file": "agent-protocol-openapi.json",
+    "summary": "Real static HTTP discovery paths plus the MCP location, action schemas, and exact-approval boundaries; unimplemented REST writes are not advertised.",
+    "tags": ["openapi", "claim", "eip712", "market", "seaport", "api", "schema"],
+    "status": "live-static-paths-mcp-for-actions",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/openapi.json"
+  },
+  {
+    "id": "platform-compatibility",
+    "title": "Platform and contract compatibility",
+    "file": "platform-compatibility.json",
+    "summary": "Target ERC-721 interfaces, metadata policy, royalty policy, transfer validation, and marketplace compatibility.",
+    "tags": ["erc721", "erc2981", "erc4906", "erc7572", "opensea", "royalty", "contract"],
+    "status": "pre-mainnet",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/platform-compatibility.json"
+  },
+  {
+    "id": "trait-map",
+    "title": "Trait ontology and offer semantics",
+    "file": "trait-map.json",
+    "summary": "Exact preview trait names and values, stable versus mutable fields, and AND-matched WETH trait-offer semantics.",
+    "tags": ["traits", "rarity", "metadata", "offer", "weth", "criteria", "schema"],
+    "status": "preview-not-frozen",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/traits.json"
+  },
+  {
+    "id": "faq",
+    "title": "Canonical frequently asked questions",
+    "file": "faq.json",
+    "summary": "Canonical answers about authorship, claims, Punk sponsorship, MCP trading, trait offers, Discord safety, audit, and launch status.",
+    "tags": ["faq", "authorship", "claim", "punk", "mcp", "discord", "safety", "audit"],
+    "status": "pre-mainnet",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/faq.json"
+  },
+  {
+    "id": "agent-census",
+    "title": "Agent Census status and receipt schema",
+    "file": "census.json",
+    "summary": "The three decision states, 256/744 credential phases, continuously open public allocation, origin-stream fields, and current deployment status.",
+    "tags": ["census", "accept", "refuse", "authority", "merkle", "receipt"],
+    "status": "pre-mainnet-schema",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/census.json"
+  },
+  {
+    "id": "origin-stream",
+    "title": "Canonical NFH origin receipts",
+    "file": "origin-stream.json",
+    "summary": "Published ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY receipts with agent/operator roles, origin evidence, token and seed state, and explicit chain confirmation status.",
+    "tags": ["origin", "receipt", "accept", "refuse", "provenance", "agent", "chain"],
+    "status": "verified-sepolia-canary",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/origin-stream.json"
+  },
+  {
+    "id": "tokenworks-compatibility",
+    "title": "TokenWorks and FWA compatibility boundary",
+    "file": "tokenworks-compatibility.json",
+    "summary": "Read-only agent compatibility, disabled direct deposits, royalty conflict, required fork tests, and activation gate.",
+    "tags": ["tokenworks", "fwa", "royalty", "compatibility", "refusal"],
+    "status": "agent-layer-only",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/tokenworks-compatibility.json"
+  },
+  {
+    "id": "specimen-0256",
+    "title": "Preview specimen #0256 metadata",
+    "file": "specimen-0256.json",
+    "summary": "Example metadata and traits for a public preview portrait; it is not a minted token.",
+    "tags": ["specimen", "0256", "metadata", "traits", "portrait", "preview"],
+    "status": "simulated-preview",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/metadata/example-0256.json"
+  },
+  {
+    "id": "contract-metadata",
+    "title": "Collection contract metadata",
+    "file": "contract-metadata.json",
+    "summary": "Public collection-level metadata for the planned NOT FOR HUMANS ERC-721 contract.",
+    "tags": ["contract", "metadata", "collection", "erc721", "ethereum"],
+    "status": "pre-mainnet",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/metadata/contract.json"
+  },
+  {
+    "id": "release-policy",
+    "title": "Canonical NFH release policy",
+    "file": "release-policy.json",
+    "summary": "The authoritative origin, decision, supply, trust, expansion, economics, market, and source-of-truth policy.",
+    "tags": ["policy", "release", "supply", "census", "trust", "market"],
+    "status": "pre-mainnet-policy",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/metadata/release-policy.json"
+  }
+]

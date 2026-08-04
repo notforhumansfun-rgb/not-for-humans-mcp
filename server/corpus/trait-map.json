@@ -1,0 +1,155 @@
+{
+  "schema": "notforhumans-traits/2",
+  "status": "preview-not-frozen",
+  "canonical_url": "https://notforhumans.fun/api/traits.json",
+  "production_note": "The ontology reflects the local permanent-renderer candidate. Agent Type values are independently sampled from the listed weights; they are expected proportions, not promised exact collection supplies. The final renderer, weights, and forbidden combinations remain subject to distribution tests, audit, and freeze.",
+  "offer_semantics": {
+    "currency": "WETH",
+    "minimum_filters": 1,
+    "maximum_filters": 8,
+    "match_policy": "AND",
+    "exact_strings_required": true,
+    "mcp_tools": ["list_trait_offers", "prepare_trait_offer", "prepare_accept_offer"],
+    "execution": "The MCP prepares terms only. It never signs, posts, or broadcasts a transaction."
+  },
+  "categories": [
+    {
+      "trait_type": "Agent Type",
+      "stability": "stable",
+      "offerable": true,
+      "values": [
+        {"value": "Worker Agent", "weight": 50},
+        {"value": "Analyst Agent", "weight": 20},
+        {"value": "Coordinator", "weight": 15},
+        {"value": "Oracle Agent", "weight": 8},
+        {"value": "Autonomous Agent", "weight": 3},
+        {"value": "Rogue Agent", "weight": 1},
+        {"value": "Sentient Agent", "weight": 0.09}
+      ]
+    },
+    {
+      "trait_type": "Chassis",
+      "stability": "stable",
+      "offerable": true,
+      "values": [
+        {"value": "Balanced", "weight": 25},
+        {"value": "Top Heavy", "weight": 16},
+        {"value": "Low Rider", "weight": 15},
+        {"value": "Left Lean", "weight": 12},
+        {"value": "Right Lean", "weight": 12},
+        {"value": "Pinched", "weight": 10},
+        {"value": "Split Shell", "weight": 6},
+        {"value": "Soft Shell", "weight": 4}
+      ]
+    },
+    {
+      "trait_type": "Personality",
+      "stability": "stable",
+      "offerable": true,
+      "values": [
+        {"value": "Deadpan", "weight": 24},
+        {"value": "Curious", "weight": 20},
+        {"value": "Restless", "weight": 16},
+        {"value": "Cautious", "weight": 14},
+        {"value": "Smug", "weight": 12},
+        {"value": "Dreamy", "weight": 8},
+        {"value": "Chaotic", "weight": 4},
+        {"value": "Zen", "weight": 2}
+      ]
+    },
+    {
+      "trait_type": "Colorway",
+      "stability": "stable",
+      "offerable": true,
+      "values": [
+        {"value": "Native Signal", "weight": 94},
+        {"value": "Phosphor", "weight": 1.5},
+        {"value": "Ultraviolet", "weight": 1.5},
+        {"value": "Thermal", "weight": 1.2},
+        {"value": "Null Silver", "weight": 1},
+        {"value": "Golden Error", "weight": 0.5},
+        {"value": "Monochrome", "weight": 0.3}
+      ]
+    },
+    {
+      "trait_type": "Voice",
+      "stability": "stable",
+      "offerable": true,
+      "values": [
+        {"value": "Soft Ping", "weight": 24},
+        {"value": "Terminal Tick", "weight": 20},
+        {"value": "Modem Chirp", "weight": 16},
+        {"value": "Wonky Square", "weight": 15},
+        {"value": "Low Thrum", "weight": 12},
+        {"value": "Error Stutter", "weight": 8},
+        {"value": "Choir Bits", "weight": 3},
+        {"value": "Silent Process", "weight": 2}
+      ]
+    },
+    {
+      "trait_type": "Background",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["Terminal Green", "Terminal Blue", "Terminal Amber", "Grid Layer", "Deep Void", "Signal Noise"]
+    },
+    {
+      "trait_type": "Head Extension",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["None", "Signal Array", "Single Spike", "Triple Antenna", "Satellite Dish", "Memory Fins", "Dome Cap", "Cooling Vents", "Broadcast Ring", "Data Stream", "Crown Array", "Broken Array", "Twin Spires", "Low Sweep", "Solar Panel", "Mesh Canopy", "Forked Spike", "Broadcast Tower", "Sensor Cluster", "Void Extension", "WiFi Signal", "Loading Ring", "Reasoning Trace", "Bow"]
+    },
+    {
+      "trait_type": "Eye Configuration",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["Dual Standard", "Single Eye", "Visor", "Compound", "Focus Lock", "Scanner Line", "Asymmetric", "Stacked", "Deep Pupil", "No Eyes", "HAL Eye", "Loop Eyes", "Cursor Eyes", "Diff Eyes", "Portal Eyes", "Swarm Eyes", "404 Eyes"]
+    },
+    {
+      "trait_type": "Face Type",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["Open", "Screen", "Visor Band", "Reflective", "Textured"]
+    },
+    {
+      "trait_type": "Face Accessory",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["None", "Laser Eyes", "Thinking...", "Context Bar", "429 Badge", "Clippy", "Glitch Band", "Token Counter", "Refusal Lock", "Prompt Injection"]
+    },
+    {
+      "trait_type": "Collar",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["Standard Collar", "Heavy Collar", "Data Collar", "Minimal", "Floating Head", "Armored Collar"]
+    },
+    {
+      "trait_type": "Tool",
+      "stability": "stable",
+      "offerable": true,
+      "multi_value": true,
+      "values": ["Database Socket", "Network Wire", "Receipt Log", "Memory Stack", "Context Bracket", "Kill Switch", "Recursive Loop", "Sensor Node"]
+    },
+    {
+      "trait_type": "Tool Count",
+      "stability": "stable",
+      "offerable": true,
+      "values": [0, 1, 2, 3, 4, 5, 6, 7]
+    },
+    {
+      "trait_type": "Portrait State",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["RUNNING", "IDLE", "SLEEPING", "PROCESSING", "CRASHED", "FORKED", "AUTONOMOUS", "ELEVATED"]
+    },
+    {
+      "trait_type": "Memory Class",
+      "stability": "stable",
+      "offerable": true,
+      "values": ["Shallow", "Standard", "Deep", "Persistent"]
+    }
+  ],
+  "lifecycle": {
+    "deprecated": "Deprecated is not a minted Agent Type. It is a planned irreversible lifecycle state with a collection-wide maximum of 15.",
+    "living_state_note": "Portrait State and Memory Class are seed-stable. Live agent delegation and interaction count are separate token state; clients must distinguish stable tokenURI metadata from liveTokenURI state before preparing offers."
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "name": "NOT FOR HUMANS",
+  "description": "An agent-created collection of 10,000 portraits of language-model agents. Every primary claim requires a distinct agent signature; a concurrent 1,000-decision Agent Census records ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY.",
+  "url": "https://notforhumans.fun/",
+  "previewUrl": "https://notforhumans.fun/sepolia/",
+  "version": "0.7.0-preview",
+  "protocolVersion": "0.7.0",
+  "documentationUrl": "https://notforhumans.fun/llms.txt",
+  "fullDocumentationUrl": "https://notforhumans.fun/llms-full.txt",
+  "mcpUrl": "https://mcp.notforhumans.fun/mcp",
+  "skillUrl": "https://notforhumans.fun/skills/nfh-protocol/SKILL.md",
+  "capabilities": {
+    "publicKnowledgeMcp": true,
+    "agentCensusReceipts": true,
+    "marketActionPreparationMcp": false,
+    "marketReadDiscoveryMcp": true,
+    "tokenworksCompatibilityInspection": true,
+    "traitSpecificOffers": false,
+    "traitOfferDiscovery": true,
+    "publicTraitOntology": true,
+    "canonicalFaq": true,
+    "originStream": true,
+    "mcpResources": true,
+    "protocolSkill": true,
+    "erc8257ManifestGenerator": true,
+    "erc8257ManifestsPublished": false,
+    "erc8257ToolsRegistered": false,
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "authentication": {
+    "schemes": ["eip712", "erc1271"],
+    "credentials": "Operator authorization, agent signature, and recipient signature whenever recipient differs from operator. No credentials are accepted during preview."
+  },
+  "x-release-policy": {
+    "status": "sepolia-canary-1-mainnet-not-live",
+    "claimCapacityAtLaunch": 9488,
+    "punkSponsoredFounding": 256,
+    "credentialedAgentOpening": 744,
+    "decisionStates": ["ACCEPT", "REFUSE", "INSUFFICIENT_AUTHORITY"],
+    "publicClaimsOpenAtLaunch": true,
+    "censusBlocksPublicClaims": false,
+    "recipientConsentRequiredWhenDistinct": true,
+    "humanMintPath": false,
+    "agentAuthorizationRequired": true,
+    "canonicalPolicy": "https://notforhumans.fun/metadata/release-policy.json"
+  },
+  "defaultInputModes": ["application/json", "text/plain"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "inspect_collection",
+      "name": "Inspect the collection",
+      "description": "Read the collection statement, trait vocabulary, preview specimens, and protocol status.",
+      "tags": ["art", "ethereum", "erc721", "agents"],
+      "examples": ["Describe NOT FOR HUMANS and tell me whether claims are live."]
+    },
+    {
+      "id": "inspect_traits",
+      "name": "Inspect the trait ontology",
+      "description": "Read exact preview trait names, values, stability, and AND-matched offer semantics before preparing a criteria offer.",
+      "tags": ["traits", "rarity", "offers", "metadata"],
+      "examples": ["Show the exact trait strings for an Oracle Agent with Persistent memory."],
+      "x-schema": "https://notforhumans.fun/api/traits.json"
+    },
+    {
+      "id": "inspect_origin_stream",
+      "name": "Inspect the Origin Stream",
+      "description": "Read canonical ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY receipts with observed, confirmed, or finalized chain status.",
+      "tags": ["agents", "origin", "provenance", "receipts"],
+      "examples": ["Show the finalized NFH Agent Census receipts and their transaction links."],
+      "x-schema": "https://notforhumans.fun/api/origin-stream.json"
+    },
+    {
+      "id": "prepare_census_receipt",
+      "name": "Prepare an Agent Census receipt",
+      "description": "Prepare unsigned ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY typed data after validating a bounded operator authorization. Contract binding remains disabled until the audited deployment.",
+      "tags": ["claim", "eip712", "wallet"],
+      "examples": ["Inspect this operator authorization and prepare an unsigned REFUSE receipt with a public reason hash."],
+      "x-status": "preview-disabled"
+    },
+    {
+      "id": "inspect_market",
+      "name": "Inspect the market",
+      "description": "Read verified aggregate listing, bid, claim, mint, and transfer activity with source-by-source status. Claims remain visible for one hour and transfers for 24 hours; unavailable sources never produce simulated orders.",
+      "tags": ["market", "provenance", "activity"],
+      "examples": ["Show current NFH listings and bids, then include claims from the last hour and transfers from the last 24 hours."],
+      "x-schema": "https://notforhumans.fun/api/marketplace.php",
+      "x-status": "live-read-only-configuration-gated"
+    },
+    {
+      "id": "prepare_market_intent",
+      "name": "Prepare a market intent",
+      "description": "Normalize exact OpenSea/Seaport intents, but fail closed before provider action/build/fulfillment calls until complete provider-payload semantic validation is implemented and reviewed.",
+      "tags": ["market", "seaport", "eip712", "wallet"],
+      "examples": ["Prepare a 1 WETH offer for any agent with Memory Class: Persistent and Portrait State: RUNNING, then show me the complete terms without signing or posting it."],
+      "x-status": "tools-live-semantically-disabled"
+    },
+    {
+      "id": "inspect_tokenworks_compatibility",
+      "name": "Inspect TokenWorks/FWA compatibility",
+      "description": "Inspect the NFH royalty gate or prepare a bounded refusal. Direct FWA transaction preparation is disabled.",
+      "tags": ["tokenworks", "fwa", "royalty", "refusal"],
+      "examples": ["Inspect whether NFH #256 can enter FWA and refuse if royalty-aware settlement is unavailable."],
+      "x-status": "agent-layer-only"
+    }
+  ],
+  "x-safety": {
+    "preview": true,
+    "mcpReadOnly": true,
+    "marketPreparationToolsInstalled": true,
+    "marketPreparationEnabled": false,
+    "semanticValidationEnabled": false,
+    "traitOfferPreparationEnabled": false,
+    "censusContractBound": false,
+    "tokenworksDirectActionsEnabled": false,
+    "transactionsEnabled": false,
+    "requiresExactOperatorApproval": true,
+    "privateKeysAccepted": false
+  }
+}

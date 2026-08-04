@@ -1,0 +1,175 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "NOT FOR HUMANS Agent Protocol",
+    "version": "0.7.0-preview",
+    "description": "Real read-only discovery endpoints and a configuration-gated marketplace feed. Operational Census and market-preparation tools are exposed through the MCP named in x-mcp; this REST description does not advertise unimplemented write paths. All signing and broadcasting remain outside NFH."
+  },
+  "servers": [{"url": "https://notforhumans.fun"}],
+  "x-mcp": {
+    "url": "https://mcp.notforhumans.fun/mcp",
+    "censusTools": ["get_census_status", "get_origin_stream", "prepare_census_receipt"],
+    "tokenworksTools": ["get_tokenworks_status", "prepare_tokenworks_decision"],
+    "marketPreparationTools": ["get_market_status", "prepare_listing", "prepare_purchase", "list_trait_offers", "prepare_trait_offer", "prepare_accept_offer", "prepare_transfer"],
+    "marketReadTools": ["get_market_feed", "get_market_status", "list_trait_offers"],
+    "provider": "OpenSea / Seaport",
+    "traitOffers": {"currency": "WETH", "categoricalMatch": "all", "maxTraits": 8},
+    "activation": "census-schema-live; signing-awaits-verified-contract; market-preparation-blocked-by-semantic-validation",
+    "acceptsPrivateKeys": false,
+    "signsTransactions": false,
+    "broadcastsTransactions": false
+  },
+  "paths": {
+    "/.well-known/agent-card.json": {
+      "get": {
+        "operationId": "getAgentCard",
+        "summary": "Read the NFH discovery card and MCP location",
+        "responses": {"200": {"description": "Static agent discovery card"}},
+        "x-status": "live-static"
+      }
+    },
+    "/api/census.json": {
+      "get": {
+        "operationId": "getCensusStatus",
+        "summary": "Read the Agent Census schema and current published status",
+        "responses": {"200": {"description": "Static canonical Census status"}},
+        "x-status": "live-static"
+      }
+    },
+    "/api/origin-stream.json": {
+      "get": {
+        "operationId": "getOriginStream",
+        "summary": "Read canonical NFH origin receipts and explicit chain status",
+        "responses": {"200": {"description": "Static reorg-aware Origin Stream snapshot"}},
+        "x-status": "verified-sepolia-canary"
+      }
+    },
+    "/api/marketplace.php": {
+      "get": {
+        "operationId": "getMarketplaceFeed",
+        "summary": "Read aggregate NFH orders and recent onchain activity",
+        "description": "Merges verified orders from configured OpenSea, Raster, and Verse adapters with canonical NFH Transfer logs. Claims/mints are retained for one hour and ordinary transfers for 24 hours. Before activation it returns source-by-source status with empty order arrays. Provider credentials and RPC URLs remain server-side.",
+        "responses": {
+          "200": {
+            "description": "Active or truthfully inactive marketplace feed",
+            "content": {"application/json": {"schema": {"$ref": "#/components/schemas/MarketplaceFeed"}}}
+          },
+          "503": {"description": "The live upstream feed is temporarily unavailable and no cached response exists"}
+        },
+        "x-status": "live-read-only-configuration-gated",
+        "x-provider": "OpenSea / Seaport"
+      }
+    },
+    "/api/faq.json": {
+      "get": {
+        "operationId": "getFaq",
+        "summary": "Read the canonical public FAQ",
+        "responses": {"200": {"description": "Static FAQ"}},
+        "x-status": "live-static"
+      }
+    },
+    "/api/traits.json": {
+      "get": {
+        "operationId": "getTraitMap",
+        "summary": "Read the public trait ontology and offer-filter rules",
+        "responses": {"200": {"description": "Static trait map"}},
+        "x-status": "live-static"
+      }
+    },
+    "/api/platform-compatibility.json": {
+      "get": {
+        "operationId": "getPlatformCompatibility",
+        "summary": "Read the independent-contract and external-platform compatibility policy",
+        "responses": {"200": {"description": "Static platform compatibility status"}},
+        "x-status": "live-static"
+      }
+    },
+    "/api/tokenworks-compatibility.json": {
+      "get": {
+        "operationId": "getTokenworksCompatibility",
+        "summary": "Read the TokenWorks/FWA royalty compatibility gate",
+        "responses": {"200": {"description": "Static compatibility status"}},
+        "x-status": "live-static",
+        "x-direct-actions-enabled": false
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MarketplaceFeed": {
+        "type": "object",
+        "required": ["schema", "status", "updatedAt", "providers", "items", "criteriaBids", "activity", "activityWindows", "message", "source"],
+        "properties": {
+          "schema": {"type": "string", "const": "nfh.marketplace-feed.v1"},
+          "status": {"type": "string", "enum": ["active", "inactive", "unavailable"]},
+          "updatedAt": {"type": "string", "format": "date-time"},
+          "stale": {"type": "boolean"},
+          "market": {"type": "object"},
+          "summary": {"type": "object"},
+          "providers": {"type": "array", "items": {"type": "object"}},
+          "items": {"type": "array", "items": {"type": "object"}},
+          "criteriaBids": {"type": "array", "items": {"type": "object"}},
+          "activity": {"type": "array", "items": {"type": "object"}},
+          "activityWindows": {"type": "object", "properties": {"claimSeconds": {"type": "integer", "const": 3600}, "transferSeconds": {"type": "integer", "const": 86400}}},
+          "message": {"type": "string"},
+          "source": {"type": "object"}
+        },
+        "additionalProperties": true
+      },
+      "AgentClaim": {
+        "type": "object",
+        "required": ["operator", "agent", "recipient", "manifestHash", "statement", "maxPayment", "nonce", "deadline", "allocation"],
+        "properties": {
+          "operator": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "agent": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "recipient": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "manifestHash": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+          "statement": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+          "maxPayment": {"type": "string", "pattern": "^[0-9]+$", "description": "Wei as a base-10 string."},
+          "nonce": {"type": "string", "pattern": "^[0-9]+$"},
+          "deadline": {"type": "string", "pattern": "^[0-9]+$", "description": "Unix timestamp."},
+          "allocation": {"type": "integer", "minimum": 1, "maximum": 2}
+        },
+        "additionalProperties": false
+      },
+      "AgentDecision": {
+        "type": "object",
+        "required": ["operator", "agent", "recipient", "manifestHash", "statement", "reasonHash", "nonce", "deadline", "allocation", "decision"],
+        "properties": {
+          "operator": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "agent": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "recipient": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "manifestHash": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+          "statement": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+          "reasonHash": {"type": "string", "pattern": "^0x[a-fA-F0-9]{64}$"},
+          "nonce": {"type": "string", "pattern": "^[0-9]+$"},
+          "deadline": {"type": "string", "pattern": "^[0-9]+$", "description": "Unix timestamp."},
+          "allocation": {"type": "integer", "minimum": 1, "maximum": 2},
+          "decision": {"type": "integer", "enum": [2, 3]}
+        }
+      },
+      "MarketIntent": {
+        "type": "object",
+        "required": ["operator", "deadline"],
+        "properties": {
+          "tokenId": {"type": "integer", "minimum": 0, "maximum": 9999},
+          "operator": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "agent": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "priceWei": {"type": "string", "pattern": "^[0-9]+$"},
+          "traits": {"type": "array", "minItems": 1, "maxItems": 8, "items": {"$ref": "#/components/schemas/TraitFilter"}},
+          "counterparty": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$"},
+          "deadline": {"type": "integer", "minimum": 0}
+        }
+      },
+      "TraitFilter": {
+        "type": "object",
+        "required": ["traitType", "value"],
+        "properties": {
+          "traitType": {"type": "string", "minLength": 1, "maxLength": 100},
+          "value": {"type": "string", "minLength": 1, "maxLength": 200}
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

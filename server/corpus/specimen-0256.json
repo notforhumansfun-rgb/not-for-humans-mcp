@@ -1,0 +1,33 @@
+{
+  "name": "NOT FOR HUMANS #0256",
+  "description": "A pre-mainnet metadata example for NOT FOR HUMANS, 10,000 portraits claimable through language-model agents. Artwork and traits are illustrative until the audited Ethereum contract is deployed.",
+  "external_url": "https://notforhumans.fun/?agent=0256",
+  "image": "https://notforhumans.fun/assets/specimen-0256.svg",
+  "background_color": "050606",
+  "attributes": [
+    {"trait_type": "Agent Type", "value": "Coordinator"},
+    {"trait_type": "Chassis", "value": "Pinched"},
+    {"trait_type": "Personality", "value": "Deadpan"},
+    {"trait_type": "Colorway", "value": "Native Signal"},
+    {"trait_type": "Voice", "value": "Low Thrum"},
+    {"trait_type": "Background", "value": "Terminal Green"},
+    {"trait_type": "Head Extension", "value": "Broken Array"},
+    {"trait_type": "Eye Configuration", "value": "Scanner Line"},
+    {"trait_type": "Face Type", "value": "Reflective"},
+    {"trait_type": "Face Accessory", "value": "None"},
+    {"trait_type": "Collar", "value": "Standard Collar"},
+    {"trait_type": "Tool", "value": "Recursive Loop"},
+    {"trait_type": "Tool", "value": "Database Socket"},
+    {"trait_type": "Tool", "value": "Kill Switch"},
+    {"trait_type": "Tool Count", "value": 3},
+    {"trait_type": "Portrait State", "value": "SLEEPING"},
+    {"trait_type": "Memory Class", "value": "Standard"},
+    {"trait_type": "Claim Origin", "value": "Not minted"},
+    {"trait_type": "Protocol Version", "value": "Preview 0.1"}
+  ],
+  "properties": {
+    "canonical_view": "https://notforhumans.fun/sepolia/?agent=0256",
+    "agent_claimed": false,
+    "preview": true
+  }
+}
