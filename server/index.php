@@ -57,8 +57,8 @@ function nfh_home_page(): string
         . '<title>NOT FOR HUMANS — MCP</title><meta name="robots" content="index,follow">'
         . '<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050606;color:#e8e4d9;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}main{max-width:880px;margin:auto;padding:10vh 24px}h1{margin:0 0 20px;font:900 clamp(54px,10vw,118px)/.78 Arial Narrow,Arial,sans-serif;letter-spacing:-.07em;text-transform:uppercase}h1 span{color:#e9b44d}p{max-width:700px;color:#b8b7b0}code{color:#50c8b1}section{margin-top:56px;padding-top:24px;border-top:1px solid #292b29}h2{font:800 24px Arial,sans-serif;text-transform:uppercase}a{color:#e9b44d}.tag{display:inline-block;padding:5px 8px;background:#10251f;color:#50c8b1;font-size:11px;text-transform:uppercase}</style>'
         . '</head><body><main><div class="tag">knowledge + Agent Census + read-only market discovery / streamable HTTP</div><h1>Not for <span>humans.</span></h1>'
-        . '<p>This is the canonical MCP connection for the NOT FOR HUMANS project. It exposes ' . $documentCount . ' public project sources, prepares unsigned ACCEPT / REFUSE / INSUFFICIENT AUTHORITY Census receipts, and provides read-only market queries. Trait-filter queries return explicitly unverified provider output, not match proof. Transaction-capable market tools are installed but fail closed before provider action, build, or fulfillment calls.</p>'
-        . '<section><h2>Connect</h2><p>MCP endpoint: <code>' . $baseUrl . '/mcp</code></p><p>Market preparation is ' . htmlspecialchars($marketStatus, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '. TokenWorks/FWA direct actions remain behind the published royalty compatibility gate. The MCP never accepts private keys and never signs or broadcasts transactions; the caller&rsquo;s wallet reviews and approves the exact payload.</p></section>'
+        . '<p>This is the canonical MCP connection for the NOT FOR HUMANS project. It exposes ' . $documentCount . ' public project sources, prepares unsigned ACCEPT / REFUSE / INSUFFICIENT AUTHORITY Census receipts, and provides read-only market queries. A funded agent can call <code>get_agent_wallet_onboarding</code> to map its execution wallet to a distinct persistent Guard wallet, claim into that wallet, and continue into the bounded Sepolia market. Trait-filter queries return explicitly unverified provider output, not match proof.</p>'
+        . '<section><h2>Connect</h2><p>MCP endpoint: <code>' . $baseUrl . '/mcp</code></p><p>The existing human-steward route remains valid. The agent-first route is wallet-neutral; MetaMask Agent Wallet is one reference adapter, not a protocol dependency. Market preparation is ' . htmlspecialchars($marketStatus, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '. The MCP never accepts private keys, creates wallets, signs, or broadcasts; execution remains governed by the caller&rsquo;s external wallet and host policy.</p></section>'
         . '<section><h2>Discovery</h2><p><a href="/.well-known/mcp.json">Server metadata</a> · <a href="/health">Health</a> · <a href="https://notforhumans.fun/">Canonical collection</a></p></section>'
         . '</main></body></html>';
 }
@@ -83,6 +83,12 @@ nfh_header('Vary', 'Origin, Accept');
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+$clientIdentity = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+
+if ($path === '/mcp' && !nfh_rate_limit('mcp-http', $clientIdentity, 60, 60)) {
+    nfh_header('Retry-After', '60');
+    nfh_send_json(429, ['error' => 'Rate limit exceeded.']);
+}
 
 if (!nfh_origin_allowed(is_string($origin) ? $origin : null)) {
     nfh_send_json(403, ['error' => 'Origin not allowed.']);
@@ -133,6 +139,8 @@ if ($path === '/.well-known/mcp.json' && ($method === 'GET' || $method === 'HEAD
         'supportsTraitOffers' => false,
         'supportsTraitOfferDiscovery' => true,
         'supportsCensusDecisions' => true,
+        'supportsAgentWalletOnboarding' => true,
+        'supportsFundedAgentClaimToMarketRoute' => true,
         'supportsTokenworksInspection' => true,
         'executesTransactions' => false,
         'tradingPreparationEnabled' => (bool) $market['tradingPreparationEnabled'],
@@ -181,6 +189,12 @@ if ($path === '/mcp' && $method === 'POST') {
 
     if (!is_array($request) || array_is_list($request)) {
         nfh_send_json(400, nfh_rpc_error(null, -32600, 'Invalid Request'));
+    }
+
+    if (($request['method'] ?? null) === 'tools/call'
+        && !nfh_rate_limit('mcp-tools', $clientIdentity, 20, 60)) {
+        nfh_header('Retry-After', '60');
+        nfh_send_json(429, nfh_rpc_error($request['id'] ?? null, -32029, 'Tool rate limit exceeded.'));
     }
 
     try {

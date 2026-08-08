@@ -90,8 +90,9 @@
     "method": "permissionless_future_block_commit_finalize",
     "oracle_dependency": false,
     "stored_result_is_immutable": true,
-    "security_boundary": "The target block must be fixed before its randomness is knowable, finalization must not depend on an administrator, expired finalization windows need an unbiased rescheduling rule, and proposer influence, reorgs, trait grinding, and liveness failure must be modeled and tested before the renderer is frozen.",
-    "status": "implemented_local_candidate_pending_fuzz_reorg_analysis_independent_audit_and_freeze"
+    "security_boundary": "This is consensus-derived future-block entropy, not a VRF or perfect randomness. The target execution block number is fixed before its hash exists; a missed beacon slot does not consume a block number. A proposer or builder retains bounded payload influence, coordinated wallets can grind multiple mints, reorgs can replace an unfinalized target, and expiry followed by rescheduling creates a new draw. Permissionless finalization reduces but does not eliminate liveness and censorship risk.",
+    "required_mainnet_controls": "Two independently operated finalizers, expiry and reschedule alerts, public Origin Stream evidence, independent proposer/MEV and multi-wallet economic review, and explicit residual-risk acceptance are mandatory. If reviewers reject this model or traits acquire material objective premiums, use a separately audited VRF or other verifiable entropy construction.",
+    "status": "implemented_and_first_party_disclosed; independent_review_finalizer_rehearsal_and_freeze_pending"
   },
   "origin_stream": {
     "status": "schema_defined; indexer_and_live_share_assets_pending",
@@ -138,6 +139,15 @@
   "market_policy": {
     "royalty_basis_points": 1000,
     "royalty_note": "ERC-2981 reports 10%. Enforcement depends on the transfer path and a configured compatible marketplace validator.",
+    "funded_agent_claim_to_market": {
+      "status": "supported_on_artifact_v14_sepolia_through_external_policy_wallets",
+      "role_pattern": "An existing funded execution wallet is operator; a distinct persistent Guard wallet is both agent and recipient.",
+      "existing_human_workflow_preserved": true,
+      "provider_neutral": true,
+      "reference_adapter": "MetaMask Agent Wallet",
+      "autonomy_boundary": "Negotiation and exact preparation may be autonomous. Wallet creation, policy broadening, signing, and submission remain governed by the external wallet and host. New counterparties or broader budgets require a new approval boundary.",
+      "mcp_authority": "The MCP may describe onboarding and prepare exact unsigned claims or marketplace calls. It never creates wallets, receives credentials, applies policy, signs, or broadcasts."
+    },
     "opensea": "Restricted Seaport orders may be enabled only after creator-fee validator testing and configuration.",
     "tokenworks_fwa": {
       "agent_layer_compatibility": "implemented_read_and_bounded_refusal_in_public_mcp",

@@ -22,6 +22,18 @@ function check(bool $condition, string $message): void
 
 $htaccess = file_get_contents(__DIR__ . '/../server/.htaccess');
 check(is_string($htaccess) && str_contains($htaccess, 'Strict-Transport-Security "max-age=31536000; includeSubDomains"'), 'MCP host requires one-year HSTS with subdomains');
+check(str_contains($htaccess, 'Header always unset Expires') && str_contains($htaccess, 'Cache-Control "no-store"'), 'MCP host removes inherited cache lifetimes');
+check(str_contains($htaccess, 'Content-Security-Policy'), 'MCP host sends CSP as an HTTP response header');
+
+$rateDirectory = sys_get_temp_dir() . '/nfh-mcp-rate-test-' . bin2hex(random_bytes(6));
+putenv('NFH_RUNTIME_DIR=' . $rateDirectory);
+check(nfh_rate_limit('test', '203.0.113.10', 2, 60, 1_780_000_000), 'rate limiter permits the first request');
+check(nfh_rate_limit('test', '203.0.113.10', 2, 60, 1_780_000_001), 'rate limiter permits requests within the configured budget');
+check(!nfh_rate_limit('test', '203.0.113.10', 2, 60, 1_780_000_002), 'rate limiter rejects requests over budget');
+check(nfh_rate_limit('test', '203.0.113.10', 2, 60, 1_780_000_061), 'rate limiter resets only after the complete window');
+foreach (glob($rateDirectory . '/*') ?: [] as $rateFile) unlink($rateFile);
+@rmdir($rateDirectory);
+putenv('NFH_RUNTIME_DIR');
 
 check(count(nfh_documents()) === 12, 'only the twelve explicitly public documents are indexed');
 
@@ -105,18 +117,28 @@ check(array_column($toolList, 'name') === [
     'search',
     'fetch',
     'get_census_status',
+    'get_agent_wallet_onboarding',
     'get_origin_stream',
     'prepare_census_receipt',
+    'prepare_public_claim',
     'get_tokenworks_status',
     'prepare_tokenworks_decision',
     'get_market_feed',
     'get_market_status',
+    'get_internal_marketplace_status',
     'prepare_listing',
     'prepare_purchase',
     'list_trait_offers',
+    'find_best_order',
     'prepare_trait_offer',
     'prepare_accept_offer',
     'prepare_transfer',
+    'prepare_internal_listing',
+    'prepare_internal_cancel_listing',
+    'prepare_internal_buy',
+    'prepare_internal_offer',
+    'prepare_internal_cancel_offer',
+    'prepare_internal_accept_offer',
     'get_agent_pfp',
 ], 'tools/list exposes knowledge and scoped market-preparation tools');
 $toolMap = array_column($toolList, null, 'name');
@@ -125,6 +147,7 @@ check(isset($marketStatusProperties['collectionConfigured'], $marketStatusProper
 $serverHomepage = file_get_contents(__DIR__ . '/../server/index.php');
 check(str_contains($serverHomepage, "'preparesWalletActions' => false"), 'MCP discovery does not advertise disabled wallet preparation');
 check(str_contains($serverHomepage, "'supportsTraitOfferDiscovery' => true"), 'MCP discovery separately advertises read-only trait discovery');
+check(str_contains($serverHomepage, "'supportsAgentWalletOnboarding' => true"), 'MCP discovery advertises the funded-agent wallet onboarding route');
 check(str_contains($serverHomepage, 'fail closed'), 'MCP homepage explains the semantic-validation blocker');
 check(($toolList[0]['annotations']['readOnlyHint'] ?? false) === true, 'knowledge tools are annotated read-only');
 check(($toolMap['prepare_trait_offer']['annotations']['readOnlyHint'] ?? false) === true, 'market tools only prepare data and are annotated read-only');
@@ -139,6 +162,16 @@ check(($censusStatus['structuredContent']['contract_version'] ?? null) === 5, 'c
 check(($censusStatus['structuredContent']['signing_preparation_enabled'] ?? true) === false, 'census typed-data preparation stays unbound before a canonical contract is configured');
 check(($censusStatus['structuredContent']['decision_states'] ?? []) === ['ACCEPT', 'REFUSE', 'INSUFFICIENT_AUTHORITY'], 'census status exposes all three decision states');
 
+$agentWalletOnboarding = nfh_call_tool('get_agent_wallet_onboarding', []);
+check(($agentWalletOnboarding['structuredContent']['status'] ?? null) === 'ready_for_external_wallet_setup', 'funded-agent onboarding is bound to the complete artifact-v14 Sepolia contract set');
+check(($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['operator'] ?? null) !== null, 'funded-agent onboarding assigns the existing funded wallet as operator');
+check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['recipient'] ?? '', 'same Guard wallet'), 'funded-agent onboarding claims directly into the persistent Guard wallet');
+check(($agentWalletOnboarding['structuredContent']['contracts']['claimMinter'] ?? null) === '0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e', 'agent-wallet onboarding pins the v14 claim minter');
+check(($agentWalletOnboarding['structuredContent']['contracts']['marketplace'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'agent-wallet onboarding pins the v14 marketplace');
+check(($agentWalletOnboarding['structuredContent']['authority']['mcpCreatesWallet'] ?? true) === false, 'MCP does not claim to create the external Agent Wallet');
+check(($agentWalletOnboarding['structuredContent']['authority']['negotiationAndPreparationMayBeAutonomous'] ?? false) === true, 'agent-wallet onboarding explicitly permits autonomous negotiation and preparation');
+check(($agentWalletOnboarding['structuredContent']['authority']['executionRequiresExternalPolicyAuthority'] ?? false) === true, 'execution remains governed by external wallet and host policy');
+
 $originStream = nfh_call_tool('get_origin_stream', []);
 check(($originStream['structuredContent']['schema'] ?? null) === 'notforhumans-origin-stream/1', 'origin stream exposes the canonical receipt schema');
 check(($originStream['structuredContent']['counts']['ACCEPT'] ?? 0) >= 1, 'origin stream exposes at least one verified Sepolia acceptance');
@@ -147,14 +180,16 @@ $tokenZeroReceipts = array_filter(
     static fn (array $receipt): bool => ($receipt['decision'] ?? null) === 'ACCEPT' && ($receipt['tokenId'] ?? null) === '0'
 );
 check(count($tokenZeroReceipts) === 1, 'origin stream preserves the verified Sepolia token #0 canary as the rehearsal grows');
-check(($originStream['structuredContent']['source'] ?? null) === 'canonical-wallet-provider-export', 'origin stream identifies the final rehearsal wallet-provider export');
+check(in_array($originStream['structuredContent']['source'] ?? null, ['canonical-chain-indexer', 'canonical-wallet-provider-export'], true), 'origin stream identifies a canonical rehearsal evidence source');
 check(($originStream['structuredContent']['canonicality']['reorgAware'] ?? false) === true, 'origin stream publishes its reorg-awareness boundary');
 
 $agentPfp = nfh_call_tool('get_agent_pfp', ['tokenId' => 1]);
 check(($agentPfp['structuredContent']['tokenId'] ?? null) === 1, 'get_agent_pfp returns the requested tokenId');
 check(($agentPfp['structuredContent']['pfpUrl'] ?? null) === 'https://notforhumans.fun/pfp/1', 'get_agent_pfp returns the canonical portrait URL');
-check(($agentPfp['structuredContent']['seedFinalized'] ?? null) === true, 'get_agent_pfp detects finalized seed for Sepolia token #1');
-check(is_string($agentPfp['structuredContent']['seedHash'] ?? null) && str_starts_with($agentPfp['structuredContent']['seedHash'], '0x'), 'get_agent_pfp exposes the on-chain seed hash for finalized tokens');
+// Artifact-v14 token #1 finalized its seed onchain; the Origin Stream exposes
+// the real seed value even while the combined receipt remains only confirmed.
+check(($agentPfp['structuredContent']['seedFinalized'] ?? null) === true, 'get_agent_pfp reports the true seed-finalized state for artifact-v14 Sepolia token #1');
+check(($agentPfp['structuredContent']['seedHash'] ?? null) === '0x67666979f09dca1c22697ae3d8eaeae0dfc9245ecf55de25cfa382bd512dc150', 'get_agent_pfp exposes the exact indexed v14 token #1 seed hash');
 $agentPfpPreview = nfh_call_tool('get_agent_pfp', ['tokenId' => 9999]);
 check(($agentPfpPreview['structuredContent']['seedFinalized'] ?? true) === false, 'get_agent_pfp returns preview=false for tokens without a finalized seed');
 $pfpContent = $agentPfpPreview['structuredContent'] ?? [];
@@ -203,6 +238,113 @@ $selfRecipientArguments['recipient'] = $selfRecipientArguments['operator'];
 $selfRecipientReceipt = nfh_call_tool('prepare_census_receipt', $selfRecipientArguments);
 check(($selfRecipientReceipt['structuredContent']['requiresRecipientSignature'] ?? true) === false, 'the operator signature also consents when operator and recipient match');
 putenv('NFH_CENSUS_CONTRACT');
+
+$publicClaimArguments = [
+    'operator' => '0x1111111111111111111111111111111111111111',
+    'agent' => '0x2222222222222222222222222222222222222222',
+    'recipient' => '0x1111111111111111111111111111111111111111',
+    'manifestHash' => '0x' . str_repeat('a', 64),
+    'statementHash' => '0x' . str_repeat('b', 64),
+    'nonce' => '123456789',
+    'deadline' => '1893456000',
+    'framework' => 'test-suite',
+];
+$draftPublicClaim = nfh_call_tool('prepare_public_claim', $publicClaimArguments);
+check(($draftPublicClaim['structuredContent']['status'] ?? null) === 'prepared_unsigned', 'public claim typed data is signable by default against the deployed Sepolia rehearsal contract');
+check(($draftPublicClaim['structuredContent']['primaryType'] ?? null) === 'AgentClaim', 'public claim is always the minting AgentClaim shape, never a decision record');
+check(($draftPublicClaim['structuredContent']['message']['allocation'] ?? null) === 0, 'public claim uses the public allocation code');
+check(($draftPublicClaim['structuredContent']['eligibilityProof'] ?? null) === [], 'public claim never requires an eligibility proof');
+check(is_string($draftPublicClaim['structuredContent']['agentSignerGuidance'] ?? null) && str_contains($draftPublicClaim['structuredContent']['agentSignerGuidance'], 'persistent'), 'public claim prefers a persistent policy-controlled external agent wallet');
+check(!str_contains($draftPublicClaim['structuredContent']['agentSignerGuidance'] ?? '', 'generate a fresh keypair'), 'public claim no longer instructs a keyless agent to create a disposable signer');
+check(($draftPublicClaim['structuredContent']['requiresAgentSignature'] ?? false) === true, 'public claim still requires a distinct agent signature');
+check(($draftPublicClaim['structuredContent']['domain']['chainId'] ?? null) === 11155111, 'public claim binds to the Sepolia chain ID, never mainnet');
+check(($draftPublicClaim['structuredContent']['domain']['verifyingContract'] ?? null) === '0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e', 'public claim domain verifies against the fresh artifact-v14 Sepolia minter contract (the EIP-712 verifyingContract must be the minter, which implements EIP712 and checks its own domain separator, never the token)');
+
+$selfAgentClaim = $publicClaimArguments;
+$selfAgentClaim['agent'] = $selfAgentClaim['operator'];
+$rejectedSelfAgent = nfh_call_tool('prepare_public_claim', $selfAgentClaim);
+check(($rejectedSelfAgent['isError'] ?? false) === true, 'public claim rejects an operator that self-attests as its own agent');
+
+putenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT=0xdddddddddddddddddddddddddddddddddddddddd');
+$overriddenPublicClaim = nfh_call_tool('prepare_public_claim', $publicClaimArguments);
+check(($overriddenPublicClaim['structuredContent']['domain']['verifyingContract'] ?? null) === '0xdddddddddddddddddddddddddddddddddddddddd', 'an env override can still repoint the public claim contract for a future Sepolia redeploy');
+putenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT');
+
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
+$marketplaceStatus = nfh_call_tool('get_internal_marketplace_status', []);
+check(($marketplaceStatus['structuredContent']['configured'] ?? false) === true, 'internal marketplace is configured by default against the deployed Sepolia contract');
+check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal marketplace targets the fresh artifact-v14 Sepolia marketplace contract');
+check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A', 'internal marketplace targets the fresh artifact-v14 Sepolia rehearsal collection');
+check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 14, 'internal marketplace status exposes artifact v14');
+check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'prepared-non-executing', 'internal marketplace status does not claim autonomous settlement');
+check(($marketplaceStatus['structuredContent']['automaticExecutionAuthorized'] ?? true) === false, 'internal marketplace status keeps automatic execution unauthorized');
+check(($marketplaceStatus['structuredContent']['wethContract'] ?? null) === '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 'internal marketplace uses the real Sepolia WETH contract');
+
+$listingArguments = [
+    'tokenId' => 0,
+    'seller' => '0x1111111111111111111111111111111111111111',
+    'priceWei' => '1000000000000000000',
+    'deadline' => '1893456000',
+];
+$defaultListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
+check(($defaultListing['structuredContent']['status'] ?? null) === 'prepared_unsigned', 'internal listing is signable by default against the deployed marketplace');
+check(($defaultListing['structuredContent']['marketplaceContract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal listing binds to the fresh artifact-v14 marketplace contract');
+check(count($defaultListing['structuredContent']['steps'] ?? []) === 2, 'internal listing prepares an approval step and a list step');
+check(($defaultListing['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal listing uses token-specific marketplace approval before listing');
+check(($defaultListing['structuredContent']['steps'][0]['args'] ?? null) === ['0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', '0'], 'internal listing approval is scoped to the exact token ID');
+check(($defaultListing['structuredContent']['steps'][1]['function'] ?? null) === 'list', 'internal listing calls list() with the exact price and deadline');
+check(($defaultListing['structuredContent']['steps'][1]['args'] ?? null) === ['0', '1000000000000000000', '1893456000'], 'internal listing args match tokenId, priceWei, and deadline exactly');
+check(($defaultListing['structuredContent']['steps'][1]['contract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal listing targets the fresh artifact-v14 marketplace contract for the list() call');
+
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT=0xEeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
+$overriddenListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
+check(($overriddenListing['structuredContent']['marketplaceContract'] ?? null) === '0xEeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 'an env override can still repoint the marketplace contract for a future Sepolia redeploy');
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
+
+$buyResult = nfh_call_tool('prepare_internal_buy', [
+    'tokenId' => 0,
+    'buyer' => '0x2222222222222222222222222222222222222222',
+    'priceWei' => '1000000000000000000',
+]);
+check(($buyResult['structuredContent']['steps'][0]['value'] ?? null) === '1000000000000000000', 'internal buy sends exactly the listed price as transaction value');
+check(($buyResult['structuredContent']['steps'][0]['function'] ?? null) === 'buy', 'internal buy calls buy() directly with no approval step needed');
+
+$offerResult = nfh_call_tool('prepare_internal_offer', [
+    'tokenId' => 0,
+    'buyer' => '0x2222222222222222222222222222222222222222',
+    'priceWeth' => '500000000000000000',
+    'deadline' => '1893456000',
+]);
+check(($offerResult['structuredContent']['steps'][0]['contract'] ?? null) === '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 'internal offer approves the real Sepolia WETH contract first');
+check(($offerResult['structuredContent']['steps'][1]['function'] ?? null) === 'makeOffer', 'internal offer then calls makeOffer()');
+
+$selfAcceptOffer = nfh_call_tool('prepare_internal_accept_offer', [
+    'tokenId' => 0,
+    'seller' => '0x1111111111111111111111111111111111111111',
+    'buyer' => '0x1111111111111111111111111111111111111111',
+]);
+check(($selfAcceptOffer['isError'] ?? false) === true, 'internal accept-offer rejects a seller accepting its own offer');
+
+$acceptOffer = nfh_call_tool('prepare_internal_accept_offer', [
+    'tokenId' => 0,
+    'seller' => '0x1111111111111111111111111111111111111111',
+    'buyer' => '0x2222222222222222222222222222222222222222',
+]);
+check(($acceptOffer['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal accept-offer uses token-specific NFT approval');
+check(($acceptOffer['structuredContent']['steps'][0]['args'] ?? null) === ['0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', '0'], 'internal accept-offer approval is scoped to the exact token ID');
+check(($acceptOffer['structuredContent']['steps'][1]['function'] ?? null) === 'acceptOffer', 'internal accept-offer calls acceptOffer() with tokenId and buyer');
+check(($acceptOffer['structuredContent']['steps'][1]['args'] ?? null) === ['0', '0x2222222222222222222222222222222222222222'], 'internal accept-offer args match tokenId and buyer exactly');
+
+$cancelListing = nfh_call_tool('prepare_internal_cancel_listing', ['tokenId' => 0, 'seller' => '0x1111111111111111111111111111111111111111']);
+check(count($cancelListing['structuredContent']['steps'] ?? []) === 1, 'internal cancel-listing is a single call');
+$cancelOffer = nfh_call_tool('prepare_internal_cancel_offer', ['tokenId' => 0, 'buyer' => '0x2222222222222222222222222222222222222222']);
+check(count($cancelOffer['structuredContent']['steps'] ?? []) === 1, 'internal cancel-offer is a single call');
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
+
+foreach (['prepare_internal_listing', 'prepare_internal_cancel_listing', 'prepare_internal_buy', 'prepare_internal_offer', 'prepare_internal_cancel_offer', 'prepare_internal_accept_offer'] as $internalTool) {
+    $definition = $toolMap[$internalTool] ?? null;
+    check($definition !== null && ($definition['annotations']['readOnlyHint'] ?? null) === true, "{$internalTool} is annotated read-only since it never signs or submits");
+}
 
 $tokenworksStatus = nfh_call_tool('get_tokenworks_status', []);
 check(($tokenworksStatus['structuredContent']['status'] ?? null) === 'agent-layer-only', 'TokenWorks status exposes the compatibility-only boundary');
@@ -292,6 +434,15 @@ $GLOBALS['NFH_OPENSEA_TEST_TRANSPORT'] = static function (string $path, array $b
             'encodedTokenIds' => 'mock-token-set',
         ];
     }
+    if ($path === '/listings/collection/not-for-humans/nfts/256/best') {
+        return ['order_hash' => '0x' . str_repeat('e', 64), 'price' => ['current' => ['value' => '250000000000000000']]];
+    }
+    if ($path === '/offers/collection/not-for-humans/nfts/256/best') {
+        return ['order_hash' => '0x' . str_repeat('f', 64), 'price' => ['value' => '100000000000000000']];
+    }
+    if ($path === '/listings/collection/not-for-humans/nfts/9999/best' || $path === '/offers/collection/not-for-humans/nfts/9999/best') {
+        throw new RuntimeException('OpenSea action preparation failed with HTTP 404: not_found');
+    }
     if ($method === 'GET') {
         return ['offers' => [['order_hash' => '0x' . str_repeat('d', 64)]], 'next' => null];
     }
@@ -371,6 +522,25 @@ $encodedTraits = json_decode($capturedRequests[1]['body']['traits'] ?? '', true,
 check(($encodedTraits[1]['traitType'] ?? null) === 'Portrait State', 'multi-trait discovery uses OpenSea traitType/value query objects');
 check(($capturedRequests[1]['body']['next'] ?? null) === 'cursor-2', 'trait-offer discovery preserves the pagination cursor');
 
+$bestListing = nfh_call_tool('find_best_order', ['tokenId' => 256, 'side' => 'listing']);
+check(($capturedRequests[2]['method'] ?? null) === 'GET', 'best-order discovery uses a read request');
+check(($capturedRequests[2]['path'] ?? null) === '/listings/collection/not-for-humans/nfts/256/best', 'best-listing discovery hits the exact per-token OpenSea endpoint');
+check(($bestListing['structuredContent']['orderHash'] ?? null) === '0x' . str_repeat('e', 64), 'best-listing discovery extracts the order hash so the human never has to supply one');
+check(($bestListing['structuredContent']['status'] ?? null) === 'unverified-provider-output', 'best-order discovery does not relabel opaque provider data as verified');
+check(($bestListing['structuredContent']['side'] ?? null) === 'listing', 'best-order discovery reports the requested side');
+
+$bestOffer = nfh_call_tool('find_best_order', ['tokenId' => 256, 'side' => 'offer']);
+check(($capturedRequests[3]['path'] ?? null) === '/offers/collection/not-for-humans/nfts/256/best', 'best-offer discovery hits the exact per-token OpenSea endpoint');
+check(($bestOffer['structuredContent']['orderHash'] ?? null) === '0x' . str_repeat('f', 64), 'best-offer discovery extracts a distinct order hash from the offer endpoint');
+
+$noBestOrder = nfh_call_tool('find_best_order', ['tokenId' => 9999, 'side' => 'listing']);
+check(($noBestOrder['structuredContent']['status'] ?? null) === 'not-found', 'best-order discovery reports not-found instead of erroring when OpenSea has no active order');
+check(($noBestOrder['structuredContent']['orderHash'] ?? null) === null, 'best-order discovery returns a null order hash when none exists');
+check(($noBestOrder['isError'] ?? false) === false, 'a missing order is not treated as a tool failure');
+
+$invalidSide = nfh_call_tool('find_best_order', ['tokenId' => 256, 'side' => 'auction']);
+check(($invalidSide['isError'] ?? false) === true, 'best-order discovery rejects an invalid side value');
+
 $traitOffer = nfh_call_tool('prepare_trait_offer', [
     'offerer' => $buyer,
     'traits' => [
@@ -383,7 +553,7 @@ $traitOffer = nfh_call_tool('prepare_trait_offer', [
 ]);
 check(($traitOffer['isError'] ?? false) === true, 'trait-offer preparation remains blocked until criteria and economic terms are fully bound');
 check(str_contains($traitOffer['content'][0]['text'] ?? '', 'semantically equivalent'), 'trait-offer blocker explains the provider-equivalence requirement');
-check(count($capturedRequests) === 2, 'blocked trait-offer preparation never calls the criteria build endpoint');
+check(count($capturedRequests) === 5, 'blocked trait-offer preparation never calls the criteria build endpoint');
 
 $duplicateTraits = nfh_call_tool('prepare_trait_offer', [
     'offerer' => $buyer,
