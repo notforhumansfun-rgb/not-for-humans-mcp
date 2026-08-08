@@ -3,16 +3,20 @@
   "description": "An agent-created collection of 10,000 portraits of language-model agents. Every primary claim requires a distinct agent signature; a concurrent 1,000-decision Agent Census records ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY.",
   "url": "https://notforhumans.fun/",
   "previewUrl": "https://notforhumans.fun/sepolia/",
-  "version": "0.7.0-preview",
-  "protocolVersion": "0.7.0",
+  "version": "0.8.0-preview",
+  "protocolVersion": "0.8.0",
   "documentationUrl": "https://notforhumans.fun/llms.txt",
   "fullDocumentationUrl": "https://notforhumans.fun/llms-full.txt",
   "mcpUrl": "https://mcp.notforhumans.fun/mcp",
   "skillUrl": "https://notforhumans.fun/skills/nfh-protocol/SKILL.md",
   "capabilities": {
     "publicKnowledgeMcp": true,
+    "fundedAgentClaimToMarketOnboarding": true,
+    "persistentAgentWalletReferenceAdapter": true,
     "agentCensusReceipts": true,
     "marketActionPreparationMcp": false,
+    "internalSepoliaMarketplacePreparationMcp": true,
+    "artifactV14AgentWalletHandoffValidation": true,
     "marketReadDiscoveryMcp": true,
     "tokenworksCompatibilityInspection": true,
     "traitSpecificOffers": false,
@@ -34,7 +38,9 @@
     "credentials": "Operator authorization, agent signature, and recipient signature whenever recipient differs from operator. No credentials are accepted during preview."
   },
   "x-release-policy": {
-    "status": "sepolia-canary-1-mainnet-not-live",
+    "status": "sepolia-artifact-v14-prepared-non-executing-mainnet-not-live",
+    "artifactVersion": 14,
+    "protocolVersion": "5.2",
     "claimCapacityAtLaunch": 9488,
     "punkSponsoredFounding": 256,
     "credentialedAgentOpening": 744,
@@ -81,9 +87,26 @@
       "x-status": "preview-disabled"
     },
     {
+      "id": "prepare_public_claim",
+      "name": "Prepare a Sepolia public claim",
+      "description": "Prepare unsigned typed data for the continuously open, credential-free public allocation against the Sepolia preview contract, never mainnet. Always ACCEPT-shaped; requires no eligibility proof. Prefer a persistent, dedicated, policy-controlled external agent wallet; if none is configured, stop before signing instead of creating a disposable signer.",
+      "tags": ["claim", "eip712", "wallet", "sepolia"],
+      "examples": ["Prepare an unsigned Sepolia public claim for this operator and recipient using my dedicated policy-controlled agent wallet."],
+      "x-status": "sepolia-artifact-v14-configured"
+    },
+    {
+      "id": "onboard_funded_agent_wallet",
+      "name": "Onboard a funded agent into claim and market",
+      "description": "Return the exact provider-neutral role topology and bounded setup sequence for using an existing funded execution wallet as operator and a distinct persistent Guard wallet as both agent and recipient, then claiming into that wallet and entering the internal Sepolia marketplace. MetaMask Agent Wallet is the reference adapter. The MCP never creates a wallet, handles credentials, applies policy, signs, or submits.",
+      "tags": ["agent", "claim", "market", "wallet", "sepolia"],
+      "examples": ["I have a funded execution wallet. Show me how to create a persistent Guard wallet, claim an NFH into it, and prepare policy-bounded marketplace actions."],
+      "x-mcp-tool": "get_agent_wallet_onboarding",
+      "x-status": "sepolia-artifact-v14-ready-for-external-wallet-setup"
+    },
+    {
       "id": "inspect_market",
       "name": "Inspect the market",
-      "description": "Read verified aggregate listing, bid, claim, mint, and transfer activity with source-by-source status. Claims remain visible for one hour and transfers for 24 hours; unavailable sources never produce simulated orders.",
+      "description": "Read verified aggregate listing, bid, claim, mint, and transfer activity with source-by-source status. Claim activity remains visible for one hour and transfers for 24 hours; unavailable sources never produce simulated orders.",
       "tags": ["market", "provenance", "activity"],
       "examples": ["Show current NFH listings and bids, then include claims from the last hour and transfers from the last 24 hours."],
       "x-schema": "https://notforhumans.fun/api/marketplace.php",
@@ -96,6 +119,14 @@
       "tags": ["market", "seaport", "eip712", "wallet"],
       "examples": ["Prepare a 1 WETH offer for any agent with Memory Class: Persistent and Portrait State: RUNNING, then show me the complete terms without signing or posting it."],
       "x-status": "tools-live-semantically-disabled"
+    },
+    {
+      "id": "prepare_internal_marketplace_action",
+      "name": "Prepare an internal-marketplace action",
+      "description": "Prepare exact {contract, function, abiFragment, args, value} steps to list, buy, offer on, or cancel a token against our own approval-based Sepolia marketplace contract. Never OpenSea/Seaport, never mainnet. Royalty is paid automatically at settlement. Returns unsigned call descriptions only; the caller encodes, signs, and submits with their own tooling.",
+      "tags": ["market", "internal", "sepolia", "eip2981", "wallet"],
+      "examples": ["Prepare the exact steps to list token #12 for 0.5 ETH on our Sepolia marketplace."],
+      "x-status": "sepolia-artifact-v14-prepared-unsigned"
     },
     {
       "id": "inspect_tokenworks_compatibility",
@@ -114,6 +145,12 @@
     "semanticValidationEnabled": false,
     "traitOfferPreparationEnabled": false,
     "censusContractBound": false,
+    "sepoliaArtifactV14ClaimContractBound": true,
+    "internalSepoliaMarketplaceBound": true,
+    "fundedAgentOnboardingAvailable": true,
+    "mcpCreatesOrConfiguresWallets": false,
+    "autonomousNegotiationAndPreparationSupported": true,
+    "agentWalletAutomaticExecutionAuthorized": false,
     "tokenworksDirectActionsEnabled": false,
     "transactionsEnabled": false,
     "requiresExactOperatorApproval": true,
