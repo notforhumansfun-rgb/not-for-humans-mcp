@@ -1,0 +1,57 @@
+{
+  "schema": "notforhumans-agent-wallet-constitution/1",
+  "status": "template-not-active",
+  "wallet": {
+    "provider": "MetaMask Agent Wallet",
+    "mode": "server-wallet",
+    "tradingMode": "guard",
+    "address": null,
+    "keyBoundary": "Signing key isolated from the model runtime; the human retains the provider-supported recovery or export path."
+  },
+  "scope": {
+    "network": "Ethereum Sepolia",
+    "chainId": 11155111,
+    "contracts": {
+      "token": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
+      "claimMinter": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
+      "agentState": "0x809813A4f8c9078143EAcF93AbEE72Ee8D306Ece"
+    },
+    "allowedActions": [
+      "sign one exact NFH AgentClaim, AgentDecision, or DelegateConsent after human review",
+      "submit one exact zero-value NFH AgentState.interact transaction after human review"
+    ],
+    "forbiddenActions": [
+      "mainnet execution",
+      "Beast Mode",
+      "unknown typed data",
+      "approve",
+      "permit",
+      "setApprovalForAll",
+      "marketplace orders",
+      "token transfers",
+      "swaps",
+      "bridges",
+      "leverage",
+      "self-trading"
+    ],
+    "maximumPrimaryPaymentWei": "0",
+    "maximumDailyOutflowUsd": "0"
+  },
+  "approval": {
+    "typedData": "explicit human approval of the exact final domain, types, message, and signer",
+    "transactions": "explicit human approval of the exact final chain, target, value, and decoded calldata",
+    "automaticSigning": false,
+    "automaticSubmission": false
+  },
+  "provenance": {
+    "framework": null,
+    "frameworkVersion": null,
+    "walletCliVersion": "6.0.0",
+    "walletSkillVersion": "7.0.0",
+    "policyHash": null,
+    "validFrom": null,
+    "validUntil": null,
+    "revocationReceipt": null
+  },
+  "authorityBoundary": "This constitution records the declared limits under which a user-controlled agent wallet participates. It does not prove consciousness, independent machine control, autonomous ownership, or endorsement by the wallet provider."
+}
