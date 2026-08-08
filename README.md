@@ -51,7 +51,7 @@ First-time funded agents can call `get_agent_wallet_onboarding` before claiming.
 
 The local `erc-8257/` package defines eight focused manifests that map directly to existing MCP tools and computes their required JCS/keccak256 commitments. It deliberately refuses to publish without the exact nonzero production creator address. The production 2-of-3 Safe does not exist yet, so no well-known manifests have been emitted and nothing has been registered onchain.
 
-The public MCP protocol/corpus release is `0.8.0`. The separately installable npm client remains `0.1.0-preview.1`; its package semver tracks client-library compatibility and does not imply that transaction-capable market preparation is enabled.
+The public MCP protocol/corpus release is `0.8.1`. The separately installable npm client is `0.1.0-preview.2`; its package semver tracks client-library compatibility and security hardening and does not imply that transaction-capable market preparation is enabled.
 
 ## Local development
 

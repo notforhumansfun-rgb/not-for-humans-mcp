@@ -276,7 +276,8 @@ check(($marketplaceStatus['structuredContent']['configured'] ?? false) === true,
 check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal marketplace targets the fresh artifact-v14 Sepolia marketplace contract');
 check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A', 'internal marketplace targets the fresh artifact-v14 Sepolia rehearsal collection');
 check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 14, 'internal marketplace status exposes artifact v14');
-check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'prepared-non-executing', 'internal marketplace status does not claim autonomous settlement');
+check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'verified-settled-to-configured-buyer', 'internal marketplace status reports the verified settlement mechanics');
+check(($marketplaceStatus['structuredContent']['classification'] ?? null) === 'synthetic-self-trade-rehearsal-not-market-activity', 'internal marketplace keeps the settlement classified as a synthetic rehearsal');
 check(($marketplaceStatus['structuredContent']['automaticExecutionAuthorized'] ?? true) === false, 'internal marketplace status keeps automatic execution unauthorized');
 check(($marketplaceStatus['structuredContent']['wethContract'] ?? null) === '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 'internal marketplace uses the real Sepolia WETH contract');
 

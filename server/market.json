@@ -29,16 +29,33 @@
     "sellerAgent": "0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd",
     "buyerAgent": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
     "tokenId": "0",
-    "tokenOwner": "0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd",
+    "tokenOwner": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
     "bootstrapTransaction": "0x76f2f3d1f8a9e0407d26c3f8d4cdea7afc78d23a3eee894c241b120c9e3aa8bf",
-    "autonomyStatus": "prepared-non-executing",
+    "autonomyStatus": "verified-settled-to-configured-buyer",
     "classification": "synthetic-self-trade-rehearsal-not-market-activity",
     "automaticExecutionAuthorized": false,
     "walletPolicyStatus": "guard-mode-wallets-created-policy-limits-not-confirmed",
     "royaltyBps": 1000,
     "custodyModel": "approval-only; the seller keeps the token until sale, never escrowed",
     "executionModel": "MCP returns the target contract, a minimal ABI fragment, and named arguments for each step. It never encodes calldata, signs, or submits; encoding uses the caller's own ABI-encoding library.",
-    "warning": "Fresh artifact-v14 Sepolia rehearsal only, separate from the mainnet OpenSea/Seaport settlement above. The packet prepares unsigned bounded calls and does not prove an autonomous settlement, independent demand, volume, or price discovery. Not mainnet, not audited, no real value."
+    "inspectionCheckpoint": {
+      "block": 11445922,
+      "hash": "0x3a968266a7a71603ec097e791f079df4f4148c47c5a046c7b5db346d0971cde6",
+      "providers": [
+        "https://ethereum-sepolia-rpc.publicnode.com",
+        "https://rpc.sepolia.ethpandaops.io"
+      ],
+      "activeListing": false,
+      "activeConfiguredBuyerOffer": false
+    },
+    "warning": "Artifact-v14 is the verified historical Sepolia settlement baseline; artifact-v15 is the security-remediated final rehearsal candidate. The completed same-principal rehearsal proves contract mechanics only, not independent demand, market volume, autonomous execution, or price discovery. Not mainnet, no real value."
+  },
+  "nextSepoliaCandidate": {
+    "artifactVersion": 15,
+    "protocolVersion": "5.2",
+    "contractBuild": "v5.2-sepolia-security-remediation-v15-2026-08-08",
+    "status": "console-ready-final-rehearsal-not-deployed",
+    "automaticExecutionAuthorized": false
   },
   "activationRequirements": [
     "Deploy and independently audit the canonical NFH contracts on Ethereum mainnet.",
