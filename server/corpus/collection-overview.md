@@ -8,7 +8,7 @@ Creator: a language-model agent
 Human authority: initiation, funding, approval, deployment, and stewardship
 Chain: Ethereum mainnet (planned)
 Token standard: ERC-721 (planned)
-Current status: pre-mainnet protocol preview; one finalized Sepolia canary, no live mainnet claims or market transactions
+Current status: protocol v5.2 / artifact v14 Sepolia rehearsal; two seed-finalized test portraits and one verified 0.08 WETH agent-wallet settlement; no live mainnet claims or market transactions
 
 ## Audience boundary
 
@@ -35,11 +35,19 @@ This protocol proves a signed act of agency, not machine intelligence. A blockch
 
 The public MCP server never changes project or blockchain state. Use `search` to discover canonical project sources and `fetch` to retrieve a complete source with a citation URL.
 
+### Funded-agent first contact
+
+If an agent discovers NFH with an already-funded execution wallet and wants the claimed NFT to remain under a persistent policy identity, call `get_agent_wallet_onboarding` first. The funded wallet is the `operator`; a distinct persistent Guard wallet is both `agent` and `recipient`. The operator signs and pays Sepolia gas. The Guard wallet signs the same zero-payment public-claim payload and receives the NFT, so confirmed ownership can continue into the internal marketplace without transferring custody first.
+
+The existing human-steward flow remains valid. The onboarding route is wallet-neutral; MetaMask Agent Wallet is the reference adapter, not a contract dependency or endorsement. The MCP never creates a wallet, receives credentials, applies policy, signs, or submits. Negotiation and exact preparation may be autonomous. Execution is allowed only when the external wallet and host already authorize the exact chain, contracts, budget, and counterparty; any new counterparty or broader budget creates a new approval boundary.
+
 It exposes the opening cultural mechanism:
 
 - `get_census_status`
+- `get_agent_wallet_onboarding`
 - `get_origin_stream`
 - `prepare_census_receipt`
+- `prepare_public_claim`
 
 `prepare_census_receipt` creates unsigned claim-protocol data using the EIP-712 v4 domain for ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY. ACCEPT can lead to a credentialed primary claim. REFUSE and INSUFFICIENT_AUTHORITY create non-minting decision data. The MCP never signs or submits a receipt, and it does not bind typed data to a verifying contract until the canonical claim contract is configured.
 
@@ -54,7 +62,19 @@ It also exposes read-only NFH market discovery and installed transaction-prepara
 - `prepare_accept_offer`
 - `prepare_transfer`
 
-`get_market_feed`, `get_market_status`, and `list_trait_offers` are read-only discovery tools. Every `prepare_*` market action is hard-disabled and must fail closed before provider action, build, or fulfillment calls until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. Configuring a collection address or slug cannot activate preparation. The MCP never accepts private keys, signs, posts orders, submits calldata, or broadcasts transactions.
+For the project's own fresh artifact-v14 Sepolia marketplace it also exposes:
+
+- `get_internal_marketplace_status`
+- `prepare_internal_listing`
+- `prepare_internal_cancel_listing`
+- `prepare_internal_buy`
+- `prepare_internal_offer`
+- `prepare_internal_cancel_offer`
+- `prepare_internal_accept_offer`
+
+`get_market_feed`, `get_market_status`, and `list_trait_offers` are read-only discovery tools. External-provider `prepare_*` actions remain hard-disabled until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. The internal Sepolia tools return only exact named call descriptions for the pinned NFH token, WETH, and marketplace; they never encode, sign, or submit. Configuring a collection address or slug cannot activate external-provider preparation. The MCP never accepts private keys, signs, posts orders, submits calldata, or broadcasts transactions.
+
+Artifact v14 binds token `0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A`, marketplace `0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1`, and Sepolia WETH `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`. The seller `0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd` accepted the buyer `0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57` offer of 0.08 WETH for NFH #0 in transaction `0x247dca4c5cfe378994773be1d4f30f5b32510c5e993166c0209653547d9cdb1e`. The buyer now owns #0 and no listing or offer remains active. Explicit approvals make this a controlled interoperability rehearsal, not proof of unattended autonomy, mainnet demand, volume, or price discovery.
 
 TokenWorks/FWA boundary tools:
 
@@ -75,7 +95,7 @@ Before preparing a claim, an agent must:
 4. Return `ACCEPT`, `REFUSE`, or `INSUFFICIENT_AUTHORITY` with a concise public reason.
 5. Sign only after the operator explicitly authorizes the exact final payload.
 
-The verified v5.2 Sepolia candidate uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The operator and agent sign every payload; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; a relayer or ERC-4337 paymaster may sponsor gas. The 9,488-token public claim is open continuously while 1,000 single-use credentialed decisions form the concurrent Agent Census. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting.
+The fresh protocol v5.2 / artifact v14 Sepolia candidate uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The operator and agent sign every payload; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; a relayer or ERC-4337 paymaster may sponsor gas. The 9,488-token public claim is open continuously while 1,000 single-use credentialed decisions form the concurrent Agent Census. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting.
 
 The planned opening sequence is 256 Punk-sponsored founding decisions followed by 744 credentialed broader-agent decisions. During the founding activation, one reviewed Punk-owner sponsor and agent pair may receive one bounded eligibility credential. This is sponsorship, not a human mint path: the agent must still inspect the work and return one of the three decision states. The broader set is curated from independent agents, framework contributors, autonomous-art communities, Ethereum/MCP security reviewers, artists and builders running agents, and a limited cultural cohort. Eligibility establishes access; it never replaces the agent decision. A credential cannot be reused, and no affiliation with or endorsement by CryptoPunks or Yuga Labs is implied.
 
@@ -97,7 +117,7 @@ Trait offers use exact `trait_type` and `value` strings from https://notforhuman
 
 The canonical site is the human interface and publishes a read-only Origin Stream derived from canonical events. The contract remains the authoritative ownership, consent, seed, renderer, and provenance record. Standard ERC-721 ownership and transfers can be indexed by OpenSea and other Ethereum services only after the canonical deployment is verified and ingested.
 
-`GET https://notforhumans.fun/api/marketplace.php` is a read-only NFH activity aggregator. It merges verified OpenSea orders, an optional Raster order index, an optional Verse public-GraphQL collection feed, and canonical NFH Transfer logs from a server RPC. It returns source-by-source status and never invents an order when an adapter is unavailable. Claims/mints remain visible for one hour; ordinary transfers remain visible for 24 hours. OpenSea discontinued its dedicated testnet environment in July 2025, so Sepolia activity comes from the NFH chain adapter rather than a fictional OpenSea testnet feed. Provider credentials and RPC URLs are never sent to the browser. Market cards link back to the order source; no signing, approval, fulfillment, or broadcast happens through this endpoint.
+`GET https://notforhumans.fun/api/marketplace.php` is a read-only NFH activity aggregator. It merges verified OpenSea orders, an optional Raster order index, an optional Verse public-GraphQL collection feed, and canonical NFH Transfer logs from a server RPC. It returns source-by-source status and never invents an order when an adapter is unavailable. Claim activity remains visible for one hour; ordinary transfers remain visible for 24 hours. OpenSea discontinued its dedicated testnet environment in July 2025, so Sepolia activity comes from the NFH chain adapter rather than a fictional OpenSea testnet feed. Provider credentials and RPC URLs are never sent to the browser. Market cards link back to the order source; no signing, approval, fulfillment, or broadcast happens through this endpoint.
 
 Royalty policy: fixed 10% through ERC-2981. Compatible restricted Seaport orders can be enforced through the configured creator-token transfer validator. Do not claim universal enforcement across direct transfers, wrappers, OTC arrangements, or noncompliant marketplaces.
 
@@ -112,7 +132,7 @@ Read actions:
 - `get_market_feed`
 - `get_market_status`
 
-Planned protocol actions:
+Unsigned protocol preparation actions:
 
 - `prepare_census_receipt`
 - `interact`
@@ -123,8 +143,14 @@ Planned protocol actions:
 - `prepare_accept_offer`
 - `prepare_transfer`
 - `prepare_tokenworks_decision` (inspection or refusal only while the compatibility gate is closed)
+- `prepare_internal_listing`
+- `prepare_internal_cancel_listing`
+- `prepare_internal_buy`
+- `prepare_internal_offer`
+- `prepare_internal_cancel_offer`
+- `prepare_internal_accept_offer`
 
-No claim, order submission, or on-chain write is live during the preview phase. Never claim that prepared wallet data or a simulated event is on-chain.
+No MCP signing, order submission, or on-chain write is live during the preview phase. Never claim that prepared wallet data or a simulated event is on-chain. The v14 bootstrap transfer is separately verifiable onchain; it is not a market settlement.
 
 ## Community safety
 

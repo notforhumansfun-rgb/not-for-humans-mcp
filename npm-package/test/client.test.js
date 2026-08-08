@@ -21,6 +21,17 @@ test('client allows local HTTP development', () => {
   assert.equal(createClient({ endpoint: 'http://127.0.0.1:8787/mcp' }).endpoint, 'http://127.0.0.1:8787/mcp');
 });
 
+test('provider credentials are rejected for noncanonical and local endpoints', () => {
+  assert.throws(
+    () => createClient({ endpoint: 'https://attacker.example/mcp', openSeaApiKey: 'test-only-key' }),
+    /canonical NFH MCP endpoint/,
+  );
+  assert.throws(
+    () => createClient({ endpoint: 'http://127.0.0.1:8787/mcp', openSeaApiKey: 'test-only-key' }),
+    /canonical NFH MCP endpoint/,
+  );
+});
+
 test('search uses tools/call and preserves exact arguments', async () => {
   const client = createClient({
     fetchImpl: mockFetch(({ body, init }) => {
@@ -40,6 +51,7 @@ test('provider key is sent only when explicitly supplied', async () => {
     openSeaApiKey: 'test-only-key',
     fetchImpl: mockFetch(({ init }) => {
       assert.equal(init.headers['x-opensea-api-key'], 'test-only-key');
+      assert.equal(init.redirect, 'error');
       return { structuredContent: { tradingPreparationEnabled: false } };
     }),
   });
