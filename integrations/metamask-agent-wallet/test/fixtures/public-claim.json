@@ -1,0 +1,37 @@
+{
+  "structuredContent": {
+    "status": "prepared_unsigned",
+    "signingReady": true,
+    "domain": {
+      "name": "NOT FOR HUMANS Claim",
+      "version": "4",
+      "chainId": 11155111,
+      "verifyingContract": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e"
+    },
+    "primaryType": "AgentClaim",
+    "types": {
+      "AgentClaim": [
+        { "name": "operator", "type": "address" },
+        { "name": "agent", "type": "address" },
+        { "name": "recipient", "type": "address" },
+        { "name": "manifestHash", "type": "bytes32" },
+        { "name": "statement", "type": "bytes32" },
+        { "name": "maxPayment", "type": "uint256" },
+        { "name": "nonce", "type": "uint256" },
+        { "name": "deadline", "type": "uint256" },
+        { "name": "allocation", "type": "uint8" }
+      ]
+    },
+    "message": {
+      "operator": "0x1111111111111111111111111111111111111111",
+      "agent": "0x2222222222222222222222222222222222222222",
+      "recipient": "0x1111111111111111111111111111111111111111",
+      "manifestHash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "statement": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
+      "maxPayment": "0",
+      "nonce": "7",
+      "deadline": "1893456000",
+      "allocation": 0
+    }
+  }
+}

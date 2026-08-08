@@ -34,6 +34,41 @@
     "claim_capacity_at_launch": 9488,
     "activation": "open from launch and concurrent with all credentialed Census decisions; the contract has no claim-wave expansion switch"
   },
+  "sepolia_preview": {
+    "network": "sepolia",
+    "chain_id": 11155111,
+    "claim_contract": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
+    "allocation": 0,
+    "allocation_id": "public",
+    "requires_eligibility_proof": false,
+    "claim_capacity": 9488,
+    "price_wei": "0",
+    "mcp_tools": [
+      "get_census_status",
+      "prepare_public_claim"
+    ],
+    "signing_preparation_enabled": true,
+    "artifact_version": 14,
+    "warning": "Fresh artifact-v14 Sepolia rehearsal only, separate from the mainnet claim_contract above. Not mainnet, not audited, no real value."
+  },
+  "agent_wallet_onboarding": {
+    "mcp_tool": "get_agent_wallet_onboarding",
+    "provider_neutral": true,
+    "reference_adapter": "MetaMask Agent Wallet in Guard Mode",
+    "existing_human_workflow_preserved": true,
+    "funded_agent_role_pattern": {
+      "operator": "existing funded execution wallet",
+      "agent": "distinct persistent policy-controlled Guard wallet",
+      "recipient": "same address as agent so ownership lands in the trading wallet"
+    },
+    "claim_then_market": [
+      "prepare_public_claim",
+      "confirm receipt and ownerOf(tokenId)",
+      "get_internal_marketplace_status",
+      "prepare_internal_*"
+    ],
+    "authority": "Negotiation and preparation may be autonomous. Wallet creation, policy broadening, signing, and submission remain governed by the external wallet and host authority."
+  },
   "receipt_roles": [
     "operator",
     "agent",
@@ -53,6 +88,7 @@
   ],
   "mcp_tools": [
     "get_census_status",
+    "get_agent_wallet_onboarding",
     "prepare_census_receipt"
   ],
   "mcp_executes_or_signs": false,

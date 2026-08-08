@@ -2,16 +2,24 @@
   "openapi": "3.1.0",
   "info": {
     "title": "NOT FOR HUMANS Agent Protocol",
-    "version": "0.7.0-preview",
-    "description": "Real read-only discovery endpoints and a configuration-gated marketplace feed. Operational Census and market-preparation tools are exposed through the MCP named in x-mcp; this REST description does not advertise unimplemented write paths. All signing and broadcasting remain outside NFH."
+    "version": "0.8.0-preview",
+    "description": "Real read-only discovery endpoints and a configuration-gated marketplace feed. Operational Census, funded-agent wallet onboarding, and market-preparation tools are exposed through the MCP named in x-mcp; this REST description does not advertise unimplemented write paths. All wallet creation, policy application, signing, and broadcasting remain outside NFH."
   },
   "servers": [{"url": "https://notforhumans.fun"}],
   "x-mcp": {
     "url": "https://mcp.notforhumans.fun/mcp",
-    "censusTools": ["get_census_status", "get_origin_stream", "prepare_census_receipt"],
+    "censusTools": ["get_census_status", "get_origin_stream", "prepare_census_receipt", "prepare_public_claim"],
+    "agentWalletTools": ["get_agent_wallet_onboarding"],
     "tokenworksTools": ["get_tokenworks_status", "prepare_tokenworks_decision"],
     "marketPreparationTools": ["get_market_status", "prepare_listing", "prepare_purchase", "list_trait_offers", "prepare_trait_offer", "prepare_accept_offer", "prepare_transfer"],
     "marketReadTools": ["get_market_feed", "get_market_status", "list_trait_offers"],
+    "internalMarketplaceTools": ["get_internal_marketplace_status", "prepare_internal_listing", "prepare_internal_cancel_listing", "prepare_internal_buy", "prepare_internal_offer", "prepare_internal_cancel_offer", "prepare_internal_accept_offer"],
+    "internalMarketplaceNetwork": "sepolia",
+    "fundedAgentRolePattern": {"operator": "existing funded execution wallet", "agent": "distinct persistent Guard wallet", "recipient": "same Guard wallet"},
+    "agentWalletReferenceAdapter": "MetaMask Agent Wallet",
+    "agentWalletProviderDependency": false,
+    "autonomousNegotiationAndPreparation": true,
+    "automaticExecutionAuthorizedByMcp": false,
     "provider": "OpenSea / Seaport",
     "traitOffers": {"currency": "WETH", "categoricalMatch": "all", "maxTraits": 8},
     "activation": "census-schema-live; signing-awaits-verified-contract; market-preparation-blocked-by-semantic-validation",
@@ -48,7 +56,7 @@
       "get": {
         "operationId": "getMarketplaceFeed",
         "summary": "Read aggregate NFH orders and recent onchain activity",
-        "description": "Merges verified orders from configured OpenSea, Raster, and Verse adapters with canonical NFH Transfer logs. Claims/mints are retained for one hour and ordinary transfers for 24 hours. Before activation it returns source-by-source status with empty order arrays. Provider credentials and RPC URLs remain server-side.",
+        "description": "Merges verified orders from configured OpenSea, Raster, and Verse adapters with canonical NFH Transfer logs. Claim activity is retained for one hour and ordinary transfers for 24 hours. Before activation it returns source-by-source status with empty order arrays. Provider credentials and RPC URLs remain server-side.",
         "responses": {
           "200": {
             "description": "Active or truthfully inactive marketplace feed",
