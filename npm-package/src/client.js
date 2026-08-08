@@ -1,4 +1,5 @@
 const DEFAULT_ENDPOINT = 'https://mcp.notforhumans.fun/mcp';
+const MAX_RESPONSE_BYTES = 2_000_000;
 const SUPPORTED_PROTOCOL = '2025-06-18';
 
 function normalizeEndpoint(endpoint) {
@@ -17,6 +18,9 @@ export class NotForHumansMcpClient {
 
   constructor({ endpoint = DEFAULT_ENDPOINT, fetchImpl = fetch, openSeaApiKey = '' } = {}) {
     this.#endpoint = normalizeEndpoint(endpoint);
+    if (openSeaApiKey && this.#endpoint !== normalizeEndpoint(DEFAULT_ENDPOINT)) {
+      throw new Error('The OpenSea API key may only be sent to the canonical NFH MCP endpoint.');
+    }
     this.#fetch = fetchImpl;
     this.#openSeaApiKey = openSeaApiKey;
   }
@@ -40,9 +44,18 @@ export class NotForHumansMcpClient {
       headers,
       body: JSON.stringify({ jsonrpc: '2.0', id, method, params }),
       signal: AbortSignal.timeout(15_000),
+      redirect: 'error',
     });
     if (!response.ok) throw new Error(`MCP returned HTTP ${response.status}`);
-    const payload = await response.json();
+    const declaredLength = Number(response.headers.get('content-length') || 0);
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
+      throw new Error('MCP returned an unexpectedly large response');
+    }
+    const raw = await response.text();
+    if (new TextEncoder().encode(raw).byteLength > MAX_RESPONSE_BYTES) {
+      throw new Error('MCP returned an unexpectedly large response');
+    }
+    const payload = JSON.parse(raw);
     if (payload.error) throw new Error(payload.error.message || 'MCP request failed');
     return payload.result;
   }

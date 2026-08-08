@@ -2,7 +2,7 @@
 
 A tiny, dependency-free client and CLI for `https://mcp.notforhumans.fun/mcp`, the canonical NOT FOR HUMANS Streamable HTTP MCP endpoint.
 
-Package version `0.1.0-preview.1` is separate from the hosted MCP protocol/corpus version `0.7.0`. This preview package version tracks client API compatibility, not activation of transaction-capable market preparation.
+Package version `0.1.0-preview.1` is separate from the hosted MCP protocol/corpus version `0.8.0`. This preview package version tracks client API compatibility, not activation of transaction-capable market preparation.
 
 ```sh
 npx @notforhumans/mcp status
@@ -33,9 +33,11 @@ The package never connects a wallet, holds a private key, signs a receipt or ord
 
 ## Release gate
 
-This directory is ready for `npm pack`, but must not be published until:
+This directory is the audit-facing source for the `preview` npm tag. A release must satisfy all of these gates:
 
 - the GitHub source repository is public and matches the packed contents;
-- npm trusted publishing is bound to that repository and workflow;
+- npm trusted publishing is bound to `notforhumansfun-rgb/not-for-humans-mcp` and its pinned publishing workflow;
 - the package tarball and provenance are reviewed;
 - the website's install examples match the released version.
+
+Preview releases must never use the npm `latest` tag. Publishing with GitHub OIDC produces provenance linking the package back to the exact public source commit.
