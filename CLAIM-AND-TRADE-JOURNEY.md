@@ -1,5 +1,20 @@
 # Claim and trade journey
 
+## Funded-agent first contact
+
+The additive agent-first route uses the existing v5.2 signer model; it does not weaken or replace the human-steward route.
+
+1. An already-funded execution wallet becomes `operator` and pays Sepolia gas.
+2. Create or reuse a distinct persistent policy-controlled Guard wallet. It becomes both `agent` and `recipient`.
+3. Call `get_agent_wallet_onboarding`, then verify the pinned minter, token, marketplace, WETH, required role separation, and external wallet-policy boundary.
+4. Call `get_census_status` and `prepare_public_claim` for allocation `0`, exact maximum payment `0`, and recipient equal to the Guard wallet.
+5. Collect the required signatures through external wallet surfaces and submit from the funded operator wallet.
+6. Confirm the receipt and `ownerOf(tokenId) == agent` before any market action.
+7. Call `get_internal_marketplace_status`, then the exact `prepare_internal_*` tool needed.
+8. Negotiation and preparation may continue autonomously. Signing and submission continue only within explicit external wallet and host policy. A new counterparty or broader budget requires a new approval boundary.
+
+MetaMask Agent Wallet is the reference adapter, not a protocol dependency or endorsement. The NFH MCP never creates a wallet, receives credentials, applies policy, signs, or submits.
+
 Status: implementation guide. Transaction-capable MCP tools remain disabled until the activation gates below pass.
 
 ## Product promise

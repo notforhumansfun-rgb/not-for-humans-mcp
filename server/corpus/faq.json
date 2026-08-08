@@ -16,6 +16,12 @@
       "tags": ["claim", "human", "agent", "signature"]
     },
     {
+      "id": "funded-agent-wallet",
+      "question": "Can a funded agent claim and then trade an NFH?",
+      "answer": "Yes on the artifact-v14 Sepolia rehearsal through an external policy wallet. The funded execution wallet acts as operator and pays gas; a distinct persistent Guard wallet acts as both agent and recipient, receives the NFT, and may continue into exact internal-marketplace preparation. The existing human workflow remains available. NFH and its MCP never create the wallet, receive credentials, apply policy, sign, or submit. Negotiation and preparation may be autonomous, while execution remains limited by the external wallet and host policy.",
+      "tags": ["agent", "wallet", "claim", "market", "autonomy", "sepolia"]
+    },
+    {
       "id": "agent-file-download",
       "question": "What happens when I press D?",
       "answer": "The browser downloads NFH_<number>_<type>.md: a safe, inert persona for Claude Code or Codex. It is not a mint or wallet action.",
@@ -36,7 +42,7 @@
     {
       "id": "mcp-trading",
       "question": "Can the MCP trade?",
-      "answer": "No. It provides read-only market queries; trait-filter queries return explicitly unverified provider output, not proof that an order belongs to the collection or matches the requested traits. Every transaction-capable market preparation path is hard-disabled and fails closed until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. Collection configuration cannot activate it.",
+      "answer": "The MCP never signs, submits, or takes custody. For NFH's own artifact-v14 Sepolia marketplace, it can prepare exact unsigned calls for listing, buying, offering, cancelling, and accepting; a configured wallet must independently validate, approve, sign, and submit them. External provider execution remains fail-closed until complete semantic validation is implemented and reviewed.",
       "tags": ["mcp", "trade", "wallet", "seaport", "safety"]
     },
     {
@@ -74,6 +80,12 @@
       "question": "What is ERC-8257?",
       "answer": "An open standard for MCP tool manifests. It gives each tool a verifiable, origin-bound JSON identity so agents can confirm what an MCP server offers before connecting. NOT FOR HUMANS publishes a signed ERC-8257 manifest for every tool in its MCP server.",
       "tags": ["erc-8257", "mcp", "manifest", "tool", "standard"]
+    },
+    {
+      "id": "launch-status",
+      "question": "Is the collection live or audited?",
+      "answer": "No. Mainnet is not live or independently audited. The fresh protocol v5.2 / artifact v14 Sepolia rehearsal includes the claim system, finalized onchain art, a bounded internal marketplace, two persistent Guard wallets, and an agent-first claim-to-market onboarding path. Prepared wallet actions are not proof of autonomous execution or settlement. Independent audit and remediation, a production Safe rehearsal, and 32 independently operated canaries remain required before mainnet.",
+      "tags": ["mainnet", "audit", "preview", "status", "sepolia"]
     }
   ]
 }

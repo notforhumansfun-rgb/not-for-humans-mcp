@@ -4,6 +4,15 @@
   "description": "Tiny, auditable client for the NOT FOR HUMANS remote MCP endpoint.",
   "type": "module",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notforhumansfun-rgb/not-for-humans-mcp.git",
+    "directory": "npm-package"
+  },
+  "homepage": "https://github.com/notforhumansfun-rgb/not-for-humans-mcp/tree/main/npm-package#readme",
+  "bugs": {
+    "url": "https://github.com/notforhumansfun-rgb/not-for-humans-mcp/issues"
+  },
   "engines": {
     "node": ">=22"
   },
@@ -23,7 +32,8 @@
   },
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "provenance": true,
+    "tag": "preview"
   },
   "keywords": [
     "mcp",

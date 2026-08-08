@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - run: python3 scan-server-secrets.py server erc-8257 npm-package integrations skills
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
@@ -26,3 +27,9 @@ jobs:
         working-directory: npm-package
       - run: npm test
         working-directory: npm-package
+      - run: npm pack --dry-run
+        working-directory: npm-package
+      - run: npm ci
+        working-directory: integrations/metamask-agent-wallet
+      - run: npm test
+        working-directory: integrations/metamask-agent-wallet

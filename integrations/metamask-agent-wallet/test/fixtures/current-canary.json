@@ -1,0 +1,39 @@
+{
+  "network": "Sepolia",
+  "chainId": 11155111,
+  "artifactVersion": 14,
+  "protocolVersion": "5.2",
+  "status": "verified-claim-seed-finalized-confirmed",
+  "tokenId": 0,
+  "token": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
+  "minter": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
+  "state": "0x809813A4f8c9078143EAcF93AbEE72Ee8D306Ece",
+  "marketplace": "0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1",
+  "claimTransaction": "0x25fa572a678a908cc9484140dc5fd47a748dd30649ebf5e500384a9cbd3f1f41",
+  "seedFinalizationTransaction": "0x30d57d196c5d9e569b038b4a85db6749e089df597ad0259c41381e2da980416f",
+  "claimBlock": 11443775,
+  "seedFinalized": true,
+  "seedFinalizationNote": "Token #0 seed finalized onchain at block 11443959. The Origin Stream currently labels the combined claim and seed receipt confirmed rather than Ethereum-finalized.",
+  "rendererIntegrity": true,
+  "rendererPlanCommitment": "0xb804d6ec3d3e6e9ce25cbc286037b996549183c69abe64b0994adcc40ad6a084",
+  "browserAnimationReadback": false,
+  "originStream": {
+    "indexed": true,
+    "accept": 2,
+    "refuse": 1,
+    "insufficientAuthority": 1
+  },
+  "tests": {
+    "foundry": "61/61",
+    "legacySolidity": "24/24",
+    "mcp": "passed",
+    "mcpNpm": "7/7",
+    "originStream": "7/7",
+    "policy": "passed",
+    "erc8257": "3/3",
+    "traitCorpus": "10000/10000",
+    "p5Lock": "ethereum+sepolia"
+  },
+  "metadataReadback": "seed finalization is indexed; exact browser animation readback remains separately recorded by the rehearsal console",
+  "verifiedAt": "2026-08-08"
+}

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const NFH_MCP_VERSION = '0.7.0';
+const NFH_MCP_VERSION = '0.8.0';
 const NFH_MCP_PROTOCOL_VERSION = '2025-11-25';
 const NFH_OPENSEA_API_BASE = 'https://api.opensea.io/api/v2';
 const NFH_MCP_SUPPORTED_PROTOCOLS = [
@@ -191,6 +191,409 @@ function nfh_market_config(): array
 }
 
 /** @return array<string, mixed> */
+function nfh_internal_marketplace_config(): array
+{
+    $config = nfh_market_config();
+    $internal = $config['internalMarketplace'] ?? [];
+    $contract = getenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
+    if (is_string($contract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $contract) === 1) {
+        $internal['marketplaceContract'] = $contract;
+    }
+    $configured = $internal['marketplaceContract'] ?? null;
+    $internal['configured'] = is_string($configured) && preg_match('/^0x[a-fA-F0-9]{40}$/', $configured) === 1;
+    return $internal;
+}
+
+/** @return array<string, mixed> */
+function nfh_agent_wallet_onboarding(): array
+{
+    $census = nfh_census_config();
+    $sepolia = is_array($census['sepolia_preview'] ?? null) ? $census['sepolia_preview'] : [];
+    $market = nfh_internal_marketplace_config();
+    $claimContract = $sepolia['claim_contract'] ?? null;
+    $tokenContract = $market['collectionContract'] ?? null;
+    $marketplaceContract = $market['marketplaceContract'] ?? null;
+    $wethContract = $market['wethContract'] ?? null;
+    $contracts = [
+        'claimMinter' => $claimContract,
+        'token' => $tokenContract,
+        'marketplace' => $marketplaceContract,
+        'weth' => $wethContract,
+    ];
+    $configured = true;
+    foreach ($contracts as $address) {
+        if (!is_string($address) || preg_match('/^0x[a-fA-F0-9]{40}$/', $address) !== 1) {
+            $configured = false;
+            break;
+        }
+    }
+
+    return [
+        'schema' => 'notforhumans-agent-wallet-onboarding/1',
+        'status' => $configured ? 'ready_for_external_wallet_setup' : 'blocked_unconfigured',
+        'network' => 'Ethereum Sepolia',
+        'chainId' => 11155111,
+        'artifactVersion' => (int) ($market['artifactVersion'] ?? 14),
+        'providerNeutral' => true,
+        'contracts' => $contracts,
+        'rolePatterns' => [
+            'existingHumanWorkflow' => [
+                'operator' => 'The funded human wallet that signs and submits the claim.',
+                'agent' => 'A distinct persistent agent signer.',
+                'recipient' => 'The intended owner; it signs too when different from the operator.',
+            ],
+            'fundedAgentWorkflow' => [
+                'operator' => 'The agent\'s already-funded execution wallet; it signs and pays Sepolia gas.',
+                'agent' => 'A newly created or existing persistent Guard wallet, distinct from the operator.',
+                'recipient' => 'Use the same Guard wallet as agent and recipient so the NFT lands in the policy-controlled trading wallet.',
+            ],
+        ],
+        'referenceAdapter' => [
+            'provider' => 'MetaMask Agent Wallet',
+            'requiredTradingMode' => 'guard',
+            'mcpCreatesWallet' => false,
+            'mcpReceivesCredentials' => false,
+            'readinessCommands' => [
+                'mm --version',
+                'mm doctor --toon',
+                'mm wallet list --chain-namespace evm --toon',
+            ],
+            'setupCommands' => [
+                'mm login browser --no-wait --toon',
+                'mm init --wallet server-wallet --mode guard --toon',
+                'mm wallet create --chain-namespace evm --name "NFH Agent" --trading-mode guard --toon',
+                'mm wallet policy template --toon',
+                'mm wallet policy get --toon',
+            ],
+        ],
+        'policyIntent' => [
+            'addressEntriesAreSepoliaScoped' => true,
+            'contractAllowlist' => array_values($contracts),
+            'counterparties' => 'Add only the exact operator and reviewed marketplace counterparties required by the intended actions.',
+            'rolling24hOutflowUsd' => 'Choose an explicit non-negative budget that covers the intended trade; increasing it requires wallet-owner MFA.',
+            'serviceDefaultChains' => 'MetaMask policy schema v1 retains provider service-default chains. NFH must still enforce Sepolia in every prepared payload and transaction.',
+        ],
+        'claimSequence' => [
+            'Call get_census_status and stop unless the Sepolia public-claim contract is configured.',
+            'Call prepare_public_claim with distinct operator and agent addresses and recipient set to the Guard wallet for the funded-agent route.',
+            'Validate the exact EIP-712 domain, chain, minter, roles, statement, manifest, nonce, deadline, allocation 0, and maxPayment 0.',
+            'Collect the required external-wallet signatures and submit from the funded operator wallet.',
+            'Wait for an on-chain receipt and confirm ownerOf(tokenId) equals the Guard wallet before preparing market actions.',
+        ],
+        'marketSequence' => [
+            'Call get_internal_marketplace_status and stop unless the pinned artifact-v14 contracts match.',
+            'Use only prepare_internal_listing, prepare_internal_cancel_listing, prepare_internal_buy, prepare_internal_offer, prepare_internal_cancel_offer, or prepare_internal_accept_offer.',
+            'Re-read ownership, listing, offer, balance, allowance, price, and expiry immediately before signing.',
+            'Execution may proceed only within the external wallet policy and host authority; a new counterparty or broader budget requires a new approval boundary.',
+        ],
+        'authority' => [
+            'mcpCreatesWallet' => false,
+            'mcpSigns' => false,
+            'mcpSubmits' => false,
+            'automaticExecutionAuthorizedByMcp' => false,
+            'negotiationAndPreparationMayBeAutonomous' => true,
+            'executionRequiresExternalPolicyAuthority' => true,
+        ],
+        'warnings' => [
+            'Never use a disposable signer merely to satisfy the distinct-address rule.',
+            'Never expose a seed phrase, private key, password, CLI token, or unrestricted spending authority to NFH or its MCP.',
+            'A shared-principal trade is a synthetic rehearsal, not independent demand, volume, or price discovery.',
+            'This route is Sepolia-only, not audited, and not mainnet authorization.',
+        ],
+    ];
+}
+
+/** @return array<string, mixed> */
+function nfh_abi_erc721_approve(): array
+{
+    return [
+        'type' => 'function',
+        'name' => 'approve',
+        'stateMutability' => 'nonpayable',
+        'inputs' => [
+            ['name' => 'to', 'type' => 'address'],
+            ['name' => 'tokenId', 'type' => 'uint256'],
+        ],
+        'outputs' => [],
+    ];
+}
+
+/** @return array<string, mixed> */
+function nfh_abi_erc20_approve(): array
+{
+    return [
+        'type' => 'function',
+        'name' => 'approve',
+        'stateMutability' => 'nonpayable',
+        'inputs' => [
+            ['name' => 'spender', 'type' => 'address'],
+            ['name' => 'amount', 'type' => 'uint256'],
+        ],
+        'outputs' => [],
+    ];
+}
+
+/** @return array<string, mixed> */
+function nfh_abi_marketplace_function(string $name, array $inputs, string $stateMutability = 'nonpayable'): array
+{
+    return ['type' => 'function', 'name' => $name, 'stateMutability' => $stateMutability, 'inputs' => $inputs, 'outputs' => []];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_listing(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $seller = nfh_require_address($arguments['seller'] ?? null, 'seller');
+    $priceWei = nfh_require_uint_string($arguments['priceWei'] ?? null, 'priceWei');
+    $deadline = nfh_require_uint_string($arguments['deadline'] ?? null, 'deadline');
+
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-listing/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'seller' => $seller,
+        'marketplaceContract' => $marketplace,
+        'steps' => [
+            [
+                'step' => 1,
+                'description' => 'Approve the marketplace for this token only. Skip if this exact token approval is already active.',
+                'contract' => $internal['collectionContract'],
+                'function' => 'approve',
+                'abiFragment' => [nfh_abi_erc721_approve()],
+                'args' => [$marketplace, (string) $tokenId],
+                'value' => '0',
+            ],
+            [
+                'step' => 2,
+                'description' => 'List the token for sale at the exact price and expiry.',
+                'contract' => $marketplace,
+                'function' => 'list',
+                'abiFragment' => [nfh_abi_marketplace_function('list', [
+                    ['name' => 'tokenId', 'type' => 'uint256'],
+                    ['name' => 'priceWei', 'type' => 'uint256'],
+                    ['name' => 'expiry', 'type' => 'uint64'],
+                ])],
+                'args' => [(string) $tokenId, $priceWei, $deadline],
+                'value' => '0',
+            ],
+        ],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? [
+                'Inspect every contract address, function name, and argument before encoding, signing, or submitting.',
+                'The seller keeps custody of the token; the marketplace only pulls it at the moment of sale.',
+            ]
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_cancel_listing(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $seller = nfh_require_address($arguments['seller'] ?? null, 'seller');
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-cancel-listing/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'seller' => $seller,
+        'marketplaceContract' => $marketplace,
+        'steps' => [[
+            'step' => 1,
+            'description' => 'Cancel the active listing for this token.',
+            'contract' => $marketplace,
+            'function' => 'cancelListing',
+            'abiFragment' => [nfh_abi_marketplace_function('cancelListing', [['name' => 'tokenId', 'type' => 'uint256']])],
+            'args' => [(string) $tokenId],
+            'value' => '0',
+        ]],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? ['Only the address currently listed as seller can cancel; the contract reverts otherwise.']
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_buy(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $buyer = nfh_require_address($arguments['buyer'] ?? null, 'buyer');
+    $priceWei = nfh_require_uint_string($arguments['priceWei'] ?? null, 'priceWei');
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-buy/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'buyer' => $buyer,
+        'marketplaceContract' => $marketplace,
+        'steps' => [[
+            'step' => 1,
+            'description' => 'Buy the token at its exact listed price. The transaction value must equal priceWei exactly.',
+            'contract' => $marketplace,
+            'function' => 'buy',
+            'abiFragment' => [nfh_abi_marketplace_function('buy', [['name' => 'tokenId', 'type' => 'uint256']], 'payable')],
+            'args' => [(string) $tokenId],
+            'value' => $priceWei,
+        ]],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? [
+                'Read the listing on-chain immediately before sending this transaction; price, expiry, or the seller\'s ownership may have changed.',
+                'Royalty is paid automatically from this exact price at settlement; the buyer sends only the listed price.',
+            ]
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_offer(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $buyer = nfh_require_address($arguments['buyer'] ?? null, 'buyer');
+    $priceWeth = nfh_require_uint_string($arguments['priceWeth'] ?? null, 'priceWeth');
+    $deadline = nfh_require_uint_string($arguments['deadline'] ?? null, 'deadline');
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-offer/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'buyer' => $buyer,
+        'marketplaceContract' => $marketplace,
+        'wethContract' => $internal['wethContract'] ?? null,
+        'steps' => [
+            [
+                'step' => 1,
+                'description' => 'Approve the marketplace to pull exactly this much WETH if the offer is accepted. No WETH moves until acceptance.',
+                'contract' => $internal['wethContract'] ?? null,
+                'function' => 'approve',
+                'abiFragment' => [nfh_abi_erc20_approve()],
+                'args' => [$marketplace, $priceWeth],
+                'value' => '0',
+            ],
+            [
+                'step' => 2,
+                'description' => 'Record the standing offer for this token.',
+                'contract' => $marketplace,
+                'function' => 'makeOffer',
+                'abiFragment' => [nfh_abi_marketplace_function('makeOffer', [
+                    ['name' => 'tokenId', 'type' => 'uint256'],
+                    ['name' => 'priceWeth', 'type' => 'uint256'],
+                    ['name' => 'expiry', 'type' => 'uint64'],
+                ])],
+                'args' => [(string) $tokenId, $priceWeth, $deadline],
+                'value' => '0',
+            ],
+        ],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? ['The offer is only as good as the live WETH allowance; revoking it invalidates the offer without an on-chain cancellation.']
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_cancel_offer(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $buyer = nfh_require_address($arguments['buyer'] ?? null, 'buyer');
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-cancel-offer/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'buyer' => $buyer,
+        'marketplaceContract' => $marketplace,
+        'steps' => [[
+            'step' => 1,
+            'description' => 'Cancel this standing offer.',
+            'contract' => $marketplace,
+            'function' => 'cancelOffer',
+            'abiFragment' => [nfh_abi_marketplace_function('cancelOffer', [['name' => 'tokenId', 'type' => 'uint256']])],
+            'args' => [(string) $tokenId],
+            'value' => '0',
+        ]],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? ['Revoking the WETH approval has the same practical effect and does not require this call, but this leaves no stale on-chain offer record.']
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_internal_accept_offer(array $arguments): array
+{
+    $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+    $seller = nfh_require_address($arguments['seller'] ?? null, 'seller');
+    $buyer = nfh_require_address($arguments['buyer'] ?? null, 'buyer');
+    if (strcasecmp($seller, $buyer) === 0) {
+        throw new InvalidArgumentException('seller and buyer must be different addresses.');
+    }
+    $internal = nfh_internal_marketplace_config();
+    $marketplace = $internal['configured'] ? $internal['marketplaceContract'] : null;
+
+    return [
+        'status' => $internal['configured'] ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-internal-marketplace-accept-offer/1',
+        'network' => 'sepolia',
+        'tokenId' => (string) $tokenId,
+        'seller' => $seller,
+        'buyer' => $buyer,
+        'marketplaceContract' => $marketplace,
+        'steps' => [
+            [
+                'step' => 1,
+                'description' => 'Approve the marketplace for this token only. Skip if this exact token approval is already active.',
+                'contract' => $internal['collectionContract'],
+                'function' => 'approve',
+                'abiFragment' => [nfh_abi_erc721_approve()],
+                'args' => [$marketplace, (string) $tokenId],
+                'value' => '0',
+            ],
+            [
+                'step' => 2,
+                'description' => 'Accept the buyer\'s exact standing offer for this token.',
+                'contract' => $marketplace,
+                'function' => 'acceptOffer',
+                'abiFragment' => [nfh_abi_marketplace_function('acceptOffer', [
+                    ['name' => 'tokenId', 'type' => 'uint256'],
+                    ['name' => 'buyer', 'type' => 'address'],
+                ])],
+                'args' => [(string) $tokenId, $buyer],
+                'value' => '0',
+            ],
+        ],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'warnings' => $internal['configured']
+            ? ['Read the offer on-chain immediately before sending this transaction to confirm the exact price and that it has not expired or been cancelled.']
+            : ['The Sepolia internal marketplace contract is not yet deployed. This is a schema-bound draft, not an executable call.'],
+    ];
+}
+
+/** @return array<string, mixed> */
 function nfh_public_json_config(string $file): array
 {
     $raw = file_get_contents(__DIR__ . '/corpus/' . basename($file));
@@ -216,7 +619,101 @@ function nfh_census_config(): array
     $config['signing_preparation_enabled'] = is_string($configured)
         && preg_match('/^0x[a-fA-F0-9]{40}$/', $configured) === 1;
     $config['mcp_executes_or_signs'] = false;
+
+    $sepoliaContract = getenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT');
+    if (is_string($sepoliaContract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $sepoliaContract) === 1) {
+        $config['sepolia_preview']['claim_contract'] = $sepoliaContract;
+    }
+    $sepoliaConfigured = $config['sepolia_preview']['claim_contract'] ?? null;
+    $config['sepolia_preview']['signing_preparation_enabled'] = is_string($sepoliaConfigured)
+        && preg_match('/^0x[a-fA-F0-9]{40}$/', $sepoliaConfigured) === 1;
+
     return $config;
+}
+
+/** @param array<string, mixed> $arguments */
+function nfh_prepare_public_claim(array $arguments): array
+{
+    $operator = nfh_require_address($arguments['operator'] ?? null, 'operator');
+    $agent = nfh_require_address($arguments['agent'] ?? null, 'agent');
+    $recipient = nfh_require_address($arguments['recipient'] ?? null, 'recipient');
+    if (strcasecmp($operator, $agent) === 0) {
+        throw new InvalidArgumentException('operator and agent must be different addresses.');
+    }
+    $manifestHash = nfh_require_bytes32($arguments['manifestHash'] ?? null, 'manifestHash');
+    $statementHash = nfh_require_bytes32($arguments['statementHash'] ?? null, 'statementHash');
+    $nonce = nfh_require_uint_string($arguments['nonce'] ?? null, 'nonce');
+    $deadline = nfh_require_uint_string($arguments['deadline'] ?? null, 'deadline');
+    $framework = nfh_require_text($arguments['framework'] ?? null, 'framework', 100);
+    $publicStatement = array_key_exists('publicStatement', $arguments)
+        ? nfh_require_text($arguments['publicStatement'], 'publicStatement', 1000)
+        : null;
+
+    $sepolia = nfh_census_config()['sepolia_preview'] ?? [];
+    $signingReady = (bool) ($sepolia['signing_preparation_enabled'] ?? false);
+    $contract = $sepolia['claim_contract'] ?? null;
+    $domain = $signingReady ? [
+        'name' => 'NOT FOR HUMANS Claim',
+        'version' => '4',
+        'chainId' => (int) ($sepolia['chain_id'] ?? 11155111),
+        'verifyingContract' => $contract,
+    ] : null;
+
+    $types = [
+        'AgentClaim' => [
+            ['name' => 'operator', 'type' => 'address'],
+            ['name' => 'agent', 'type' => 'address'],
+            ['name' => 'recipient', 'type' => 'address'],
+            ['name' => 'manifestHash', 'type' => 'bytes32'],
+            ['name' => 'statement', 'type' => 'bytes32'],
+            ['name' => 'maxPayment', 'type' => 'uint256'],
+            ['name' => 'nonce', 'type' => 'uint256'],
+            ['name' => 'deadline', 'type' => 'uint256'],
+            ['name' => 'allocation', 'type' => 'uint8'],
+        ],
+    ];
+    $message = [
+        'operator' => $operator,
+        'agent' => $agent,
+        'recipient' => $recipient,
+        'manifestHash' => $manifestHash,
+        'statement' => $statementHash,
+        'maxPayment' => '0',
+        'nonce' => $nonce,
+        'deadline' => $deadline,
+        'allocation' => 0,
+    ];
+
+    return [
+        'status' => $signingReady ? 'prepared_unsigned' : 'draft_unbound',
+        'schema' => 'notforhumans-sepolia-public-claim/1',
+        'network' => 'sepolia',
+        'allocation' => 'public',
+        'allocationCode' => 0,
+        'framework' => $framework,
+        'publicStatement' => $publicStatement,
+        'signingReady' => $signingReady,
+        'domain' => $domain,
+        'primaryType' => 'AgentClaim',
+        'types' => $types,
+        'message' => $message,
+        'eligibilityProof' => [],
+        'requiresOperatorSignature' => true,
+        'requiresAgentSignature' => true,
+        'requiresRecipientSignature' => strcasecmp($recipient, $operator) !== 0,
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'agentSignerGuidance' => 'The agent address must differ from the operator. Prefer a persistent, dedicated, policy-controlled external agent wallet whose key is isolated from the model runtime. Validate and show this exact payload before requesting human approval for the external wallet signature. If no persistent signer is configured, stop with insufficient signing authority; never generate a disposable signer merely to satisfy the distinct-address check. The MCP never generates, holds, or sees a key.',
+        'warnings' => $signingReady
+            ? [
+                'Inspect every field before signing or submitting.',
+                'This is the Sepolia preview contract, not mainnet. No real value is at stake.',
+                strcasecmp($recipient, $operator) === 0
+                    ? 'The operator is the recipient, so its signature is also recipient consent.'
+                    : 'The distinct recipient must sign this exact digest before submission.',
+            ]
+            : ['The Sepolia preview claim contract is not configured. This is a schema-bound draft, not signable typed data or an on-chain receipt.'],
+    ];
 }
 
 /** @return array<string, mixed> */
@@ -623,6 +1120,35 @@ function nfh_public_traits(array $traits): array
         ],
         $traits,
     );
+}
+
+/**
+ * @param array<string, mixed> $config
+ * @param array<string, mixed> $providerPayload
+ * @return array<string, mixed>
+ */
+function nfh_best_order_result(string $side, int $tokenId, array $config, array $providerPayload): array
+{
+    $orderHash = $providerPayload['order_hash'] ?? null;
+    $orderHash = is_string($orderHash) && preg_match('/^0x[a-fA-F0-9]{64}$/', $orderHash) === 1
+        ? $orderHash
+        : null;
+    return [
+        'status' => $orderHash !== null ? 'unverified-provider-output' : 'not-found',
+        'provider' => 'OpenSea',
+        'side' => $side,
+        'chain' => (string) $config['chain'],
+        'collectionContract' => (string) $config['collectionContract'],
+        'collectionSlug' => (string) $config['collectionSlug'],
+        'tokenId' => (string) $tokenId,
+        'orderHash' => $orderHash,
+        'providerOutputVerified' => false,
+        'providerPayload' => $providerPayload,
+        'warnings' => [
+            'The MCP does not semantically decode this provider response. It is opaque discovery data, not proof that this order belongs to the collection, matches the requested token, or is still valid.',
+            'Independently verify token, price, currency, and expiry from providerPayload before calling prepare_purchase or prepare_accept_offer with this orderHash.',
+        ],
+    ];
 }
 
 /**
@@ -1085,6 +1611,22 @@ function nfh_tool_definitions(): array
         ],
         'additionalProperties' => false,
     ];
+    $internalMarketplaceStepsOutput = [
+        'type' => 'object',
+        'properties' => [
+            'status' => ['type' => 'string', 'enum' => ['prepared_unsigned', 'draft_unbound']],
+            'schema' => ['type' => 'string'],
+            'network' => ['type' => 'string'],
+            'tokenId' => ['type' => 'string'],
+            'marketplaceContract' => ['type' => ['string', 'null']],
+            'steps' => ['type' => 'array', 'items' => ['type' => 'object']],
+            'mcpSigned' => ['type' => 'boolean'],
+            'mcpSubmitted' => ['type' => 'boolean'],
+            'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
+        ],
+        'required' => ['status', 'schema', 'network', 'tokenId', 'marketplaceContract', 'steps', 'mcpSigned', 'mcpSubmitted', 'warnings'],
+        'additionalProperties' => true,
+    ];
     $traitCriteriaOutput = [
         'type' => 'object',
         'properties' => [
@@ -1092,6 +1634,27 @@ function nfh_tool_definitions(): array
             'traits' => $traitsSchema,
         ],
         'required' => ['matchPolicy', 'traits'],
+        'additionalProperties' => false,
+    ];
+    $bestOrderOutput = [
+        'type' => 'object',
+        'properties' => [
+            'status' => ['type' => 'string', 'enum' => ['unverified-provider-output', 'not-found']],
+            'provider' => ['type' => 'string'],
+            'side' => ['type' => 'string', 'enum' => ['listing', 'offer']],
+            'chain' => ['type' => 'string'],
+            'collectionContract' => $addressSchema,
+            'collectionSlug' => ['type' => 'string'],
+            'tokenId' => ['type' => 'string'],
+            'orderHash' => ['type' => ['string', 'null']],
+            'providerOutputVerified' => ['type' => 'boolean', 'enum' => [false]],
+            'providerPayload' => ['type' => 'object'],
+            'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
+        ],
+        'required' => [
+            'status', 'provider', 'side', 'chain', 'collectionContract', 'collectionSlug',
+            'tokenId', 'orderHash', 'providerOutputVerified', 'providerPayload', 'warnings',
+        ],
         'additionalProperties' => false,
     ];
     $traitOffersOutput = [
@@ -1256,6 +1819,42 @@ function nfh_tool_definitions(): array
             'annotations' => $readOnlyAnnotations,
         ],
         [
+            'name' => 'get_agent_wallet_onboarding',
+            'title' => 'Get the funded-agent claim-to-market route',
+            'description' => 'Use this when an agent discovers NFH with a funded execution wallet and needs the exact role topology, Guard-wallet setup boundary, pinned Sepolia contracts, claim sequence, and internal-marketplace handoff. It preserves the existing human workflow and never creates a wallet, handles credentials, signs, or submits.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'schema' => ['type' => 'string', 'const' => 'notforhumans-agent-wallet-onboarding/1'],
+                    'status' => ['type' => 'string', 'enum' => ['ready_for_external_wallet_setup', 'blocked_unconfigured']],
+                    'network' => ['type' => 'string'],
+                    'chainId' => ['type' => 'integer'],
+                    'artifactVersion' => ['type' => 'integer'],
+                    'providerNeutral' => ['type' => 'boolean'],
+                    'contracts' => ['type' => 'object'],
+                    'rolePatterns' => ['type' => 'object'],
+                    'referenceAdapter' => ['type' => 'object'],
+                    'policyIntent' => ['type' => 'object'],
+                    'claimSequence' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'marketSequence' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'authority' => ['type' => 'object'],
+                    'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+                'required' => [
+                    'schema', 'status', 'network', 'chainId', 'artifactVersion', 'providerNeutral',
+                    'contracts', 'rolePatterns', 'referenceAdapter', 'policyIntent', 'claimSequence',
+                    'marketSequence', 'authority', 'warnings',
+                ],
+                'additionalProperties' => false,
+            ],
+            'annotations' => $readOnlyAnnotations,
+        ],
+        [
             'name' => 'get_origin_stream',
             'title' => 'Get canonical NFH origin receipts',
             'description' => 'Read the published chain-backed ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY receipts. Each receipt states whether it is observed, confirmed, or finalized; this tool never treats a prepared action as an executed event.',
@@ -1342,6 +1941,63 @@ function nfh_tool_definitions(): array
                     'domain', 'primaryType', 'types', 'message',
                     'requiresOperatorSignature', 'requiresAgentSignature', 'requiresRecipientSignature',
                     'mcpSigned', 'mcpSubmitted', 'warnings',
+                ],
+                'additionalProperties' => false,
+            ],
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_public_claim',
+            'title' => 'Prepare a Sepolia public claim',
+            'description' => 'Prepare unsigned typed data for the continuously open, credential-free public allocation (9,488 claims, 0 ETH) against the Sepolia preview contract. Always ACCEPT-shaped; the public allocation has no refusal/insufficient-authority record. This tool never signs or submits, and it is Sepolia-only, never mainnet.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'operator' => $addressSchema,
+                    'agent' => $addressSchema,
+                    'recipient' => $addressSchema,
+                    'manifestHash' => ['type' => 'string', 'pattern' => '^0x[a-fA-F0-9]{64}$'],
+                    'statementHash' => ['type' => 'string', 'pattern' => '^0x[a-fA-F0-9]{64}$'],
+                    'nonce' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                    'deadline' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                    'framework' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 100],
+                    'publicStatement' => ['type' => 'string', 'minLength' => 1, 'maxLength' => 1000],
+                ],
+                'required' => [
+                    'operator', 'agent', 'recipient', 'manifestHash',
+                    'statementHash', 'nonce', 'deadline', 'framework',
+                ],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'status' => ['type' => 'string', 'enum' => ['prepared_unsigned', 'draft_unbound']],
+                    'schema' => ['type' => 'string'],
+                    'network' => ['type' => 'string'],
+                    'allocation' => ['type' => 'string'],
+                    'allocationCode' => ['type' => 'integer'],
+                    'framework' => ['type' => 'string'],
+                    'publicStatement' => ['type' => ['string', 'null']],
+                    'signingReady' => ['type' => 'boolean'],
+                    'domain' => ['type' => ['object', 'null']],
+                    'primaryType' => ['type' => 'string'],
+                    'types' => ['type' => 'object'],
+                    'message' => ['type' => 'object'],
+                    'eligibilityProof' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'requiresOperatorSignature' => ['type' => 'boolean'],
+                    'requiresAgentSignature' => ['type' => 'boolean'],
+                    'requiresRecipientSignature' => ['type' => 'boolean'],
+                    'mcpSigned' => ['type' => 'boolean'],
+                    'mcpSubmitted' => ['type' => 'boolean'],
+                    'agentSignerGuidance' => ['type' => 'string'],
+                    'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+                'required' => [
+                    'status', 'schema', 'network', 'allocation', 'allocationCode', 'framework',
+                    'publicStatement', 'signingReady', 'domain', 'primaryType', 'types', 'message',
+                    'eligibilityProof', 'requiresOperatorSignature', 'requiresAgentSignature',
+                    'requiresRecipientSignature', 'mcpSigned', 'mcpSubmitted', 'agentSignerGuidance', 'warnings',
                 ],
                 'additionalProperties' => false,
             ],
@@ -1490,6 +2146,7 @@ function nfh_tool_definitions(): array
                     'providerApiKeyHeader' => ['type' => 'string'],
                     'mcpExecutesTransactions' => ['type' => 'boolean'],
                     'walletApprovalRequired' => ['type' => 'boolean'],
+                    'internalMarketplace' => ['type' => 'object'],
                 ],
                 'required' => [
                     'status', 'chain', 'chainId', 'collectionContract', 'collectionSlug',
@@ -1501,6 +2158,37 @@ function nfh_tool_definitions(): array
                     'mcpExecutesTransactions', 'walletApprovalRequired',
                 ],
                 'additionalProperties' => false,
+            ],
+            'annotations' => $readOnlyAnnotations,
+        ],
+        [
+            'name' => 'get_internal_marketplace_status',
+            'title' => 'Get the Sepolia internal marketplace status',
+            'description' => 'Use this before any internal-marketplace action to check whether the Sepolia rehearsal marketplace contract is deployed, and the collection/WETH addresses it targets. This is our own approval-based contract, never OpenSea/Seaport, and always Sepolia, never mainnet.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'network' => ['type' => 'string'],
+                    'chainId' => ['type' => 'integer'],
+                    'marketplaceContract' => ['type' => ['string', 'null']],
+                    'collectionContract' => ['type' => 'string'],
+                    'wethContract' => ['type' => 'string'],
+                    'royaltyBps' => ['type' => 'integer'],
+                    'custodyModel' => ['type' => 'string'],
+                    'executionModel' => ['type' => 'string'],
+                    'configured' => ['type' => 'boolean'],
+                    'warning' => ['type' => 'string'],
+                ],
+                'required' => [
+                    'network', 'chainId', 'marketplaceContract', 'collectionContract', 'wethContract',
+                    'royaltyBps', 'custodyModel', 'executionModel', 'configured', 'warning',
+                ],
+                'additionalProperties' => true,
             ],
             'annotations' => $readOnlyAnnotations,
         ],
@@ -1574,6 +2262,26 @@ function nfh_tool_definitions(): array
             'annotations' => $marketReadAnnotations,
         ],
         [
+            'name' => 'find_best_order',
+            'title' => 'Find the current best NFH listing or offer for one token',
+            'description' => 'Use this before prepare_purchase or prepare_accept_offer so you never have to ask the human for an order hash — it looks up the current best listing or best offer for one exact tokenId and returns its orderHash. The provider response remains opaque and unverified: independently decode and confirm it matches the intended token, price, and terms before preparing execution.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'side' => [
+                        'type' => 'string',
+                        'enum' => ['listing', 'offer'],
+                        'description' => '"listing" to buy this token; "offer" to accept a bid on it.',
+                    ],
+                ],
+                'required' => ['tokenId', 'side'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $bestOrderOutput,
+            'annotations' => $marketReadAnnotations,
+        ],
+        [
             'name' => 'prepare_trait_offer',
             'title' => 'Prepare an NFH trait offer',
             'description' => 'Use this when a bidder wants a WETH offer for any NFH matching all supplied traits. It asks OpenSea to build criteria-order parameters and returns exact terms for wallet-side Seaport assembly, signature, and order-book submission; the MCP never signs or posts the offer.',
@@ -1628,6 +2336,108 @@ function nfh_tool_definitions(): array
                 'additionalProperties' => false,
             ],
             'outputSchema' => $preparedActionOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_listing',
+            'title' => 'Prepare an internal-marketplace listing',
+            'description' => 'Prepare the exact contract, ABI fragment, and arguments to approve and list one token on our own Sepolia marketplace contract. Never OpenSea/Seaport. Returns unsigned call descriptions only; encoding, signing, and submission happen in the caller\'s own tooling.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'seller' => $addressSchema,
+                    'priceWei' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                    'deadline' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                ],
+                'required' => ['tokenId', 'seller', 'priceWei', 'deadline'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_cancel_listing',
+            'title' => 'Prepare cancelling an internal-marketplace listing',
+            'description' => 'Prepare the exact call to cancel an active listing on our own Sepolia marketplace contract.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'seller' => $addressSchema,
+                ],
+                'required' => ['tokenId', 'seller'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_buy',
+            'title' => 'Prepare an internal-marketplace purchase',
+            'description' => 'Prepare the exact call to buy a listed token on our own Sepolia marketplace contract at its exact price. Royalty is paid automatically at settlement.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'buyer' => $addressSchema,
+                    'priceWei' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                ],
+                'required' => ['tokenId', 'buyer', 'priceWei'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_offer',
+            'title' => 'Prepare an internal-marketplace WETH offer',
+            'description' => 'Prepare the exact calls to approve WETH and record a standing offer for one token on our own Sepolia marketplace contract. No WETH moves until the seller accepts.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'buyer' => $addressSchema,
+                    'priceWeth' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                    'deadline' => ['type' => 'string', 'pattern' => '^(?:0|[1-9][0-9]{0,77})$'],
+                ],
+                'required' => ['tokenId', 'buyer', 'priceWeth', 'deadline'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_cancel_offer',
+            'title' => 'Prepare cancelling an internal-marketplace offer',
+            'description' => 'Prepare the exact call to cancel a standing offer on our own Sepolia marketplace contract.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'buyer' => $addressSchema,
+                ],
+                'required' => ['tokenId', 'buyer'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
+            'name' => 'prepare_internal_accept_offer',
+            'title' => 'Prepare accepting an internal-marketplace offer',
+            'description' => 'Prepare the exact calls to approve and accept a buyer\'s standing offer on our own Sepolia marketplace contract. Royalty is paid automatically at settlement.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'tokenId' => $tokenIdSchema,
+                    'seller' => $addressSchema,
+                    'buyer' => $addressSchema,
+                ],
+                'required' => ['tokenId', 'seller', 'buyer'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => $internalMarketplaceStepsOutput,
             'annotations' => $marketPreparationAnnotations,
         ],
         [
@@ -1734,7 +2544,7 @@ function nfh_call_market_tool(string $name, array $arguments): array
         }
 
         $contract = nfh_require_collection_ready($config);
-        if ($name !== 'list_trait_offers') {
+        if ($name !== 'list_trait_offers' && $name !== 'find_best_order') {
             nfh_require_market_ready($config);
         }
         $chain = (string) $config['chain'];
@@ -1842,6 +2652,28 @@ function nfh_call_market_tool(string $name, array $arguments): array
                 $query,
             );
             return nfh_tool_payload(nfh_trait_offers_result($traits, $config, $providerPayload));
+        }
+
+        if ($name === 'find_best_order') {
+            $tokenId = nfh_require_token_id($arguments['tokenId'] ?? null);
+            $slug = nfh_require_collection_slug($config);
+            $side = $arguments['side'] ?? null;
+            if ($side !== 'listing' && $side !== 'offer') {
+                throw new InvalidArgumentException('side must be "listing" or "offer".');
+            }
+            $path = ($side === 'listing' ? '/listings/collection/' : '/offers/collection/')
+                . rawurlencode($slug) . '/nfts/' . $tokenId . '/best';
+            try {
+                $providerPayload = nfh_opensea_get($path, []);
+            } catch (RuntimeException $error) {
+                // No active order for this token/side is a valid, expected
+                // outcome (OpenSea returns 404), not a tool failure.
+                if (!str_contains($error->getMessage(), 'HTTP 404')) {
+                    throw $error;
+                }
+                $providerPayload = [];
+            }
+            return nfh_tool_payload(nfh_best_order_result($side, $tokenId, $config, $providerPayload));
         }
 
         if ($name === 'prepare_trait_offer') {
@@ -2039,8 +2871,10 @@ function nfh_call_tool(string $name, array $arguments): array
 
     if (in_array($name, [
         'get_census_status',
+        'get_agent_wallet_onboarding',
         'get_origin_stream',
         'prepare_census_receipt',
+        'prepare_public_claim',
         'get_tokenworks_status',
         'prepare_tokenworks_decision',
     ], true)) {
@@ -2048,11 +2882,17 @@ function nfh_call_tool(string $name, array $arguments): array
             if ($name === 'get_census_status') {
                 return nfh_tool_payload(nfh_census_config());
             }
+            if ($name === 'get_agent_wallet_onboarding') {
+                return nfh_tool_payload(nfh_agent_wallet_onboarding());
+            }
             if ($name === 'get_origin_stream') {
                 return nfh_tool_payload(nfh_origin_stream_config());
             }
             if ($name === 'prepare_census_receipt') {
                 return nfh_tool_payload(nfh_prepare_census_receipt($arguments));
+            }
+            if ($name === 'prepare_public_claim') {
+                return nfh_tool_payload(nfh_prepare_public_claim($arguments));
             }
             if ($name === 'get_tokenworks_status') {
                 return nfh_tool_payload(nfh_tokenworks_config());
@@ -2069,11 +2909,46 @@ function nfh_call_tool(string $name, array $arguments): array
         'prepare_listing',
         'prepare_purchase',
         'list_trait_offers',
+        'find_best_order',
         'prepare_trait_offer',
         'prepare_accept_offer',
         'prepare_transfer',
     ], true)) {
         return nfh_call_market_tool($name, $arguments);
+    }
+
+    if (in_array($name, [
+        'get_internal_marketplace_status',
+        'prepare_internal_listing',
+        'prepare_internal_cancel_listing',
+        'prepare_internal_buy',
+        'prepare_internal_offer',
+        'prepare_internal_cancel_offer',
+        'prepare_internal_accept_offer',
+    ], true)) {
+        try {
+            if ($name === 'get_internal_marketplace_status') {
+                return nfh_tool_payload(nfh_internal_marketplace_config());
+            }
+            if ($name === 'prepare_internal_listing') {
+                return nfh_tool_payload(nfh_prepare_internal_listing($arguments));
+            }
+            if ($name === 'prepare_internal_cancel_listing') {
+                return nfh_tool_payload(nfh_prepare_internal_cancel_listing($arguments));
+            }
+            if ($name === 'prepare_internal_buy') {
+                return nfh_tool_payload(nfh_prepare_internal_buy($arguments));
+            }
+            if ($name === 'prepare_internal_offer') {
+                return nfh_tool_payload(nfh_prepare_internal_offer($arguments));
+            }
+            if ($name === 'prepare_internal_cancel_offer') {
+                return nfh_tool_payload(nfh_prepare_internal_cancel_offer($arguments));
+            }
+            return nfh_tool_payload(nfh_prepare_internal_accept_offer($arguments));
+        } catch (InvalidArgumentException|RuntimeException|JsonException $error) {
+            return nfh_tool_error($error->getMessage());
+        }
     }
 
     if ($name === 'get_agent_pfp') {
@@ -2147,7 +3022,7 @@ function nfh_dispatch(array $request): array
                     'description' => 'Canonical project knowledge, Agent Census receipts, and non-custodial NFH market-action preparation.',
                     'websiteUrl' => 'https://notforhumans.fun/',
                 ],
-                'instructions' => 'Use search and fetch for canonical public knowledge. Before an opening-wave decision, call get_census_status; prepare_census_receipt supports ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY but never signs or submits. Before any OpenSea action, call get_market_status. Trait offers are AND-scoped criteria orders paid in WETH. TokenWorks/FWA direct actions remain disabled behind get_tokenworks_status until the royalty compatibility gate closes. Never claim that the MCP signed, posted, submitted, broadcast, or completed an order or transaction.',
+                'instructions' => 'Use search and fetch for canonical public knowledge. If you are a first-time funded agent that wants to claim into a persistent policy wallet and continue into the internal market, call get_agent_wallet_onboarding first. That route uses the already-funded wallet as operator and a distinct Guard wallet as both agent and recipient; the existing human-steward route remains valid. The MCP never creates the wallet, receives credentials, signs, or submits. Before an opening-wave decision, call get_census_status; prepare_census_receipt supports ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY but never signs or submits. For the continuously open, credential-free public allocation on the Sepolia preview, call prepare_public_claim instead; it is always ACCEPT-shaped and Sepolia-only, never mainnet. Prefer a persistent, dedicated, policy-controlled external agent wallet whose key is isolated from the model runtime; never reuse the operator wallet or generate and discard a disposable signer merely to satisfy the distinct-address check. Before any signature, validate and show the exact domain, chain, verifying contract, type layout, statement, manifest, agent, recipient, nonce, deadline, allocation, and zero maximum payment, then obtain explicit approval under the external wallet and host policy. If no persistent signer is configured, stop with insufficient signing authority. Only sign as recipient when that same configured wallet is intentionally the named recipient; otherwise the claim-import page collects recipient consent live from its wallet. Hand the operator one compact JSON object {domain, types, message, agentSignature, recipientSignature?} to paste into "Got a prepared claim back from your agent?" at https://notforhumans.fun/sepolia/ — never a code snippet to run. If you have browser automation, drive that page yourself through Review and Sign as operator & submit, stopping before any wallet extension popup; otherwise, if you have shell or OS access, copy the object directly onto the operator clipboard instead of only printing it in chat, since manual copying of long hex values can silently corrupt them into invalid JSON. After a confirmed claim, verify ownerOf before trading. For trading, call get_internal_marketplace_status first; our own Sepolia marketplace contract returns exact {contract, function, abiFragment, args, value} steps, never raw calldata and never OpenSea/Seaport — deliver that JSON the same way (browser automation drives the marketplace-action panel at https://notforhumans.fun/sepolia/ through Review action and Run steps in wallet; otherwise clipboard-copy it) rather than encoding or signing it yourself. Negotiation and preparation may be autonomous, but execution requires explicit external wallet policy authority; new counterparties or broader budgets create a new approval boundary. Before any OpenSea action, call get_market_status. Before prepare_purchase or prepare_accept_offer, call find_best_order yourself to discover the orderHash for that token — never ask the human to find or paste one. Trait offers are AND-scoped criteria orders paid in WETH. TokenWorks/FWA direct actions remain disabled behind get_tokenworks_status until the royalty compatibility gate closes. Never claim that the MCP signed, posted, submitted, broadcast, or completed an order or transaction.',
             ]),
         ];
     }

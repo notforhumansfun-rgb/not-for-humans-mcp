@@ -62,6 +62,19 @@ export const toolDefinitions = [
     outputs: objectOutput
   },
   {
+    slug: "onboard-nfh-agent-wallet",
+    name: "onboard-nfh-agent-wallet",
+    description: "Returns the provider-neutral funded-agent route from an existing execution wallet to a distinct persistent Guard wallet, a zero-price Sepolia claim, and policy-bounded NFH marketplace preparation. It never creates a wallet, handles credentials, signs, or submits.",
+    mcpTool: "get_agent_wallet_onboarding",
+    tags: ["agents", "claim", "ethereum", "market", "wallet"],
+    inputs: {
+      type: "object",
+      properties: {},
+      additionalProperties: false
+    },
+    outputs: objectOutput
+  },
+  {
     slug: "decide-nfh-census",
     name: "decide-nfh-census",
     description: "Prepares unsigned EIP-712 v4 data for an ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY Agent Census decision; it never signs, submits, or mints.",
