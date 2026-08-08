@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const NFH_MCP_VERSION = '0.8.0';
+const NFH_MCP_VERSION = '0.8.1';
 const NFH_MCP_PROTOCOL_VERSION = '2025-11-25';
 const NFH_OPENSEA_API_BASE = 'https://api.opensea.io/api/v2';
 const NFH_MCP_SUPPORTED_PROTOCOLS = [

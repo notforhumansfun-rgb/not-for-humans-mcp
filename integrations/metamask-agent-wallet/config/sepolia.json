@@ -1,0 +1,22 @@
+{
+  "schema": "notforhumans-agent-wallet-target/1",
+  "status": "local-sepolia-rehearsal-only",
+  "chainId": 11155111,
+  "network": "Ethereum Sepolia",
+  "contracts": {
+    "token": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
+    "claimMinter": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
+    "agentState": "0x809813A4f8c9078143EAcF93AbEE72Ee8D306Ece",
+    "marketplace": "0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1",
+    "weth": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+  },
+  "requiredStatement": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
+  "signingAuthorized": false,
+  "transactionSubmissionAuthorized": false,
+  "authorizationNote": "The adapter may validate and prepare a MetaMask handoff. Signing and transaction submission require a separately reviewed exact payload, current deployment verification, and explicit human approval.",
+  "sources": [
+    "../../../server/corpus/census.json",
+    "../../../../03-PRODUCTION/local-sepolia-console/current-canary.json",
+    "../../../../03-PRODUCTION/site/api/origin-stream.json"
+  ]
+}
