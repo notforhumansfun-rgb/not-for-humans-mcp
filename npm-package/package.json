@@ -1,6 +1,6 @@
 {
   "name": "@notforhumans/mcp",
-  "version": "0.1.0-preview.1",
+  "version": "0.1.0-preview.2",
   "description": "Tiny, auditable client for the NOT FOR HUMANS remote MCP endpoint.",
   "type": "module",
   "license": "UNLICENSED",

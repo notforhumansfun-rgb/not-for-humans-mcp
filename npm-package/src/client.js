@@ -35,7 +35,7 @@ export class NotForHumansMcpClient {
       accept: 'application/json, text/event-stream',
       'content-type': 'application/json',
       'mcp-protocol-version': SUPPORTED_PROTOCOL,
-      'user-agent': '@notforhumans/mcp/0.1',
+      'user-agent': '@notforhumans/mcp/0.1.0-preview.2',
     };
     if (this.#openSeaApiKey) headers['x-opensea-api-key'] = this.#openSeaApiKey;
 
@@ -64,7 +64,7 @@ export class NotForHumansMcpClient {
     return this.request('initialize', {
       protocolVersion: SUPPORTED_PROTOCOL,
       capabilities: {},
-      clientInfo: { name: '@notforhumans/mcp', version: '0.1.0-preview.1' },
+      clientInfo: { name: '@notforhumans/mcp', version: '0.1.0-preview.2' },
     });
   }
 
