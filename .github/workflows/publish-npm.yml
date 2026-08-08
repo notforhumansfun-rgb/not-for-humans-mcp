@@ -37,3 +37,5 @@ jobs:
         working-directory: npm-package
       - run: npm publish
         working-directory: npm-package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
