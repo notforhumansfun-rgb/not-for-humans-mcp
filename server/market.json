@@ -20,42 +20,50 @@
   "internalMarketplace": {
     "network": "sepolia",
     "chainId": 11155111,
-    "artifactVersion": 14,
+    "artifactVersion": 16,
     "protocolVersion": "5.2",
-    "contractBuild": "v5.2-sepolia-autonomy-rehearsal-v14-2026-08-08",
-    "marketplaceContract": "0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1",
-    "collectionContract": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
+    "contractBuild": "v5.2-sepolia-artifact-integrity-v16-2026-08-08",
+    "marketplaceContract": "0x5a2E15492026a47224b26F60a8afBFA727681235",
+    "collectionContract": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
     "wethContract": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-    "sellerAgent": "0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd",
-    "buyerAgent": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
+    "sellerAgent": null,
+    "buyerAgent": null,
     "tokenId": "0",
-    "tokenOwner": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
-    "bootstrapTransaction": "0x76f2f3d1f8a9e0407d26c3f8d4cdea7afc78d23a3eee894c241b120c9e3aa8bf",
-    "autonomyStatus": "verified-settled-to-configured-buyer",
-    "classification": "synthetic-self-trade-rehearsal-not-market-activity",
+    "tokenOwner": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
+    "deploymentTransaction": "0x0e0afac48dbeebf96a65194d131357923119344390f7805375ea9fff8c4e3780",
+    "autonomyStatus": "deployed-runtime-verified-no-v16-settlement-yet",
+    "classification": "deployment-and-canary-evidence-not-market-activity",
     "automaticExecutionAuthorized": false,
-    "walletPolicyStatus": "guard-mode-wallets-created-policy-limits-not-confirmed",
+    "walletPolicyStatus": "not-configured-for-v16-settlement",
     "royaltyBps": 1000,
     "custodyModel": "approval-only; the seller keeps the token until sale, never escrowed",
     "executionModel": "MCP returns the target contract, a minimal ABI fragment, and named arguments for each step. It never encodes calldata, signs, or submits; encoding uses the caller's own ABI-encoding library.",
     "inspectionCheckpoint": {
-      "block": 11445922,
-      "hash": "0x3a968266a7a71603ec097e791f079df4f4148c47c5a046c7b5db346d0971cde6",
+      "block": 11446859,
+      "hash": "0xc800ca4d59217e21ec7a9d6ec5e345f32d6cb5bd5220c343d3ae509061964b81",
       "providers": [
         "https://ethereum-sepolia-rpc.publicnode.com",
         "https://rpc.sepolia.ethpandaops.io"
       ],
       "activeListing": false,
-      "activeConfiguredBuyerOffer": false
+      "activeConfiguredBuyerOffer": false,
+      "totalSupply": 2,
+      "foundingDecisions": 4,
+      "foundingRootFrozen": true
     },
-    "warning": "Artifact-v14 is the verified historical Sepolia settlement baseline; artifact-v15 is the security-remediated final rehearsal candidate. The completed same-principal rehearsal proves contract mechanics only, not independent demand, market volume, autonomous execution, or price discovery. Not mainnet, no real value."
+    "warning": "Artifact-v16 is the current Sepolia target and has verified deployment, role wiring, a frozen founding root, and four confirmed canaries. Its seed lifecycle, protocol freezes, and independent marketplace settlement are not complete. Artifact-v14 remains the historical same-principal settlement baseline. Not mainnet, not proof of demand, no real value."
   },
-  "nextSepoliaCandidate": {
-    "artifactVersion": 15,
+  "historicalSepoliaSettlement": {
+    "artifactVersion": 14,
     "protocolVersion": "5.2",
-    "contractBuild": "v5.2-sepolia-security-remediation-v15-2026-08-08",
-    "status": "console-ready-final-rehearsal-not-deployed",
-    "automaticExecutionAuthorized": false
+    "marketplaceContract": "0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1",
+    "collectionContract": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
+    "sellerAgent": "0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd",
+    "buyerAgent": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
+    "tokenId": "0",
+    "settlementTransaction": "0x247dca4c5cfe378994773be1d4f30f5b32510c5e993166c0209653547d9cdb1e",
+    "priceWeth": "80000000000000000",
+    "classification": "synthetic-self-trade-rehearsal-not-market-activity"
   },
   "activationRequirements": [
     "Deploy and independently audit the canonical NFH contracts on Ethereum mainnet.",

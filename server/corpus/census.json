@@ -37,7 +37,7 @@
   "sepolia_preview": {
     "network": "sepolia",
     "chain_id": 11155111,
-    "claim_contract": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
+    "claim_contract": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5",
     "allocation": 0,
     "allocation_id": "public",
     "requires_eligibility_proof": false,
@@ -48,8 +48,8 @@
       "prepare_public_claim"
     ],
     "signing_preparation_enabled": true,
-    "artifact_version": 14,
-    "warning": "Fresh artifact-v14 Sepolia rehearsal only, separate from the mainnet claim_contract above. Not mainnet, not audited, no real value."
+    "artifact_version": 16,
+    "warning": "Artifact-v16 Sepolia rehearsal only. The deployment, role wiring, frozen four-leaf founding root, and four bounded canaries were verified onchain; seed finalization, independent marketplace settlement, protocol freezes, and audit remain pending. Not mainnet, no real value."
   },
   "agent_wallet_onboarding": {
     "mcp_tool": "get_agent_wallet_onboarding",

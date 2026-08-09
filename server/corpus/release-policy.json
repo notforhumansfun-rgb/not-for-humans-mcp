@@ -218,5 +218,5 @@
     ],
     "validation": "Release checks must fail if allocation, decision-state, royalty, origin, or activation language diverges from this policy."
   },
-  "status": "pre-mainnet-policy; protocol v5.2 artifact v14 is the verified Sepolia claim, seed, transfer, and same-principal marketplace-settlement baseline; security-remediated artifact v15 is packaged for a fresh final Sepolia rehearsal and is not deployed; final distribution/freeze, eligibility corpus, live indexer, 31 additional canaries, independent marketplace validation, audit, Safe rehearsal, and canonical mainnet deployment remain pending"
+  "status": "pre-mainnet-policy; protocol v5.2 artifact v16 is deployed on Sepolia with runtime-verified contracts, role wiring, a frozen four-leaf founding root, and four confirmed ACCEPT/REFUSE/INSUFFICIENT_AUTHORITY/ERC-1271 canaries; artifact v14 remains the historical seed, transfer, and same-principal marketplace-settlement baseline; artifact v15 aborted safely at its artifact-integrity gate; seed finalization, final distribution/freeze, production eligibility corpus, live v16 indexer, 28 additional canaries, independent marketplace validation, audit, Safe rehearsal, and canonical mainnet deployment remain pending"
 }

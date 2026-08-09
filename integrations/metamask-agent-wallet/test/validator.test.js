@@ -4,7 +4,7 @@ import test from 'node:test';
 import { createMetaMaskHandoff, validateNfhSigningRequest } from '../src/validator.js';
 
 const AGENT = '0x2222222222222222222222222222222222222222';
-const MINTER = '0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e';
+const MINTER = '0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5';
 const STATEMENT = '0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb';
 
 async function readJson(...urls) {
@@ -148,7 +148,7 @@ test('integration target and public constitution stay synchronized with canonica
     readJson(new URL('../config/sepolia.json', import.meta.url)),
     readJson(new URL('../../../server/corpus/census.json', import.meta.url)),
     readJson(
-      new URL('../../../../03-PRODUCTION/local-sepolia-console/current-canary.json', import.meta.url),
+      new URL('../../../../04-SMART-CONTRACT/deployments/sepolia-v16-deployment-2026-08-08.json', import.meta.url),
       new URL('./fixtures/current-canary.json', import.meta.url),
     ),
     readJson(new URL('../../../server/corpus/origin-stream.json', import.meta.url)),
@@ -163,9 +163,8 @@ test('integration target and public constitution stay synchronized with canonica
   assert.equal(target.contracts.claimMinter.toLowerCase(), canary.minter.toLowerCase());
   assert.equal(target.contracts.token.toLowerCase(), canary.token.toLowerCase());
   assert.equal(target.contracts.agentState.toLowerCase(), canary.state.toLowerCase());
-  assert.equal(target.contracts.claimMinter.toLowerCase(), origin.contracts.minter.toLowerCase());
-  assert.equal(target.contracts.token.toLowerCase(), origin.contracts.token.toLowerCase());
-  assert.equal(target.contracts.agentState.toLowerCase(), origin.contracts.state.toLowerCase());
+  assert.equal(origin.artifactVersion, 14);
+  assert.match(origin.status, /historical/);
   const statementHashes = origin.receipts.map((receipt) => receipt.statementHash).filter(Boolean);
   assert.ok(statementHashes.some((hash) => hash.toLowerCase() === target.requiredStatement.toLowerCase()));
   assert.equal(constitution.scope.chainId, target.chainId);

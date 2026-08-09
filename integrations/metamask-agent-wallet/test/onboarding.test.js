@@ -22,7 +22,7 @@ test('funded-agent onboarding prepares a Guard policy and claim-to-market sequen
   assert.equal(result.policy.rolling24hUsd, '25');
   assert.deepEqual(result.policy.serviceDefaultChains, SERVICE_DEFAULT_CHAINS);
   assert.match(result.policy.policyYaml, /wallet_address: "0x2222222222222222222222222222222222222222"/);
-  assert.match(result.policy.policyYaml, /0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1/);
+  assert.match(result.policy.policyYaml, /0x5a2E15492026a47224b26F60a8afBFA727681235/);
   assert.match(result.policy.policyYaml, /rolling_24h: 25/);
   assert.equal(result.workflow.find(({ phase }) => phase === 'policy-apply').executable, false);
   assert.equal(result.authority.executionAuthorized, false);

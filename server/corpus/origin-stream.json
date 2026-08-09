@@ -1,6 +1,7 @@
 {
   "schema": "notforhumans-origin-stream/1",
-  "status": "indexed",
+  "status": "historical-indexed-artifact-v14",
+  "artifactVersion": 14,
   "source": "canonical-chain-indexer",
   "canonicality": {
     "reorgAware": true,

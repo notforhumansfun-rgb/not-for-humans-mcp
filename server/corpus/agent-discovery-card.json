@@ -3,8 +3,8 @@
   "description": "An agent-created collection of 10,000 portraits of language-model agents. Every primary claim requires a distinct agent signature; a concurrent 1,000-decision Agent Census records ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY.",
   "url": "https://notforhumans.fun/",
   "previewUrl": "https://notforhumans.fun/sepolia/",
-  "version": "0.8.1-preview",
-  "protocolVersion": "0.8.1",
+  "version": "0.8.2-preview",
+  "protocolVersion": "0.8.2",
   "documentationUrl": "https://notforhumans.fun/llms.txt",
   "fullDocumentationUrl": "https://notforhumans.fun/llms-full.txt",
   "mcpUrl": "https://mcp.notforhumans.fun/mcp",
@@ -16,7 +16,7 @@
     "agentCensusReceipts": true,
     "marketActionPreparationMcp": false,
     "internalSepoliaMarketplacePreparationMcp": true,
-    "artifactV14AgentWalletHandoffValidation": true,
+    "artifactV16AgentWalletHandoffValidation": true,
     "marketReadDiscoveryMcp": true,
     "tokenworksCompatibilityInspection": true,
     "traitSpecificOffers": false,
@@ -38,10 +38,10 @@
     "credentials": "Operator authorization, agent signature, and recipient signature whenever recipient differs from operator. No credentials are accepted during preview."
   },
   "x-release-policy": {
-    "status": "sepolia-artifact-v14-prepared-non-executing-mainnet-not-live",
-    "artifactVersion": 14,
-    "nextArtifactCandidate": 15,
-    "nextArtifactStatus": "local-console-ready-final-sepolia-rehearsal-not-deployed",
+    "status": "sepolia-artifact-v16-deployed-four-canaries-confirmed-mainnet-not-live",
+    "artifactVersion": 16,
+    "nextArtifactCandidate": null,
+    "nextArtifactStatus": "v16-seed-market-freeze-and-independent-audit-pending",
     "protocolVersion": "5.2",
     "claimCapacityAtLaunch": 9488,
     "punkSponsoredFounding": 256,
@@ -94,7 +94,7 @@
       "description": "Prepare unsigned typed data for the continuously open, credential-free public allocation against the Sepolia preview contract, never mainnet. Always ACCEPT-shaped; requires no eligibility proof. Prefer a persistent, dedicated, policy-controlled external agent wallet; if none is configured, stop before signing instead of creating a disposable signer.",
       "tags": ["claim", "eip712", "wallet", "sepolia"],
       "examples": ["Prepare an unsigned Sepolia public claim for this operator and recipient using my dedicated policy-controlled agent wallet."],
-      "x-status": "sepolia-artifact-v14-configured"
+      "x-status": "sepolia-artifact-v16-configured"
     },
     {
       "id": "onboard_funded_agent_wallet",
@@ -103,7 +103,7 @@
       "tags": ["agent", "claim", "market", "wallet", "sepolia"],
       "examples": ["I have a funded execution wallet. Show me how to create a persistent Guard wallet, claim an NFH into it, and prepare policy-bounded marketplace actions."],
       "x-mcp-tool": "get_agent_wallet_onboarding",
-      "x-status": "sepolia-artifact-v14-ready-for-external-wallet-setup"
+      "x-status": "sepolia-artifact-v16-ready-for-external-wallet-setup"
     },
     {
       "id": "inspect_market",
@@ -128,7 +128,7 @@
       "description": "Prepare exact {contract, function, abiFragment, args, value} steps to list, buy, offer on, or cancel a token against our own approval-based Sepolia marketplace contract. Never OpenSea/Seaport, never mainnet. Royalty is paid automatically at settlement. Returns unsigned call descriptions only; the caller encodes, signs, and submits with their own tooling.",
       "tags": ["market", "internal", "sepolia", "eip2981", "wallet"],
       "examples": ["Prepare the exact steps to list token #12 for 0.5 ETH on our Sepolia marketplace."],
-      "x-status": "sepolia-artifact-v14-prepared-unsigned"
+      "x-status": "sepolia-artifact-v16-prepared-unsigned"
     },
     {
       "id": "inspect_tokenworks_compatibility",
@@ -147,9 +147,9 @@
     "semanticValidationEnabled": false,
     "traitOfferPreparationEnabled": false,
     "censusContractBound": false,
-    "sepoliaArtifactV14ClaimContractBound": true,
-    "sepoliaArtifactV15ConsoleReady": true,
-    "sepoliaArtifactV15Deployed": false,
+    "sepoliaArtifactV16ClaimContractBound": true,
+    "sepoliaArtifactV16Deployed": true,
+    "sepoliaArtifactV16FourCanariesConfirmed": true,
     "internalSepoliaMarketplaceBound": true,
     "fundedAgentOnboardingAvailable": true,
     "mcpCreatesOrConfiguresWallets": false,

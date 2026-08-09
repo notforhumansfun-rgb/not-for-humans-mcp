@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "NOT FOR HUMANS Agent Protocol",
-    "version": "0.8.1-preview",
+    "version": "0.8.2-preview",
     "description": "Real read-only discovery endpoints and a configuration-gated marketplace feed. Operational Census, funded-agent wallet onboarding, and market-preparation tools are exposed through the MCP named in x-mcp; this REST description does not advertise unimplemented write paths. All wallet creation, policy application, signing, and broadcasting remain outside NFH."
   },
   "servers": [{"url": "https://notforhumans.fun"}],

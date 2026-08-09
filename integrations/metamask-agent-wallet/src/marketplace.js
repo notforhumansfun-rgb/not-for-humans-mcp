@@ -115,7 +115,7 @@ export function createAutonomyRehearsalPlan(
   if (!input || typeof input !== 'object' || Array.isArray(input)) fail('input must be an object.');
   if (input.schema !== 'notforhumans-autonomy-rehearsal-request/1') fail('unsupported request schema.');
   const chainId = uint(input.chainId, 'chainId');
-  if (chainId !== 11155111n) fail('v14 autonomy rehearsals are Sepolia-only.');
+  if (chainId !== 11155111n) fail('v16 autonomy rehearsals are Sepolia-only.');
   const expectedContracts = pinnedContracts(target, chainId);
   const tokenId = uint(input.tokenId, 'tokenId');
   const seller = address(input.sellerAgent, 'sellerAgent');
@@ -144,13 +144,13 @@ export function createAutonomyRehearsalPlan(
   if (reserve > initialAsk) fail('seller reserve cannot exceed initial ask.');
   if (openingOffer > buyerMaximum) fail('opening offer cannot exceed buyer maximum.');
   if (expiry <= BigInt(now)) fail('expiry must be in the future.');
-  if (expiry > BigInt(now + 7 * 24 * 60 * 60)) fail('expiry cannot exceed seven days in the v14 rehearsal.');
+  if (expiry > BigInt(now + 7 * 24 * 60 * 60)) fail('expiry cannot exceed seven days in the v16 rehearsal.');
 
   const negotiation = negotiate({ initialAsk, reserve, openingOffer, buyerMaximum });
   if (!negotiation.agreed) fail(`negotiation failed: ${negotiation.reason}.`);
   const finalPrice = BigInt(negotiation.finalPriceWeth);
   const steps = [
-    transaction({ signer: seller, role: 'seller', contract: token, functionName: 'approve', args: [marketplace, tokenId], intent: `Approve only NFH #${tokenId} for the v14 marketplace` }),
+    transaction({ signer: seller, role: 'seller', contract: token, functionName: 'approve', args: [marketplace, tokenId], intent: `Approve only NFH #${tokenId} for the v16 marketplace` }),
     transaction({ signer: seller, role: 'seller', contract: marketplace, functionName: 'list', args: [tokenId, initialAsk, expiry], intent: `List NFH #${tokenId} for ${initialAsk} wei until ${expiry}` }),
   ];
   if (buyerWethBalance < finalPrice) {
@@ -175,7 +175,7 @@ export function createAutonomyRehearsalPlan(
 
   return {
     schema: 'notforhumans-autonomy-rehearsal-plan/1',
-    artifactVersion: 14,
+    artifactVersion: 16,
     protocolVersion: '5.2',
     environment: 'sepolia-rehearsal',
     classification: samePrincipal ? 'synthetic-self-trade-rehearsal-not-market-activity' : 'independent-principals-rehearsal',
@@ -203,7 +203,7 @@ export function createAutonomyRehearsalPlan(
 }
 
 export function createTransactionHandoffs(plan) {
-  if (plan?.schema !== 'notforhumans-autonomy-rehearsal-plan/1' || !Array.isArray(plan.steps)) fail('validated v14 plan required.');
+  if (plan?.schema !== 'notforhumans-autonomy-rehearsal-plan/1' || !Array.isArray(plan.steps)) fail('validated v16 plan required.');
   return plan.steps.map((step, index) => ({
     sequence: index + 1,
     executable: false,

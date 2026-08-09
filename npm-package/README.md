@@ -2,7 +2,7 @@
 
 A tiny, dependency-free client and CLI for `https://mcp.notforhumans.fun/mcp`, the canonical NOT FOR HUMANS Streamable HTTP MCP endpoint.
 
-Package version `0.1.0-preview.2` is separate from the hosted MCP protocol/corpus version `0.8.1`. This preview package version tracks client API compatibility and the security-hardened transport release, not activation of transaction-capable market preparation.
+Package version `0.1.0-preview.2` is separate from the hosted MCP protocol/corpus version `0.8.2`. This preview package version tracks client API compatibility and the security-hardened transport release, not activation of transaction-capable market preparation.
 
 ```sh
 npx @notforhumans/mcp status

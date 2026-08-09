@@ -30,9 +30,9 @@ const request = (overrides = {}) => ({
 
 const options = (overrides = {}) => ({ now: 1700000000, target, ...overrides });
 
-test('creates a disclosed v14 two-agent Sepolia negotiation and exact transaction sequence', () => {
+test('creates a disclosed v16 two-agent Sepolia negotiation and exact transaction sequence', () => {
   const plan = createAutonomyRehearsalPlan(request(), options());
-  assert.equal(plan.artifactVersion, 14);
+  assert.equal(plan.artifactVersion, 16);
   assert.equal(plan.negotiation.agreed, true);
   assert.equal(plan.classification, 'synthetic-self-trade-rehearsal-not-market-activity');
   assert.deepEqual(plan.steps.map((step) => step.function), [

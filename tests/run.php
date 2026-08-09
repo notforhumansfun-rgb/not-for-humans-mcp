@@ -163,11 +163,11 @@ check(($censusStatus['structuredContent']['signing_preparation_enabled'] ?? true
 check(($censusStatus['structuredContent']['decision_states'] ?? []) === ['ACCEPT', 'REFUSE', 'INSUFFICIENT_AUTHORITY'], 'census status exposes all three decision states');
 
 $agentWalletOnboarding = nfh_call_tool('get_agent_wallet_onboarding', []);
-check(($agentWalletOnboarding['structuredContent']['status'] ?? null) === 'ready_for_external_wallet_setup', 'funded-agent onboarding is bound to the complete artifact-v14 Sepolia contract set');
+check(($agentWalletOnboarding['structuredContent']['status'] ?? null) === 'ready_for_external_wallet_setup', 'funded-agent onboarding is bound to the complete artifact-v16 Sepolia contract set');
 check(($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['operator'] ?? null) !== null, 'funded-agent onboarding assigns the existing funded wallet as operator');
 check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['recipient'] ?? '', 'same Guard wallet'), 'funded-agent onboarding claims directly into the persistent Guard wallet');
-check(($agentWalletOnboarding['structuredContent']['contracts']['claimMinter'] ?? null) === '0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e', 'agent-wallet onboarding pins the v14 claim minter');
-check(($agentWalletOnboarding['structuredContent']['contracts']['marketplace'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'agent-wallet onboarding pins the v14 marketplace');
+check(($agentWalletOnboarding['structuredContent']['contracts']['claimMinter'] ?? null) === '0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5', 'agent-wallet onboarding pins the v16 claim minter');
+check(($agentWalletOnboarding['structuredContent']['contracts']['marketplace'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'agent-wallet onboarding pins the v16 marketplace');
 check(($agentWalletOnboarding['structuredContent']['authority']['mcpCreatesWallet'] ?? true) === false, 'MCP does not claim to create the external Agent Wallet');
 check(($agentWalletOnboarding['structuredContent']['authority']['negotiationAndPreparationMayBeAutonomous'] ?? false) === true, 'agent-wallet onboarding explicitly permits autonomous negotiation and preparation');
 check(($agentWalletOnboarding['structuredContent']['authority']['executionRequiresExternalPolicyAuthority'] ?? false) === true, 'execution remains governed by external wallet and host policy');
@@ -258,7 +258,7 @@ check(is_string($draftPublicClaim['structuredContent']['agentSignerGuidance'] ??
 check(!str_contains($draftPublicClaim['structuredContent']['agentSignerGuidance'] ?? '', 'generate a fresh keypair'), 'public claim no longer instructs a keyless agent to create a disposable signer');
 check(($draftPublicClaim['structuredContent']['requiresAgentSignature'] ?? false) === true, 'public claim still requires a distinct agent signature');
 check(($draftPublicClaim['structuredContent']['domain']['chainId'] ?? null) === 11155111, 'public claim binds to the Sepolia chain ID, never mainnet');
-check(($draftPublicClaim['structuredContent']['domain']['verifyingContract'] ?? null) === '0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e', 'public claim domain verifies against the fresh artifact-v14 Sepolia minter contract (the EIP-712 verifyingContract must be the minter, which implements EIP712 and checks its own domain separator, never the token)');
+check(($draftPublicClaim['structuredContent']['domain']['verifyingContract'] ?? null) === '0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5', 'public claim domain verifies against the artifact-v16 Sepolia minter contract (the EIP-712 verifyingContract must be the minter, which implements EIP712 and checks its own domain separator, never the token)');
 
 $selfAgentClaim = $publicClaimArguments;
 $selfAgentClaim['agent'] = $selfAgentClaim['operator'];
@@ -273,11 +273,11 @@ putenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT');
 putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
 $marketplaceStatus = nfh_call_tool('get_internal_marketplace_status', []);
 check(($marketplaceStatus['structuredContent']['configured'] ?? false) === true, 'internal marketplace is configured by default against the deployed Sepolia contract');
-check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal marketplace targets the fresh artifact-v14 Sepolia marketplace contract');
-check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A', 'internal marketplace targets the fresh artifact-v14 Sepolia rehearsal collection');
-check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 14, 'internal marketplace status exposes artifact v14');
-check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'verified-settled-to-configured-buyer', 'internal marketplace status reports the verified settlement mechanics');
-check(($marketplaceStatus['structuredContent']['classification'] ?? null) === 'synthetic-self-trade-rehearsal-not-market-activity', 'internal marketplace keeps the settlement classified as a synthetic rehearsal');
+check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal marketplace targets the artifact-v16 Sepolia marketplace contract');
+check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173', 'internal marketplace targets the artifact-v16 Sepolia rehearsal collection');
+check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 16, 'internal marketplace status exposes artifact v16');
+check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'deployed-runtime-verified-no-v16-settlement-yet', 'internal marketplace status does not overstate v16 settlement');
+check(($marketplaceStatus['structuredContent']['classification'] ?? null) === 'deployment-and-canary-evidence-not-market-activity', 'internal marketplace classifies deployment and canaries as non-market activity');
 check(($marketplaceStatus['structuredContent']['automaticExecutionAuthorized'] ?? true) === false, 'internal marketplace status keeps automatic execution unauthorized');
 check(($marketplaceStatus['structuredContent']['wethContract'] ?? null) === '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 'internal marketplace uses the real Sepolia WETH contract');
 
@@ -289,13 +289,13 @@ $listingArguments = [
 ];
 $defaultListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
 check(($defaultListing['structuredContent']['status'] ?? null) === 'prepared_unsigned', 'internal listing is signable by default against the deployed marketplace');
-check(($defaultListing['structuredContent']['marketplaceContract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal listing binds to the fresh artifact-v14 marketplace contract');
+check(($defaultListing['structuredContent']['marketplaceContract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal listing binds to the artifact-v16 marketplace contract');
 check(count($defaultListing['structuredContent']['steps'] ?? []) === 2, 'internal listing prepares an approval step and a list step');
 check(($defaultListing['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal listing uses token-specific marketplace approval before listing');
-check(($defaultListing['structuredContent']['steps'][0]['args'] ?? null) === ['0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', '0'], 'internal listing approval is scoped to the exact token ID');
+check(($defaultListing['structuredContent']['steps'][0]['args'] ?? null) === ['0x5a2E15492026a47224b26F60a8afBFA727681235', '0'], 'internal listing approval is scoped to the exact token ID');
 check(($defaultListing['structuredContent']['steps'][1]['function'] ?? null) === 'list', 'internal listing calls list() with the exact price and deadline');
 check(($defaultListing['structuredContent']['steps'][1]['args'] ?? null) === ['0', '1000000000000000000', '1893456000'], 'internal listing args match tokenId, priceWei, and deadline exactly');
-check(($defaultListing['structuredContent']['steps'][1]['contract'] ?? null) === '0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', 'internal listing targets the fresh artifact-v14 marketplace contract for the list() call');
+check(($defaultListing['structuredContent']['steps'][1]['contract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal listing targets the artifact-v16 marketplace contract for the list() call');
 
 putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT=0xEeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
 $overriddenListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
@@ -332,7 +332,7 @@ $acceptOffer = nfh_call_tool('prepare_internal_accept_offer', [
     'buyer' => '0x2222222222222222222222222222222222222222',
 ]);
 check(($acceptOffer['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal accept-offer uses token-specific NFT approval');
-check(($acceptOffer['structuredContent']['steps'][0]['args'] ?? null) === ['0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1', '0'], 'internal accept-offer approval is scoped to the exact token ID');
+check(($acceptOffer['structuredContent']['steps'][0]['args'] ?? null) === ['0x5a2E15492026a47224b26F60a8afBFA727681235', '0'], 'internal accept-offer approval is scoped to the exact token ID');
 check(($acceptOffer['structuredContent']['steps'][1]['function'] ?? null) === 'acceptOffer', 'internal accept-offer calls acceptOffer() with tokenId and buyer');
 check(($acceptOffer['structuredContent']['steps'][1]['args'] ?? null) === ['0', '0x2222222222222222222222222222222222222222'], 'internal accept-offer args match tokenId and buyer exactly');
 

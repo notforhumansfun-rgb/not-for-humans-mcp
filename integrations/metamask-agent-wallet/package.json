@@ -1,6 +1,6 @@
 {
   "name": "@notforhumans/metamask-agent-wallet-integration",
-  "version": "0.2.0-v14-private",
+  "version": "0.3.0-v16-private",
   "private": true,
   "type": "module",
   "engines": {

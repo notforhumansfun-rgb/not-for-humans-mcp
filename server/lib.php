@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const NFH_MCP_VERSION = '0.8.1';
+const NFH_MCP_VERSION = '0.8.2';
 const NFH_MCP_PROTOCOL_VERSION = '2025-11-25';
 const NFH_OPENSEA_API_BASE = 'https://api.opensea.io/api/v2';
 const NFH_MCP_SUPPORTED_PROTOCOLS = [
@@ -342,7 +342,7 @@ function nfh_agent_wallet_onboarding(): array
             'Wait for an on-chain receipt and confirm ownerOf(tokenId) equals the Guard wallet before preparing market actions.',
         ],
         'marketSequence' => [
-            'Call get_internal_marketplace_status and stop unless the pinned artifact-v14 contracts match.',
+            'Call get_internal_marketplace_status and stop unless the pinned artifact-v16 contracts match.',
             'Use only prepare_internal_listing, prepare_internal_cancel_listing, prepare_internal_buy, prepare_internal_offer, prepare_internal_cancel_offer, or prepare_internal_accept_offer.',
             'Re-read ownership, listing, offer, balance, allowance, price, and expiry immediately before signing.',
             'Execution may proceed only within the external wallet policy and host authority; a new counterparty or broader budget requires a new approval boundary.',

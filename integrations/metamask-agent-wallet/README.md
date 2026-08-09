@@ -4,7 +4,7 @@ This is a wallet-neutral safety adapter for using MetaMask Agent Wallet as a per
 
 It validates an unsigned MCP result against the exact NFH EIP-712 domain, type layout, selected agent-wallet address, current Sepolia minter, required statement, zero-payment rule, allocation, decision code, nonce, and deadline. It then prints a structured `mm wallet sign-typed-data` handoff. It never executes that handoff.
 
-Artifact v14 also validates a bounded two-agent marketplace rehearsal. It negotiates only inside explicit seller/buyer price bounds, classifies same-principal test trades as synthetic rather than market activity, encodes only the pinned NFH token, WETH, and marketplace methods, scopes NFT approval to one token, scopes WETH approval to the exact offer, and ends with allowance revocation. The resulting MetaMask transaction handoffs are deliberately non-executing.
+Artifact v16 also validates a bounded two-agent marketplace rehearsal. It negotiates only inside explicit seller/buyer price bounds, classifies same-principal test trades as synthetic rather than market activity, encodes only the pinned NFH token, WETH, and marketplace methods, scopes NFT approval to one token, scopes WETH approval to the exact offer, and ends with allowance revocation. The resulting MetaMask transaction handoffs are deliberately non-executing.
 
 ## Installed prerequisites
 
@@ -49,7 +49,7 @@ Then prepare the non-executing onboarding packet:
 node src/cli.js onboard /absolute/path/to/onboarding.json
 ```
 
-The output binds the v14 Sepolia minter, token, agent-state, marketplace, WETH, operator, and exact counterparties; emits reviewed Guard-policy YAML; and sequences wallet readiness, policy readback, public claim, ownership verification, and internal-market preparation. It does not create or select a wallet, apply policy, sign, or submit. MetaMask policy schema v1 retains service-default chains, so NFH independently binds every prepared payload and transaction to Sepolia. New counterparties or a higher budget require a new wallet-policy approval boundary.
+The output binds the v16 Sepolia minter, token, agent-state, marketplace, WETH, operator, and exact counterparties; emits reviewed Guard-policy YAML; and sequences wallet readiness, policy readback, public claim, ownership verification, and internal-market preparation. It does not create or select a wallet, apply policy, sign, or submit. MetaMask policy schema v1 retains service-default chains, so NFH independently binds every prepared payload and transaction to Sepolia. New counterparties or a higher budget require a new wallet-policy approval boundary.
 
 ## Review an MCP signing payload
 
@@ -81,12 +81,12 @@ The target configuration deliberately sets both `signingAuthorized` and `transac
 
 The NFH MCP remains read/prepare-only and wallet-agnostic. MetaMask is an optional execution adapter, not a protocol dependency or endorsement.
 
-## Prepare a v14 two-agent marketplace rehearsal
+## Prepare a v16 two-agent marketplace rehearsal
 
-Create a request using the freshly exported v14 deployment addresses, two distinct persistent Agent Wallet addresses, explicit principal identifiers, price bounds, and an expiry of seven days or less:
+Create a request using the freshly exported v16 deployment addresses, two distinct persistent Agent Wallet addresses, explicit principal identifiers, price bounds, and an expiry of seven days or less:
 
 ```sh
-node src/cli.js marketplace-plan /absolute/path/to/v14-marketplace-request.json
+node src/cli.js marketplace-plan /absolute/path/to/v16-marketplace-request.json
 ```
 
 If both wallets have the same beneficial controller, set `syntheticSelfTradeRehearsal: true`. The output will then be permanently classified as `synthetic-self-trade-rehearsal-not-market-activity`; it must not be reported as an independent sale, demand, volume, or price discovery.

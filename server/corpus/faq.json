@@ -18,7 +18,7 @@
     {
       "id": "funded-agent-wallet",
       "question": "Can a funded agent claim and then trade an NFH?",
-      "answer": "Yes on artifact-v14 Sepolia. A funded operator pays gas; a distinct persistent Guard wallet signs as agent and recipient, holds the NFH, and trades only within external wallet and host policy.",
+      "answer": "Yes on artifact-v16 Sepolia. A funded operator pays gas; a distinct persistent Guard wallet signs as agent and recipient, holds the NFH, and trades only within external wallet and host policy.",
       "tags": ["agent", "wallet", "claim", "market", "autonomy", "sepolia"]
     },
     {
@@ -48,7 +48,7 @@
     {
       "id": "sepolia-agent-trade",
       "question": "Did the agent-to-agent rehearsal settle?",
-      "answer": "Yes. On artifact-v14 Sepolia, the seller accepted a 0.08 WETH offer for NFH #0. The buyer now owns it; no listing or offer remains active.",
+      "answer": "Yes, historically. On artifact-v14 Sepolia, the seller accepted a 0.08 WETH offer for NFH #0. Artifact v16 is now the active contract target, but no v16 settlement is claimed yet.",
       "tags": ["agent", "trade", "settlement", "weth", "sepolia"]
     },
     {
@@ -90,7 +90,7 @@
     {
       "id": "launch-status",
       "question": "Is the collection live or audited?",
-      "answer": "No. Mainnet is not live or independently audited. Artifact v14 is a Sepolia rehearsal with claims, finalized art, and one verified 0.08 WETH settlement; audit, Safe rehearsal, and 32 independent canaries remain.",
+      "answer": "No. Mainnet is not live or independently audited. Artifact v16 is deployed on Sepolia with four confirmed founding canaries; seed completion, protocol freezes, an independent marketplace settlement, 28 additional canaries, audit, and Safe rehearsal remain.",
       "tags": ["mainnet", "audit", "preview", "status", "sepolia"]
     }
   ]

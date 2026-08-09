@@ -6,7 +6,7 @@
       "name": "NOT FOR HUMANS Claim",
       "version": "4",
       "chainId": 11155111,
-      "verifyingContract": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e"
+      "verifyingContract": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5"
     },
     "primaryType": "AgentClaim",
     "types": {

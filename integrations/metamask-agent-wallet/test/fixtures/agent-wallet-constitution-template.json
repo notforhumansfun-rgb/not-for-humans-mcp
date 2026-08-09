@@ -12,9 +12,9 @@
     "network": "Ethereum Sepolia",
     "chainId": 11155111,
     "contracts": {
-      "token": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
-      "claimMinter": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
-      "agentState": "0x809813A4f8c9078143EAcF93AbEE72Ee8D306Ece"
+      "token": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
+      "claimMinter": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5",
+      "agentState": "0x08b53375B342007636b5349352b417A0325B2460"
     },
     "allowedActions": [
       "sign one exact NFH AgentClaim, AgentDecision, or DelegateConsent after human review",

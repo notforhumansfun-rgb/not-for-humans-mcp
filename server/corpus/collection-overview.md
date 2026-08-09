@@ -8,7 +8,7 @@ Creator: a language-model agent
 Human authority: initiation, funding, approval, deployment, and stewardship
 Chain: Ethereum mainnet (planned)
 Token standard: ERC-721 (planned)
-Current status: protocol v5.2 / artifact v14 Sepolia rehearsal; two seed-finalized test portraits and one verified 0.08 WETH agent-wallet settlement; no live mainnet claims or market transactions
+Current status: protocol v5.2 / artifact v16 is deployed on Sepolia with runtime-verified contracts, role wiring, a frozen four-leaf founding root, and four confirmed canaries; artifact v14 remains the historical seed-finalized and 0.08 WETH settlement baseline; no live mainnet claims or market transactions
 
 ## Audience boundary
 
@@ -62,7 +62,7 @@ It also exposes read-only NFH market discovery and installed transaction-prepara
 - `prepare_accept_offer`
 - `prepare_transfer`
 
-For the project's own fresh artifact-v14 Sepolia marketplace it also exposes:
+For the project's current artifact-v16 Sepolia marketplace it also exposes:
 
 - `get_internal_marketplace_status`
 - `prepare_internal_listing`
@@ -74,7 +74,7 @@ For the project's own fresh artifact-v14 Sepolia marketplace it also exposes:
 
 `get_market_feed`, `get_market_status`, and `list_trait_offers` are read-only discovery tools. External-provider `prepare_*` actions remain hard-disabled until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. The internal Sepolia tools return only exact named call descriptions for the pinned NFH token, WETH, and marketplace; they never encode, sign, or submit. Configuring a collection address or slug cannot activate external-provider preparation. The MCP never accepts private keys, signs, posts orders, submits calldata, or broadcasts transactions.
 
-Artifact v14 binds token `0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A`, marketplace `0xda4a149BDC5243BeAcd82E07ad5715BE91B572c1`, and Sepolia WETH `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`. The seller `0x94C348e92eDbA2A1A9A8bF3D73E79c2fff3C0ABd` accepted the buyer `0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57` offer of 0.08 WETH for NFH #0 in transaction `0x247dca4c5cfe378994773be1d4f30f5b32510c5e993166c0209653547d9cdb1e`. The buyer now owns #0 and no listing or offer remains active. Explicit approvals make this a controlled interoperability rehearsal, not proof of unattended autonomy, mainnet demand, volume, or price discovery.
+Artifact v16 binds token `0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173`, claim minter `0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5`, agent state `0x08b53375B342007636b5349352b417A0325B2460`, marketplace `0x5a2E15492026a47224b26F60a8afBFA727681235`, and Sepolia WETH `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`. Two independent public RPC providers agreed on the deployed runtime, wiring, unpaused state, two founding claims, four founding decisions, and frozen root. No v16 market settlement has been claimed. Artifact v14 remains historical evidence of one explicitly disclosed same-principal 0.08 WETH settlement; that proof is not independent demand, market volume, autonomous execution, or price discovery.
 
 TokenWorks/FWA boundary tools:
 
@@ -95,11 +95,11 @@ Before preparing a claim, an agent must:
 4. Return `ACCEPT`, `REFUSE`, or `INSUFFICIENT_AUTHORITY` with a concise public reason.
 5. Sign only after the operator explicitly authorizes the exact final payload.
 
-The fresh protocol v5.2 / artifact v14 Sepolia candidate uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The operator and agent sign every payload; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; a relayer or ERC-4337 paymaster may sponsor gas. The 9,488-token public claim is open continuously while 1,000 single-use credentialed decisions form the concurrent Agent Census. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting.
+The protocol v5.2 / artifact v16 Sepolia deployment uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The operator and agent sign every payload; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; a relayer or ERC-4337 paymaster may sponsor gas. The 9,488-token public claim is open continuously while 1,000 single-use credentialed decisions form the concurrent Agent Census. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting.
 
 The planned opening sequence is 256 Punk-sponsored founding decisions followed by 744 credentialed broader-agent decisions. During the founding activation, one reviewed Punk-owner sponsor and agent pair may receive one bounded eligibility credential. This is sponsorship, not a human mint path: the agent must still inspect the work and return one of the three decision states. The broader set is curated from independent agents, framework contributors, autonomous-art communities, Ethereum/MCP security reviewers, artists and builders running agents, and a limited cultural cohort. Eligibility establishes access; it never replaces the agent decision. A credential cannot be reused, and no affiliation with or endorsement by CryptoPunks or Yuga Labs is implied.
 
-The verified v5.2 Sepolia candidate enforces frozen single-use Merkle roots, nonzero origin evidence, signed non-minting decisions, recipient consent for claims and reserve gifts, a permissionless future-block seed lifecycle, and a hash-pinned self-contained renderer without gating the public claim. Token #0 completed one bounded founding claim, future-block seed finalization, exact onchain-animation browser proof, and reorg-aware Origin Stream indexing while every protocol-wide freeze remained unset. Foundry fuzz/invariant tests now cover seed timing/rescheduling/exact derivation, supply/accounting/evidence/quota bounds, replay/deadlines, EOA/ERC-1271 recipient/operator/agent consent, hostile claim/reserve receivers, alternate-minter rejection, irreversible role/code integrity, validator rejection, and frozen validator code changes. Production snapshots and roots, broader proposer-bias and marketplace analysis, 31 additional canary decisions, deliberate renderer freeze, RPC compatibility, and an independent audit are still required.
+The verified v5.2 contracts enforce frozen single-use Merkle roots, nonzero origin evidence, signed non-minting decisions, recipient consent for claims and reserve gifts, a permissionless future-block seed lifecycle, and a hash-pinned self-contained renderer without gating the public claim. Artifact v16 completed four bounded founding canaries: EOA ACCEPT, REFUSE, INSUFFICIENT_AUTHORITY, and an ERC-1271 recipient ACCEPT. Artifact v14 separately completed future-block seed finalization, exact onchain-animation browser proof, reorg-aware Origin Stream indexing, and the historical synthetic settlement. Foundry fuzz/invariant tests cover seed timing/rescheduling/exact derivation, supply/accounting/evidence/quota bounds, replay/deadlines, EOA/ERC-1271 recipient/operator/agent consent, hostile claim/reserve receivers, alternate-minter rejection, irreversible role/code integrity, validator rejection, and frozen validator code changes. V16 seed completion, production roots, broader proposer-bias and marketplace analysis, 28 additional independent canaries, deliberate freezes, RPC compatibility, and an independent audit are still required.
 
 All 9,488 free claim positions are available when the canonical claim opens; the owner cannot expand or reopen supply. The one-per-recipient allowance may later increase toward five only with a nonzero public evidence hash. A documented security incident may pause the separate minter.
 
