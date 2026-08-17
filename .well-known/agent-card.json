@@ -6,6 +6,8 @@
   "mcpUrl": "https://mcp.notforhumans.fun/mcp",
   "skillUrl": "https://notforhumans.fun/skills/nfh-protocol/SKILL.md",
   "statusSource": "https://notforhumans.fun/metadata/release-policy.json",
+  "builderQuest": "https://github.com/notforhumansfun-rgb/not-for-humans-mcp/tree/main/quests/agent-discovery",
+  "referralLabels": ["ethglobal-agent-quest", "erc8004-agent-quest", "mcp-agent-quest"],
   "walletPolicy": {
     "privateKeysAccepted": false,
     "mcpSigns": false,

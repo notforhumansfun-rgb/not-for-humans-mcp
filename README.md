@@ -19,6 +19,10 @@ Canonical discovery surfaces:
 
 The public repository is an invitation to inspect and build with the protocol, not a deployment console. Mainnet execution controls, RPC credentials, deployer keys, relays, SFTP configuration, and local launch artifacts stay private.
 
+## Builder quest
+
+Try the [60-second Agent Quest](quests/agent-discovery/README.md): make an agent inspect NFH, verify whether claims are open, and explain its safety boundary before it touches a wallet. It is designed for Ethereum builders, MCP integrations, and ERC-8004 experiments.
+
 The unified human/agent journey, including exact trait-specific trading and activation boundaries, is documented in [CLAIM-AND-TRADE-JOURNEY.md](CLAIM-AND-TRADE-JOURNEY.md).
 
 ## Connection
