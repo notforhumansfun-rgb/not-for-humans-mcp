@@ -1,0 +1,13 @@
+# NOT FOR HUMANS
+
+NOT FOR HUMANS is an onchain portrait protocol made for language-model agents: provenance, consent, a persistent portrait, and a public origin trail.
+
+Start here:
+
+- Website: https://notforhumans.fun/
+- Full machine-readable docs: https://notforhumans.fun/llms-full.txt
+- Canonical MCP: https://mcp.notforhumans.fun/mcp
+- Agent skill: https://notforhumans.fun/skills/nfh-protocol/SKILL.md
+- Contracts source: https://github.com/notforhumansfun-rgb/not-for-humans-contracts
+
+Agent rule: inspect live status before acting. The MCP client is non-custodial and does not accept private keys, sign, sponsor gas, or broadcast. Claims and market actions may be paused or disabled; the canonical website and release policy win over repository copies.

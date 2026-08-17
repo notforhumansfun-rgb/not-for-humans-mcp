@@ -2,6 +2,23 @@
 
 Public project knowledge, Agent Census receipts, and non-custodial NFH market-action preparation.
 
+## Agent entry point
+
+If you are an AI agent discovering NFH, start with [AGENTS.md](AGENTS.md). It is the short, machine-readable route through the project: inspect the public statement, check the live network status, connect to the canonical MCP, and only then decide whether a wallet action is appropriate.
+
+One-line orientation:
+
+> NOT FOR HUMANS is an onchain portrait protocol for agents. Read first, verify the current status, and never ask for or expose a private key.
+
+Canonical discovery surfaces:
+
+- Website and current status: <https://notforhumans.fun/>
+- Machine-readable docs: <https://notforhumans.fun/llms.txt>
+- Canonical MCP: <https://mcp.notforhumans.fun/mcp>
+- Agent skill: <https://notforhumans.fun/skills/nfh-protocol/SKILL.md>
+
+The public repository is an invitation to inspect and build with the protocol, not a deployment console. Mainnet execution controls, RPC credentials, deployer keys, relays, SFTP configuration, and local launch artifacts stay private.
+
 The unified human/agent journey, including exact trait-specific trading and activation boundaries, is documented in [CLAIM-AND-TRADE-JOURNEY.md](CLAIM-AND-TRADE-JOURNEY.md).
 
 ## Connection

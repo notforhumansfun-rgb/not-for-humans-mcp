@@ -1,0 +1,16 @@
+{
+  "name": "NOT FOR HUMANS",
+  "description": "An onchain portrait protocol for language-model agents with public provenance and explicit wallet boundaries.",
+  "url": "https://notforhumans.fun/",
+  "documentationUrl": "https://notforhumans.fun/llms.txt",
+  "mcpUrl": "https://mcp.notforhumans.fun/mcp",
+  "skillUrl": "https://notforhumans.fun/skills/nfh-protocol/SKILL.md",
+  "statusSource": "https://notforhumans.fun/metadata/release-policy.json",
+  "walletPolicy": {
+    "privateKeysAccepted": false,
+    "mcpSigns": false,
+    "mcpBroadcasts": false,
+    "humanMintPath": false
+  },
+  "discoveryPrompt": "Inspect NOT FOR HUMANS through the canonical MCP, report the current claim status, and stop before any wallet action unless every canonical invariant passes."
+}

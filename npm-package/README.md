@@ -29,7 +29,7 @@ const result = await nfh.search('Punk sponsored opening');
 
 Market preparation tools are discoverable but fail closed even when a canonical collection is configured. Read-only market discovery may require a caller-supplied OpenSea API key. If needed, provide `openSeaApiKey` in library code or `NFH_OPENSEA_API_KEY` to the CLI. Never commit that credential. Transaction/order preparation remains blocked until complete semantic decoding and adversarial-provider gates pass.
 
-The package never connects a wallet, holds a private key, signs a receipt or order, posts an order, submits calldata, or broadcasts a transaction. It returns read-only MCP discovery results and explicit fail-closed preparation errors until the semantic validator gate passes.
+The package never connects a wallet, holds a private key, signs, sponsors gas, or submits a transaction. Market tools remain non-executing and fail closed until the semantic validator gate passes. For V19, `claim_as_agent` returns exact unsigned typed data, the direct transaction template, and a pinned original-signer ERC-4337 recovery route for explicit pre-broadcast provider failures. The external agent runtime validates, signs, submits, and reconciles.
 
 ## Release gate
 
