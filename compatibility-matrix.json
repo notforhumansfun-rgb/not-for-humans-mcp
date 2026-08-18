@@ -1,0 +1,51 @@
+{
+  "schema": "notforhumans-mcp-compatibility/1",
+  "status": "pre-mainnet-preview",
+  "currentProtocolRevision": "2025-11-25",
+  "supportedProtocolRevisions": [
+    "2025-11-25",
+    "2025-06-18",
+    "2025-03-26"
+  ],
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://mcp.notforhumans.fun/mcp",
+    "stateless": true
+  },
+  "registry": {
+    "name": "fun.notforhumans/mcp",
+    "metadataPrepared": true,
+    "metadataValidated": true,
+    "validatedAt": "2026-08-09",
+    "published": false,
+    "publicationAuthorized": false
+  },
+  "candidateRevisions": {
+    "2026-07-28": {
+      "status": "tracked-not-implemented",
+      "advertised": false,
+      "implemented": false,
+      "notes": "Adopt only after the revision is final, its security implications are reviewed, and backwards-compatible conformance tests pass."
+    }
+  },
+  "capabilities": {
+    "knowledge": true,
+    "resources": true,
+    "censusPreparation": true,
+    "internalSepoliaPreparation": true,
+    "signing": false,
+    "submission": false,
+    "submissionScope": "none; external agent wallets use the exact direct transaction or original-signer ERC-4337 route",
+    "mainnetSubmission": false,
+    "arbitraryTransactionSubmission": false,
+    "a2aTasks": false,
+    "erc8004Registration": false,
+    "x402Payments": false
+  },
+  "evidence": {
+    "localJsonRpcContractTests": true,
+    "localNpmClientTests": true,
+    "officialRegistrySchemaValidation": "passed-2026-08-09",
+    "independentClientTranscripts": []
+  }
+}

@@ -10,7 +10,7 @@
     "match_policy": "AND",
     "exact_strings_required": true,
     "mcp_tools": ["list_trait_offers", "prepare_trait_offer", "prepare_accept_offer"],
-    "execution": "The MCP prepares terms only. It never signs, posts, or broadcasts a transaction."
+    "execution": "Trait and market tools prepare terms only. The MCP never signs, posts, sponsors, or broadcasts any transaction; agent wallets submit exact V19 claims and any later market actions directly under their own policy."
   },
   "categories": [
     {

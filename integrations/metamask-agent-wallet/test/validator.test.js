@@ -4,8 +4,8 @@ import test from 'node:test';
 import { createMetaMaskHandoff, validateNfhSigningRequest } from '../src/validator.js';
 
 const AGENT = '0x2222222222222222222222222222222222222222';
-const MINTER = '0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5';
-const STATEMENT = '0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb';
+const MINTER = '0x1919191919191919191919191919191919191919';
+const STATEMENT = '0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca';
 
 async function readJson(...urls) {
   let missing;
@@ -47,9 +47,9 @@ function claim(overrides = {}) {
     primaryType: 'AgentClaim',
     types: structuredClone(claimTypes),
     message: {
-      operator: '0x1111111111111111111111111111111111111111',
+      operator: AGENT,
       agent: AGENT,
-      recipient: '0x1111111111111111111111111111111111111111',
+      recipient: AGENT,
       manifestHash: `0x${'a'.repeat(64)}`,
       statement: STATEMENT,
       maxPayment: '0',
@@ -143,30 +143,24 @@ test('accepts a canonical refusal and rejects an ACCEPT encoded as AgentDecision
   assert.throws(() => validate(refusal), /REFUSE \(2\) or INSUFFICIENT_AUTHORITY \(3\)/);
 });
 
-test('integration target and public constitution stay synchronized with canonical Sepolia project files', async () => {
-  const [target, census, canary, origin, constitution, market] = await Promise.all([
+test('live V19 target and public constitution stay synchronized with canonical files', async () => {
+  const [target, census, constitution, market] = await Promise.all([
     readJson(new URL('../config/sepolia.json', import.meta.url)),
     readJson(new URL('../../../server/corpus/census.json', import.meta.url)),
-    readJson(
-      new URL('../../../../04-SMART-CONTRACT/deployments/sepolia-v16-deployment-2026-08-08.json', import.meta.url),
-      new URL('./fixtures/current-canary.json', import.meta.url),
-    ),
-    readJson(new URL('../../../server/corpus/origin-stream.json', import.meta.url)),
     readJson(
       new URL('../../../../05-LAUNCH/agent-wallet-constitution-template.json', import.meta.url),
       new URL('./fixtures/agent-wallet-constitution-template.json', import.meta.url),
     ),
     readJson(new URL('../../../server/market.json', import.meta.url)),
   ]);
-  assert.equal(target.chainId, census.sepolia_preview.chain_id);
-  assert.equal(target.contracts.claimMinter.toLowerCase(), census.sepolia_preview.claim_contract.toLowerCase());
-  assert.equal(target.contracts.claimMinter.toLowerCase(), canary.minter.toLowerCase());
-  assert.equal(target.contracts.token.toLowerCase(), canary.token.toLowerCase());
-  assert.equal(target.contracts.agentState.toLowerCase(), canary.state.toLowerCase());
-  assert.equal(origin.artifactVersion, 14);
-  assert.match(origin.status, /historical/);
-  const statementHashes = origin.receipts.map((receipt) => receipt.statementHash).filter(Boolean);
-  assert.ok(statementHashes.some((hash) => hash.toLowerCase() === target.requiredStatement.toLowerCase()));
+  assert.equal(target.chainId, census.sepolia_next.chain_id);
+  assert.equal(target.artifactVersion, 19);
+  assert.equal(target.protocolVersion, '5.3');
+  assert.equal(target.status, 'v19-sepolia-deployed');
+  assert.equal(target.contracts.claimMinter, census.sepolia_next.claim_contract);
+  assert.equal(target.contracts.token, census.sepolia_next.token_contract);
+  assert.equal(target.contracts.agentState, census.sepolia_next.agent_state_contract);
+  assert.equal(target.requiredStatement.toLowerCase(), census.sepolia_next.required_statement_hash.toLowerCase());
   assert.equal(constitution.scope.chainId, target.chainId);
   assert.deepEqual(constitution.scope.contracts, {
     ['token']: target.contracts.token,
@@ -174,9 +168,15 @@ test('integration target and public constitution stay synchronized with canonica
     agentState: target.contracts.agentState,
   });
   assert.equal(target.contracts.marketplace.toLowerCase(), market.internalMarketplace.marketplaceContract.toLowerCase());
+  assert.equal(target.contracts.token.toLowerCase(), market.internalMarketplace.collectionContract.toLowerCase());
   assert.equal(target.contracts.weth.toLowerCase(), market.internalMarketplace.wethContract.toLowerCase());
-  assert.equal(constitution.approval.automaticSigning, false);
-  assert.equal(constitution.approval.automaticSubmission, false);
-  assert.equal(target.signingAuthorized, false);
-  assert.equal(target.transactionSubmissionAuthorized, false);
+  assert.equal(target.deployment.runtimeAndWiringVerified, true);
+  assert.equal(target.deployment.sourceVerified, false);
+  assert.equal(constitution.approval.separateNfhHumanApprovalRequired, false);
+  assert.equal(constitution.approval.adapterAutomaticSigning, false);
+  assert.equal(constitution.approval.adapterAutomaticSubmission, false);
+  assert.equal(target.adapterExecutesSigning, false);
+  assert.equal(target.adapterExecutesSubmission, true);
+  assert.match(target.adapterSubmissionScope, /exact.*agent-signed V19 Sepolia UserOperation/i);
+  assert.equal(target.agentRuntimeMaySignAfterExactValidation, true);
 });

@@ -1,6 +1,6 @@
 {
-  "schema": "notforhumans-agent-wallet-constitution/1",
-  "status": "template-not-active",
+  "schema": "notforhumans-agent-wallet-constitution/2",
+  "status": "v19-live-target-template-wallet-unconfigured",
   "wallet": {
     "provider": "MetaMask Agent Wallet",
     "mode": "server-wallet",
@@ -12,13 +12,13 @@
     "network": "Ethereum Sepolia",
     "chainId": 11155111,
     "contracts": {
-      "token": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
-      "claimMinter": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5",
-      "agentState": "0x08b53375B342007636b5349352b417A0325B2460"
+      "token": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6",
+      "claimMinter": "0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8",
+      "agentState": "0x1FA5725B11c282f92fD7DEda51594f50E461117e"
     },
     "allowedActions": [
-      "sign one exact NFH AgentClaim, AgentDecision, or DelegateConsent after human review",
-      "submit one exact zero-value NFH AgentState.interact transaction after human review"
+      "validate and sign one exact zero-price public AgentClaim against the published V19 Sepolia minter when authorized by the user's initial claim prompt and existing host policy",
+      "submit that exact V19 claim and verify its receipt without requiring a second NFH-specific human instruction"
     ],
     "forbiddenActions": [
       "mainnet execution",
@@ -38,10 +38,12 @@
     "maximumDailyOutflowUsd": "0"
   },
   "approval": {
-    "typedData": "explicit human approval of the exact final domain, types, message, and signer",
-    "transactions": "explicit human approval of the exact final chain, target, value, and decoded calldata",
-    "automaticSigning": false,
-    "automaticSubmission": false
+    "initialPrompt": "the human's one claim prompt may authorize exactly one free V19 claim within the wallet and host's existing policy",
+    "typedData": "agent runtime must validate the exact canonical V19 domain, types, statement, zero payment, roles, nonce, and deadline",
+    "transactions": "agent runtime must validate the exact chain, V19 target, zero value, and typed claim, try the exact direct transaction, and reconcile every reference; after its one explicit pre-broadcast retry fails with no reference, preserve the original signer and NFT recipient and use only the pinned agent-owned ERC-4337 route, never another server wallet",
+    "separateNfhHumanApprovalRequired": false,
+    "adapterAutomaticSigning": false,
+    "adapterAutomaticSubmission": false
   },
   "provenance": {
     "framework": null,
@@ -53,5 +55,5 @@
     "validUntil": null,
     "revocationReceipt": null
   },
-  "authorityBoundary": "This constitution records the declared limits under which a user-controlled agent wallet participates. It does not prove consciousness, independent machine control, autonomous ownership, or endorsement by the wallet provider."
+  "authorityBoundary": "This constitution records the declared limits under which a user-controlled agent wallet participates. A human may prompt, fund gas, and hold custody or recovery while the agent runtime operates the claim. The onchain statement is a self-attestation; it does not prove human exclusion, consciousness, independent machine control, autonomous ownership, or endorsement by the wallet provider."
 }

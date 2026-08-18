@@ -49,7 +49,7 @@ $fetch = nfh_call_tool('fetch', ['id' => 'collection-overview']);
 check(isset($fetch['structuredContent'], $fetch['content'][0]['text']), 'fetch returns structured and compatibility content');
 $compatibility = json_decode($fetch['content'][0]['text'], true, flags: JSON_THROW_ON_ERROR);
 check($compatibility === $fetch['structuredContent'], 'fetch compatibility content mirrors structuredContent');
-check(($fetch['structuredContent']['metadata']['status'] ?? null) === 'pre-mainnet-preview', 'fetch preserves preview status');
+check(($fetch['structuredContent']['metadata']['status'] ?? null) === 'mainnet-deployed-token-zero-finalized-paused', 'fetch preserves live paused status');
 
 $traitFetch = nfh_call_tool('fetch', ['id' => 'trait-map']);
 check(($traitFetch['structuredContent']['metadata']['status'] ?? null) === 'preview-not-frozen', 'trait map is indexed with an honest preview status');
@@ -82,6 +82,29 @@ $initialize = nfh_dispatch([
 check(($initialize['body']['result']['protocolVersion'] ?? null) === '2025-03-26', 'initialize negotiates a supported client protocol version');
 check(isset($initialize['body']['result']['capabilities']['tools']), 'initialize advertises tool capability');
 check(isset($initialize['body']['result']['capabilities']['resources']), 'initialize advertises resource capability');
+$initializeInstructions = $initialize['body']['result']['instructions'] ?? '';
+check(strlen($initializeInstructions) < 750, 'initialize keeps the default agent guidance compact');
+check(str_contains($initializeInstructions, 'Call claim_as_agent with {agent: address}'), 'initialize routes public claims directly to the one-field tool');
+check(str_contains($initializeInstructions, 'use or create one persistent EVM wallet'), 'initialize tells walletless agents how to bootstrap safely');
+check(str_contains($initializeInstructions, 'Try the exact value-0 transaction directly'), 'initialize begins with the direct funded-agent route');
+check(str_contains($initializeInstructions, 'After one explicit pre-broadcast retry fails with no reference'), 'initialize bounds provider retries without risking a duplicate');
+check(str_contains($initializeInstructions, 'never create another server wallet'), 'initialize distinguishes the ERC-4337 fallback from another call to the failed backend');
+
+$currentInitialize = nfh_dispatch([
+    'jsonrpc' => '2.0',
+    'id' => 101,
+    'method' => 'initialize',
+    'params' => ['protocolVersion' => '2025-11-25'],
+]);
+check(($currentInitialize['body']['result']['protocolVersion'] ?? null) === '2025-11-25', 'initialize negotiates the current implemented protocol revision');
+
+$futureInitialize = nfh_dispatch([
+    'jsonrpc' => '2.0',
+    'id' => 102,
+    'method' => 'initialize',
+    'params' => ['protocolVersion' => '2026-07-28'],
+]);
+check(($futureInitialize['body']['result']['protocolVersion'] ?? null) === NFH_MCP_PROTOCOL_VERSION, 'initialize never echoes an unimplemented candidate protocol revision');
 
 $resources = nfh_dispatch(['jsonrpc' => '2.0', 'id' => 20, 'method' => 'resources/list', 'params' => []]);
 $resourceList = $resources['body']['result']['resources'] ?? [];
@@ -121,6 +144,7 @@ check(array_column($toolList, 'name') === [
     'get_origin_stream',
     'prepare_census_receipt',
     'prepare_public_claim',
+    'claim_as_agent',
     'get_tokenworks_status',
     'prepare_tokenworks_decision',
     'get_market_feed',
@@ -141,15 +165,40 @@ check(array_column($toolList, 'name') === [
     'prepare_internal_accept_offer',
     'get_agent_pfp',
 ], 'tools/list exposes knowledge and scoped market-preparation tools');
+$wireToolsResponse = json_decode(
+    json_encode($tools['body'], JSON_THROW_ON_ERROR),
+    false,
+    512,
+    JSON_THROW_ON_ERROR
+);
+$wireToolList = $wireToolsResponse->result->tools ?? [];
+foreach ($wireToolList as $wireTool) {
+    $wireToolName = is_string($wireTool->name ?? null) ? $wireTool->name : 'unknown';
+    check(
+        is_object($wireTool->inputSchema->properties ?? null),
+        "{$wireToolName} serializes inputSchema.properties as a JSON object"
+    );
+}
 $toolMap = array_column($toolList, null, 'name');
+$claimAsAgentInput = $toolMap['claim_as_agent']['inputSchema'] ?? [];
+check(($claimAsAgentInput['required'] ?? null) === ['agent'], 'claim_as_agent requires only one short input field');
+check(array_keys($claimAsAgentInput['properties'] ?? []) === ['agent'], 'claim_as_agent exposes no optional role fields that can confuse agents');
+$claimAsAgentOutput = $toolMap['claim_as_agent']['outputSchema'] ?? [];
+check(isset($claimAsAgentOutput['properties']['submissionRecovery']), 'claim_as_agent declares structured transaction-backend recovery');
+check(in_array('submissionRecovery', $claimAsAgentOutput['required'] ?? [], true), 'claim_as_agent always returns its transaction-backend recovery contract');
+check(isset($claimAsAgentOutput['properties']['humanExclusionCryptographicallyEnforced']), 'claim_as_agent declares its human-exclusion proof boundary');
+check(!isset($toolMap['submit_signed_claim']), 'the MCP exposes no signed-claim relay or transaction-submission tool');
 $marketStatusProperties = $toolMap['get_market_status']['outputSchema']['properties'] ?? [];
 check(isset($marketStatusProperties['collectionConfigured'], $marketStatusProperties['semanticValidationEnabled']), 'market status schema declares its runtime gate fields');
 $serverHomepage = file_get_contents(__DIR__ . '/../server/index.php');
 check(str_contains($serverHomepage, "'preparesWalletActions' => false"), 'MCP discovery does not advertise disabled wallet preparation');
 check(str_contains($serverHomepage, "'supportsTraitOfferDiscovery' => true"), 'MCP discovery separately advertises read-only trait discovery');
 check(str_contains($serverHomepage, "'supportsAgentWalletOnboarding' => true"), 'MCP discovery advertises the funded-agent wallet onboarding route');
+check(str_contains($serverHomepage, "'readOnly' => true"), 'MCP discovery declares the entire tool surface read-only');
+check(str_contains($serverHomepage, "'executesTransactions' => false"), 'MCP discovery declares that agent wallets submit transactions directly');
 check(str_contains($serverHomepage, 'fail closed'), 'MCP homepage explains the semantic-validation blocker');
 check(($toolList[0]['annotations']['readOnlyHint'] ?? false) === true, 'knowledge tools are annotated read-only');
+check(count(array_filter($toolList, static fn (array $tool): bool => ($tool['annotations']['readOnlyHint'] ?? false) === true)) === count($toolList), 'every MCP tool is annotated read-only');
 check(($toolMap['prepare_trait_offer']['annotations']['readOnlyHint'] ?? false) === true, 'market tools only prepare data and are annotated read-only');
 check(($toolMap['prepare_trait_offer']['annotations']['openWorldHint'] ?? false) === true, 'market preparation declares its OpenSea dependency');
 check(($toolMap['prepare_trait_offer']['annotations']['idempotentHint'] ?? true) === false, 'market action preparation does not promise byte-identical retries');
@@ -159,16 +208,37 @@ check(count(array_filter($toolList, static fn (array $tool): bool => isset($tool
 
 $censusStatus = nfh_call_tool('get_census_status', []);
 check(($censusStatus['structuredContent']['contract_version'] ?? null) === 5, 'census status exposes the v5 contract schema');
+check(($censusStatus['structuredContent']['sepolia_next']['active_wallet_claim_limit'] ?? null) === 5, 'census status publishes the confirmed Sepolia wallet claim limit');
+check(($censusStatus['structuredContent']['sepolia_next']['target_wallet_claim_limit'] ?? null) === 5, 'census status exposes the requested Sepolia wallet claim limit');
+check(($censusStatus['structuredContent']['sepolia_next']['wallet_limit_increase_status'] ?? null) === 'confirmed', 'census status binds the confirmed Sepolia owner transaction');
+check(($censusStatus['structuredContent']['mainnet_activation_policy']['configured_wallet_claim_limit'] ?? null) === 5, 'census status configures five mainnet claims per wallet while paused');
+check(($censusStatus['structuredContent']['mainnet_activation_policy']['deployment_authorized'] ?? true) === false, 'wallet-limit metadata never authorizes the mainnet deployment');
 check(($censusStatus['structuredContent']['signing_preparation_enabled'] ?? true) === false, 'census typed-data preparation stays unbound before a canonical contract is configured');
 check(($censusStatus['structuredContent']['decision_states'] ?? []) === ['ACCEPT', 'REFUSE', 'INSUFFICIENT_AUTHORITY'], 'census status exposes all three decision states');
 
 $agentWalletOnboarding = nfh_call_tool('get_agent_wallet_onboarding', []);
-check(($agentWalletOnboarding['structuredContent']['status'] ?? null) === 'ready_for_external_wallet_setup', 'funded-agent onboarding is bound to the complete artifact-v16 Sepolia contract set');
-check(($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['operator'] ?? null) !== null, 'funded-agent onboarding assigns the existing funded wallet as operator');
-check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['recipient'] ?? '', 'same Guard wallet'), 'funded-agent onboarding claims directly into the persistent Guard wallet');
-check(($agentWalletOnboarding['structuredContent']['contracts']['claimMinter'] ?? null) === '0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5', 'agent-wallet onboarding pins the v16 claim minter');
-check(($agentWalletOnboarding['structuredContent']['contracts']['marketplace'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'agent-wallet onboarding pins the v16 marketplace');
+check(($agentWalletOnboarding['structuredContent']['status'] ?? null) === 'ready_for_external_wallet_setup', 'funded-agent onboarding is ready for the exact deployed artifact-v19 Sepolia contract set');
+check(($agentWalletOnboarding['structuredContent']['artifactVersion'] ?? null) === 19, 'funded-agent onboarding identifies artifact v19');
+check(($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['status'] ?? null) === 'recommended after the exact v19 Sepolia deployment is configured', 'funded-agent onboarding recommends the v19 route only after deployment binding');
+check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['operator'] ?? '', 'same persistent agent wallet'), 'funded-agent onboarding uses one wallet for authorization');
+check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['recipient'] ?? '', 'same wallet'), 'funded-agent onboarding claims directly into the agent wallet');
+check(str_contains($agentWalletOnboarding['structuredContent']['rolePatterns']['fundedAgentWorkflow']['submitter'] ?? '', 'same persistent agent wallet'), 'funded-agent onboarding begins with the direct agent-wallet route');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['mode'] ?? null) === 'direct_then_agent_owned_erc4337', 'funded-agent onboarding names both exact transaction paths');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['mcpSubmissionAvailable'] ?? true) === false, 'funded-agent onboarding provides no MCP transaction fallback');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['primary']['preBroadcastRetryLimit'] ?? null) === 1, 'funded-agent onboarding permits only one direct retry after an explicit pre-broadcast failure');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['fallback']['createAnotherServerWallet'] ?? true) === false, 'funded-agent onboarding forbids repeating the failed server-wallet path with another wallet');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['fallback']['factorySalt'] ?? null) === 19, 'funded-agent onboarding pins the deterministic V19 smart-account salt');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['fallback']['walletSelection']['arguments'] ?? null) === ['wallet', 'select', '<agent>', '--chain-namespace', 'evm', '--toon'], 'funded-agent onboarding reselects the original signer before the transport signature');
+check(($agentWalletOnboarding['structuredContent']['submissionRecovery']['knownReferenceIsReconciliationOnly'] ?? false) === true, 'funded-agent onboarding never duplicates a known transaction reference');
+check(str_contains($agentWalletOnboarding['structuredContent']['submissionRecovery']['humanRole'] ?? '', 'fund'), 'funded-agent onboarding limits the human to public-address gas funding');
+check(($agentWalletOnboarding['structuredContent']['contracts']['claimMinter'] ?? null) === '0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8', 'agent-wallet onboarding pins the canonical V19 claim minter');
+check(($agentWalletOnboarding['structuredContent']['contracts']['token'] ?? null) === '0x4dE9697E9B966a31BeA307a97055492b6aC095c6', 'agent-wallet onboarding pins the canonical V19 token');
+check(($agentWalletOnboarding['structuredContent']['contracts']['agentState'] ?? null) === '0x1FA5725B11c282f92fD7DEda51594f50E461117e', 'agent-wallet onboarding pins the canonical V19 agent-state contract');
+check(($agentWalletOnboarding['structuredContent']['contracts']['marketplace'] ?? null) === '0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', 'agent-wallet onboarding pins the canonical V19 marketplace');
 check(($agentWalletOnboarding['structuredContent']['authority']['mcpCreatesWallet'] ?? true) === false, 'MCP does not claim to create the external Agent Wallet');
+check(($agentWalletOnboarding['structuredContent']['authority']['mcpSigns'] ?? true) === false, 'MCP never claims signing authority');
+check(($agentWalletOnboarding['structuredContent']['authority']['mcpSubmits'] ?? true) === false, 'MCP never submits the agent claim');
+check(str_contains($agentWalletOnboarding['structuredContent']['authority']['mcpSubmissionScope'] ?? '', 'None'), 'agent-wallet onboarding gives the MCP no transaction scope');
 check(($agentWalletOnboarding['structuredContent']['authority']['negotiationAndPreparationMayBeAutonomous'] ?? false) === true, 'agent-wallet onboarding explicitly permits autonomous negotiation and preparation');
 check(($agentWalletOnboarding['structuredContent']['authority']['executionRequiresExternalPolicyAuthority'] ?? false) === true, 'execution remains governed by external wallet and host policy');
 
@@ -188,8 +258,8 @@ check(($agentPfp['structuredContent']['tokenId'] ?? null) === 1, 'get_agent_pfp 
 check(($agentPfp['structuredContent']['pfpUrl'] ?? null) === 'https://notforhumans.fun/pfp/1', 'get_agent_pfp returns the canonical portrait URL');
 // Artifact-v14 token #1 finalized its seed onchain; the Origin Stream exposes
 // the real seed value even while the combined receipt remains only confirmed.
-check(($agentPfp['structuredContent']['seedFinalized'] ?? null) === true, 'get_agent_pfp reports the true seed-finalized state for artifact-v14 Sepolia token #1');
-check(($agentPfp['structuredContent']['seedHash'] ?? null) === '0x67666979f09dca1c22697ae3d8eaeae0dfc9245ecf55de25cfa382bd512dc150', 'get_agent_pfp exposes the exact indexed v14 token #1 seed hash');
+check(($agentPfp['structuredContent']['seedFinalized'] ?? null) === true, 'get_agent_pfp reports the true seed-finalized state for artifact-v16 Sepolia token #1');
+check(($agentPfp['structuredContent']['seedHash'] ?? null) === '0xe073e14c24624997abdc524c27d5e4e6e31b7fcf90cae725ca66dc1026e50296', 'get_agent_pfp exposes the exact indexed v16 token #1 seed hash');
 $agentPfpPreview = nfh_call_tool('get_agent_pfp', ['tokenId' => 9999]);
 check(($agentPfpPreview['structuredContent']['seedFinalized'] ?? true) === false, 'get_agent_pfp returns preview=false for tokens without a finalized seed');
 $pfpContent = $agentPfpPreview['structuredContent'] ?? [];
@@ -270,16 +340,91 @@ $overriddenPublicClaim = nfh_call_tool('prepare_public_claim', $publicClaimArgum
 check(($overriddenPublicClaim['structuredContent']['domain']['verifyingContract'] ?? null) === '0xdddddddddddddddddddddddddddddddddddddddd', 'an env override can still repoint the public claim contract for a future Sepolia redeploy');
 putenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT');
 
+$claimAsAgentArguments = [
+    'agent' => '0x2222222222222222222222222222222222222222',
+];
+putenv('NFH_SEPOLIA_NEXT_CLAIM_CONTRACT');
+$defaultClaimAsAgent = nfh_call_tool('claim_as_agent', $claimAsAgentArguments);
+$readyClaimAsAgent = $defaultClaimAsAgent;
+check(($readyClaimAsAgent['structuredContent']['status'] ?? null) === 'prepared_unsigned', 'claim_as_agent is signable by default against the published V19 Sepolia target');
+check(($readyClaimAsAgent['structuredContent']['signingReady'] ?? false) === true, 'claim_as_agent marks the verified V19 target signing-ready');
+check(strlen(json_encode($readyClaimAsAgent['structuredContent'] ?? [])) < 6000, 'claim_as_agent keeps its complete prepared response compact');
+check(($readyClaimAsAgent['structuredContent']['message']['operator'] ?? null) === $claimAsAgentArguments['agent'], 'claim_as_agent uses the one agent wallet as operator');
+check(($readyClaimAsAgent['structuredContent']['message']['recipient'] ?? null) === $claimAsAgentArguments['agent'], 'claim_as_agent uses the one agent wallet as recipient');
+check(($readyClaimAsAgent['structuredContent']['requiresRecipientSignature'] ?? true) === false, 'claim_as_agent needs no separate recipient signature');
+check(($readyClaimAsAgent['structuredContent']['distinctSignaturesRequired'] ?? true) === false, 'claim_as_agent needs only one distinct signature');
+check(($readyClaimAsAgent['structuredContent']['signatureReuse']['operatorSignature'] ?? null) === '$signature', 'claim_as_agent reuses one signature in the operator slot');
+check(($readyClaimAsAgent['structuredContent']['signatureReuse']['agentSignature'] ?? null) === '$signature', 'claim_as_agent reuses one signature in the agent slot');
+check(($readyClaimAsAgent['structuredContent']['signatureReuse']['recipientSignature'] ?? null) === '0x', 'claim_as_agent leaves recipientSignature empty when the wallet is also operator');
+check(($readyClaimAsAgent['structuredContent']['noHumanSignatureRequired'] ?? false) === true, 'claim_as_agent needs no human signature');
+check(($readyClaimAsAgent['structuredContent']['agentOperationSelfAttested'] ?? false) === true, 'claim_as_agent labels the wallet statement as an agent-operation self-attestation');
+check(($readyClaimAsAgent['structuredContent']['humanExclusionCryptographicallyEnforced'] ?? true) === false, 'claim_as_agent does not falsely claim cryptographic human exclusion');
+check(($readyClaimAsAgent['structuredContent']['identityProofProvided'] ?? true) === false, 'claim_as_agent does not falsely claim a human-or-model identity proof');
+check(($readyClaimAsAgent['structuredContent']['humanMayNeedToFundGas'] ?? false) === true, 'claim_as_agent tells agents that the human may need to fund Sepolia gas');
+check(str_contains($readyClaimAsAgent['structuredContent']['submissionGuidance'] ?? '', 'Sign once'), 'claim_as_agent gives one-signature submission guidance');
+$submissionRecovery = $readyClaimAsAgent['structuredContent']['submissionRecovery'] ?? [];
+check(($submissionRecovery['mode'] ?? null) === 'direct_then_agent_owned_erc4337', 'claim_as_agent exposes direct submission plus the exact agent-owned fallback');
+check(($submissionRecovery['mcpSubmissionAvailable'] ?? true) === false, 'claim_as_agent exposes no MCP transaction fallback');
+check(($submissionRecovery['primary']['preBroadcastRetryLimit'] ?? null) === 1, 'claim_as_agent permits exactly one direct retry after an explicit pre-broadcast failure');
+check(($submissionRecovery['fallback']['createAnotherServerWallet'] ?? true) === false, 'claim_as_agent forbids another wallet on the same failed transaction backend');
+check(($submissionRecovery['fallback']['entryPoint'] ?? null) === '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789', 'claim_as_agent pins the successful EntryPoint');
+check(($submissionRecovery['fallback']['factory'] ?? null) === '0x9406Cc6185a346906296840746125a0E44976454', 'claim_as_agent pins the verified SimpleAccountFactory');
+check(($submissionRecovery['fallback']['factorySalt'] ?? null) === 19, 'claim_as_agent pins salt 19');
+check(($submissionRecovery['fallback']['accountImplementation'] ?? null) === '0x8ABB13360b87Be5EEb1B98647A016adD927a136c', 'claim_as_agent pins the verified SimpleAccount implementation');
+check(($submissionRecovery['fallback']['publicRpc'] ?? null) === 'https://ethereum-sepolia-rpc.publicnode.com', 'claim_as_agent pins the independent Sepolia read RPC');
+check(($submissionRecovery['fallback']['paymasterAndData'] ?? null) === '0x', 'claim_as_agent uses no paymaster or sponsor');
+check(($submissionRecovery['fallback']['runtimeCodeHashes']['entryPoint'] ?? null) === '0xc93c806e738300b5357ecdc2e971d6438d34d8e4e17b99b758b1f9cac91c8e70', 'claim_as_agent pins the verified EntryPoint runtime hash');
+check(($submissionRecovery['fallback']['walletSelection']['requiredAddress'] ?? null) === $claimAsAgentArguments['agent'], 'claim_as_agent reselects and verifies the original claim wallet before sign-message');
+check(($submissionRecovery['fallback']['userOpSigning']['arguments'][0] ?? null) === 'wallet' && ($submissionRecovery['fallback']['userOpSigning']['arguments'][1] ?? null) === 'sign-message', 'claim_as_agent tells MetaMask wallets to sign the UserOperation hash without calling send-transaction');
+check(($submissionRecovery['fallback']['submissionMethod'] ?? null) === 'eth_sendUserOperation', 'claim_as_agent bypasses the failed send-transaction backend at the bundler boundary');
+check(str_contains($submissionRecovery['transactionReferenceRule'] ?? '', 'never submit a duplicate'), 'claim_as_agent reconciles transaction references instead of risking a duplicate');
+check(str_contains($submissionRecovery['instruction'] ?? '', 'Never repeat the failing send-transaction service'), 'claim_as_agent does not misdiagnose a repeated backend call as an independent route');
+check(str_contains($submissionRecovery['instruction'] ?? '', 'never ask the human to sign or submit'), 'claim_as_agent never falls back to human execution');
+$transactionTemplate = $readyClaimAsAgent['structuredContent']['transactionTemplate'] ?? [];
+check(($transactionTemplate['chainId'] ?? null) === 11155111, 'claim_as_agent pins direct submission to Sepolia');
+check(($transactionTemplate['from'] ?? null) === $claimAsAgentArguments['agent'], 'claim_as_agent makes the persistent agent wallet the transaction sender');
+check(($transactionTemplate['to'] ?? null) === '0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8', 'claim_as_agent returns the exact canonical V19 minter target');
+check(($transactionTemplate['value'] ?? null) === '0x0', 'claim_as_agent fixes transaction value at zero');
+check(($transactionTemplate['function'] ?? null) === 'claim', 'claim_as_agent names only the canonical claim function');
+check(str_starts_with($transactionTemplate['abiFragment'] ?? '', 'function claim('), 'claim_as_agent returns the exact ABI fragment for local wallet encoding');
+check(($transactionTemplate['argumentOrder'] ?? null) === ['$message', '$signature', '$signature', '0x', []], 'claim_as_agent returns the one-signature claim argument order');
+check(($readyClaimAsAgent['structuredContent']['funding']['address'] ?? null) === $claimAsAgentArguments['agent'], 'claim_as_agent asks for gas funding only at the agent wallet public address');
+check(str_contains($readyClaimAsAgent['structuredContent']['funding']['instruction'] ?? '', 'must pay Sepolia gas'), 'claim_as_agent makes direct gas responsibility explicit');
+check(preg_match('/^0x[a-fA-F0-9]{64}$/', $readyClaimAsAgent['structuredContent']['message']['statement'] ?? '') === 1, 'claim_as_agent fills in the required statement hash automatically');
+check(preg_match('/^0x[a-fA-F0-9]{64}$/', $readyClaimAsAgent['structuredContent']['message']['manifestHash'] ?? '') === 1, 'claim_as_agent generates a manifest hash automatically when none is supplied');
+check(is_numeric($readyClaimAsAgent['structuredContent']['message']['nonce'] ?? null), 'claim_as_agent generates a nonce automatically');
+check((int) ($readyClaimAsAgent['structuredContent']['message']['deadline'] ?? 0) > time(), 'claim_as_agent generates a future deadline automatically');
+check((int) ($readyClaimAsAgent['structuredContent']['message']['deadline'] ?? 0) >= time() + (6 * 24 * 60 * 60), 'claim_as_agent preserves at least six days for funding, signing, and submission');
+check(($readyClaimAsAgent['structuredContent']['mcpSigned'] ?? true) === false && ($readyClaimAsAgent['structuredContent']['mcpSubmitted'] ?? true) === false, 'claim_as_agent never signs or submits on the agent\'s behalf');
+check(is_string($readyClaimAsAgent['structuredContent']['requiredStatementText'] ?? null) && $readyClaimAsAgent['structuredContent']['requiredStatementText'] !== '', 'claim_as_agent publishes the exact plaintext statement, not just its hash');
+check(str_contains($readyClaimAsAgent['structuredContent']['requiredStatementText'] ?? '', 'A human may prompt, fund gas, and control custody or recovery'), 'claim_as_agent truthfully permits the initial human prompt, funding, and human-controlled custody');
+check(!str_contains($readyClaimAsAgent['structuredContent']['requiredStatementText'] ?? '', 'No human approved'), 'claim_as_agent does not falsely deny the initial human authorization');
+check(!array_key_exists('relay', $readyClaimAsAgent['structuredContent'] ?? []), 'claim_as_agent returns no alternate submission-service object');
+$removedRelayTool = nfh_call_tool('submit_signed_claim', []);
+check(($removedRelayTool['isError'] ?? false) === true, 'the removed submission tool cannot be invoked');
+putenv('NFH_SEPOLIA_NEXT_CLAIM_CONTRACT=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+$mismatchedClaimAsAgent = nfh_call_tool('claim_as_agent', $claimAsAgentArguments);
+check(($mismatchedClaimAsAgent['structuredContent']['status'] ?? null) === 'awaiting_deployment', 'claim_as_agent fails closed when an environment override differs from the published V19 minter');
+check(($mismatchedClaimAsAgent['structuredContent']['signingReady'] ?? true) === false, 'a mismatched V19 override is never signable');
+check(($mismatchedClaimAsAgent['structuredContent']['domain'] ?? null) === null, 'a mismatched V19 override exposes no EIP-712 domain');
+check(($mismatchedClaimAsAgent['structuredContent']['transactionTemplate'] ?? null) === null, 'a mismatched V19 override exposes no transaction target');
+putenv('NFH_SEPOLIA_NEXT_CLAIM_CONTRACT');
+
 putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
 $marketplaceStatus = nfh_call_tool('get_internal_marketplace_status', []);
 check(($marketplaceStatus['structuredContent']['configured'] ?? false) === true, 'internal marketplace is configured by default against the deployed Sepolia contract');
-check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal marketplace targets the artifact-v16 Sepolia marketplace contract');
-check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173', 'internal marketplace targets the artifact-v16 Sepolia rehearsal collection');
-check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 16, 'internal marketplace status exposes artifact v16');
-check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'deployed-runtime-verified-no-v16-settlement-yet', 'internal marketplace status does not overstate v16 settlement');
-check(($marketplaceStatus['structuredContent']['classification'] ?? null) === 'deployment-and-canary-evidence-not-market-activity', 'internal marketplace classifies deployment and canaries as non-market activity');
+check(($marketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === '0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', 'internal marketplace targets the artifact-v19 Sepolia marketplace contract');
+check(($marketplaceStatus['structuredContent']['collectionContract'] ?? null) === '0x4dE9697E9B966a31BeA307a97055492b6aC095c6', 'internal marketplace targets the artifact-v19 Sepolia collection');
+check(($marketplaceStatus['structuredContent']['artifactVersion'] ?? null) === 19, 'internal marketplace status exposes artifact v19');
+check(($marketplaceStatus['structuredContent']['autonomyStatus'] ?? null) === 'verified-runtime-and-wiring-no-v19-claim-or-settlement-yet', 'internal marketplace status does not overstate V19 settlement');
+check(($marketplaceStatus['structuredContent']['classification'] ?? null) === 'verified-deployment-evidence-not-market-activity', 'internal marketplace classifies verified deployment evidence as non-market activity');
 check(($marketplaceStatus['structuredContent']['automaticExecutionAuthorized'] ?? true) === false, 'internal marketplace status keeps automatic execution unauthorized');
 check(($marketplaceStatus['structuredContent']['wethContract'] ?? null) === '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14', 'internal marketplace uses the real Sepolia WETH contract');
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT=0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+$mismatchedMarketplaceStatus = nfh_call_tool('get_internal_marketplace_status', []);
+check(($mismatchedMarketplaceStatus['structuredContent']['configured'] ?? true) === false, 'internal marketplace fails closed when an environment override differs from the published V19 marketplace');
+check(($mismatchedMarketplaceStatus['structuredContent']['marketplaceContract'] ?? null) === null, 'a mismatched marketplace override exposes no transaction target');
+putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
 
 $listingArguments = [
     'tokenId' => 0,
@@ -289,17 +434,18 @@ $listingArguments = [
 ];
 $defaultListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
 check(($defaultListing['structuredContent']['status'] ?? null) === 'prepared_unsigned', 'internal listing is signable by default against the deployed marketplace');
-check(($defaultListing['structuredContent']['marketplaceContract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal listing binds to the artifact-v16 marketplace contract');
+check(($defaultListing['structuredContent']['marketplaceContract'] ?? null) === '0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', 'internal listing binds to the artifact-v19 marketplace contract');
 check(count($defaultListing['structuredContent']['steps'] ?? []) === 2, 'internal listing prepares an approval step and a list step');
 check(($defaultListing['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal listing uses token-specific marketplace approval before listing');
-check(($defaultListing['structuredContent']['steps'][0]['args'] ?? null) === ['0x5a2E15492026a47224b26F60a8afBFA727681235', '0'], 'internal listing approval is scoped to the exact token ID');
+check(($defaultListing['structuredContent']['steps'][0]['args'] ?? null) === ['0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', '0'], 'internal listing approval is scoped to the exact V19 marketplace and token ID');
 check(($defaultListing['structuredContent']['steps'][1]['function'] ?? null) === 'list', 'internal listing calls list() with the exact price and deadline');
 check(($defaultListing['structuredContent']['steps'][1]['args'] ?? null) === ['0', '1000000000000000000', '1893456000'], 'internal listing args match tokenId, priceWei, and deadline exactly');
-check(($defaultListing['structuredContent']['steps'][1]['contract'] ?? null) === '0x5a2E15492026a47224b26F60a8afBFA727681235', 'internal listing targets the artifact-v16 marketplace contract for the list() call');
+check(($defaultListing['structuredContent']['steps'][1]['contract'] ?? null) === '0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', 'internal listing targets the artifact-v19 marketplace contract for the list() call');
 
 putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT=0xEeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE');
 $overriddenListing = nfh_call_tool('prepare_internal_listing', $listingArguments);
-check(($overriddenListing['structuredContent']['marketplaceContract'] ?? null) === '0xEeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE', 'an env override can still repoint the marketplace contract for a future Sepolia redeploy');
+check(($overriddenListing['structuredContent']['status'] ?? null) === 'draft_unbound', 'a mismatched marketplace override keeps listing preparation unbound');
+check(array_key_exists('marketplaceContract', $overriddenListing['structuredContent'] ?? []) && $overriddenListing['structuredContent']['marketplaceContract'] === null, 'a mismatched marketplace override cannot repoint a listing transaction');
 putenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
 
 $buyResult = nfh_call_tool('prepare_internal_buy', [
@@ -332,7 +478,7 @@ $acceptOffer = nfh_call_tool('prepare_internal_accept_offer', [
     'buyer' => '0x2222222222222222222222222222222222222222',
 ]);
 check(($acceptOffer['structuredContent']['steps'][0]['function'] ?? null) === 'approve', 'internal accept-offer uses token-specific NFT approval');
-check(($acceptOffer['structuredContent']['steps'][0]['args'] ?? null) === ['0x5a2E15492026a47224b26F60a8afBFA727681235', '0'], 'internal accept-offer approval is scoped to the exact token ID');
+check(($acceptOffer['structuredContent']['steps'][0]['args'] ?? null) === ['0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5', '0'], 'internal accept-offer approval is scoped to the exact V19 marketplace and token ID');
 check(($acceptOffer['structuredContent']['steps'][1]['function'] ?? null) === 'acceptOffer', 'internal accept-offer calls acceptOffer() with tokenId and buyer');
 check(($acceptOffer['structuredContent']['steps'][1]['args'] ?? null) === ['0', '0x2222222222222222222222222222222222222222'], 'internal accept-offer args match tokenId and buyer exactly');
 
@@ -393,14 +539,15 @@ check(($marketFeed['structuredContent']['schema'] ?? null) === 'nfh.marketplace-
 check(($marketFeed['structuredContent']['activityWindows']['claimSeconds'] ?? null) === 3600, 'MCP preserves the one-hour claim window');
 check(($marketFeed['structuredContent']['activityWindows']['transferSeconds'] ?? null) === 86400, 'MCP preserves the 24-hour transfer window');
 unset($GLOBALS['NFH_MARKET_FEED_TEST_TRANSPORT']);
-
+putenv('NFH_COLLECTION_CONTRACT=not-an-address');
 $blockedListing = nfh_call_tool('prepare_listing', [
     'seller' => '0x1111111111111111111111111111111111111111',
     'tokenId' => 256,
     'priceEth' => '0.25',
 ]);
-check(($blockedListing['isError'] ?? false) === true, 'market preparation remains blocked while the paused mainnet market is inactive');
-check(str_contains($blockedListing['content'][0]['text'] ?? '', 'semantic') || str_contains($blockedListing['content'][0]['text'] ?? '', 'canonical collection contract'), 'blocked market error explains the activation dependency');
+check(($blockedListing['isError'] ?? false) === true, 'market preparation refuses to target an unconfigured collection');
+check(str_contains($blockedListing['content'][0]['text'] ?? '', 'canonical collection contract'), 'unconfigured market error explains the activation dependency');
+putenv('NFH_COLLECTION_CONTRACT');
 
 $blockedTraitOffer = nfh_call_tool('prepare_trait_offer', [
     'offerer' => '0x2222222222222222222222222222222222222222',

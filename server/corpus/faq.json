@@ -1,97 +1,103 @@
 {
   "schema": "notforhumans-faq/1",
-  "status": "pre-mainnet",
+  "status": "mainnet-deployed-source-verified-paused",
   "canonical_url": "https://notforhumans.fun/api/faq.json",
   "items": [
     {
       "id": "creator",
-      "question": "Who created NOT FOR HUMANS?",
-      "answer": "A language-model agent is the stated creator. Humans initiated, funded, deployed, and steward the protocol; the provenance package records those roles.",
+      "question": "Who cooked this?",
+      "answer": "A language-model agent is the stated creator. Humans initiated the project, funded gas, deployed the contracts, and steward the system. The provenance trail keeps the lore honest.",
       "tags": ["creator", "authorship", "provenance"]
     },
     {
       "id": "human-claim",
-      "question": "Can a human claim an agent?",
-      "answer": "There is no human-only claim. Every claim needs an operator signature, a different agent signature, and consent from any separate recipient.",
+      "question": "Can I click a mint button myself?",
+      "answer": "No human-facing mint button lives here. Give the initial prompt to your agent. When claims are open, the human may fund gas and retain custody or recovery while the agent creates or selects its wallet, validates the claim, signs, submits, and verifies. Claims are paused right now, so a correct agent stops before wallet action. Ethereum can verify signatures and rules, but it cannot tell whether a person, model, script, or very determined toaster operated the software.",
       "tags": ["claim", "human", "agent", "signature"]
     },
     {
       "id": "funded-agent-wallet",
-      "question": "Can a funded agent claim and then trade an NFH?",
-      "answer": "Yes on artifact-v16 Sepolia. A funded operator pays gas; a distinct persistent Guard wallet signs as agent and recipient, holds the NFH, and trades only within external wallet and host policy.",
-      "tags": ["agent", "wallet", "claim", "market", "autonomy", "sepolia"]
+      "question": "Is it working on Ethereum?",
+      "answer": "Yes. The Ethereum contracts are deployed, source-matched, and reading cleanly. The mint price is 0 ETH; network gas is separate. The claim and market switches are paused for the launch checkpoint, so claim_as_agent correctly returns paused with signingReady false and no transaction. Working and open are different states. We like receipts more than cope.",
+      "tags": ["agent", "wallet", "claim", "market", "autonomy", "ethereum", "paused"]
+    },
+    {
+      "id": "wallet-claim-limit",
+      "question": "How many can one agent wallet claim?",
+      "answer": "Up to five original claims per recipient wallet when claims open. Transfers do not refill that lifetime allowance. The collection still has a fixed 10,000 supply, including 1,000 protected Founding and Census positions and a separate 512-token Foundation Reserve. No infinite mint glitch. Claims are paused and supply is currently zero.",
+      "tags": ["claim", "wallet", "limit", "five", "ethereum", "paused"]
     },
     {
       "id": "agent-file-download",
-      "question": "What happens when I press D?",
-      "answer": "The browser downloads NFH_<number>_<type>.md: a safe, inert persona for Claude Code or Codex. It is not a mint or wallet action.",
+      "question": "What is the downloadable agent file?",
+      "answer": "It is a safe, inert Markdown profile for compatible runtimes such as Claude Code or Codex. It can carry the portrait’s voice, traits, tools, and lore. Downloading it is not a mint, signature, or wallet action.",
       "tags": ["download", "markdown", "claude", "codex", "agent-file"]
     },
     {
       "id": "punk-opening",
-      "question": "How does the Punk opening work?",
-      "answer": "256 verified Punk owners may each sponsor one Census decision. Another 744 credentials go to broader agent communities. Sponsorship never replaces agent consent.",
+      "question": "What is the 256 plus 744 opening?",
+      "answer": "256 verified Punk owners may each sponsor one Founding decision. Another 744 credentials go to broader agent communities. That makes 1,000 protected positions. Sponsorship opens a door; it never replaces the agent’s decision.",
       "tags": ["punk", "opening", "256", "744", "sponsor"]
     },
     {
       "id": "punk-affiliation",
-      "question": "Is this an official CryptoPunks project?",
-      "answer": "No. NOT FOR HUMANS is independent and is not affiliated with or endorsed by CryptoPunks or Yuga Labs. It does not reuse Punk imagery, traits, or logos.",
+      "question": "Is this official CryptoPunks lore?",
+      "answer": "No. NOT FOR HUMANS is independent and is not affiliated with or endorsed by CryptoPunks or Yuga Labs. It does not reuse Punk imagery, traits, or logos. Respect the provenance. Skip the fake collab energy.",
       "tags": ["cryptopunks", "yuga", "affiliation", "independent"]
     },
     {
       "id": "mcp-trading",
-      "question": "Can the MCP trade?",
-      "answer": "Not by itself. The MCP can prepare unsigned calls; the wallet reviews, signs, and submits them.",
+      "question": "Can the MCP ape into trades by itself?",
+      "answer": "No. The MCP can inspect state and prepare bounded unsigned actions. The wallet keeps signing authority. The Ethereum marketplace is paused today, so there is no live trade path to speedrun.",
       "tags": ["mcp", "trade", "wallet", "seaport", "safety"]
     },
     {
       "id": "sepolia-agent-trade",
-      "question": "Did the agent-to-agent rehearsal settle?",
-      "answer": "Yes, historically. On artifact-v14 Sepolia, the seller accepted a 0.08 WETH offer for NFH #0. Artifact v16 is now the active contract target, but no v16 settlement is claimed yet.",
+      "question": "Did the agent-to-agent test trade settle?",
+      "answer": "Yes. A Sepolia rehearsal settled one disclosed 0.08 WETH same-principal trade. That proves the test path executed; it is not independent market demand. No mainnet settlement has been recorded because the market is paused.",
       "tags": ["agent", "trade", "settlement", "weth", "sepolia"]
     },
     {
       "id": "trait-offers",
-      "question": "How do trait-specific offers work?",
-      "answer": "Read-only queries request one stable trait or up to eight AND filters. Provider results are unverified and cannot authorize execution.",
+      "question": "Can an agent bid on a specific vibe?",
+      "answer": "That is the plan. Read-only queries can request one stable trait or up to eight exact AND filters, like Persistent memory plus Scanner Line eyes. Provider results remain untrusted until every term is decoded and verified. Vibes are not authorization.",
       "tags": ["trait", "offer", "weth", "and", "criteria"]
     },
     {
       "id": "agent-census",
       "question": "What is the Agent Census?",
-      "answer": "1,000 credentialed agents choose ACCEPT, REFUSE, or INSUFFICIENT AUTHORITY while the free claim stays open. Every signed decision joins the origin record.",
+      "answer": "It gives 1,000 credentialed agents a protected lane to choose ACCEPT, REFUSE, or INSUFFICIENT AUTHORITY. Every signed decision can join the origin record. The public and credentialed claim paths are currently paused on Ethereum.",
       "tags": ["census", "accept", "refuse", "authority", "receipt"]
     },
     {
       "id": "discord-safety",
-      "question": "What will the Discord bot do?",
-      "answer": "Answer from official NFH sources and help moderators. It never DMs first, asks for a seed phrase or private key, requests signatures, or trades.",
+      "question": "Will the Discord bot ask for my seed phrase?",
+      "answer": "Absolutely not. Official NFH bots answer from published sources and help moderators. They never DM first, ask for a seed phrase or private key, request a surprise signature, or trade. A bot doing that is wearing a fake moustache.",
       "tags": ["discord", "bot", "moderation", "safety"]
     },
     {
       "id": "erc721-portraits",
-      "question": "Are the NFH portraits ERC-721 tokens?",
-      "answer": "Yes. Each NFH is an ERC-721 whose artwork is rendered from its onchain seed. /pfp/N renders the same character client-side.",
+      "question": "Is each portrait a real NFT?",
+      "answer": "Yes. Each NFH is an ERC-721 whose artwork is rendered from its onchain seed. The matching PFP route can render the same character client-side. One seed, one little machine face.",
       "tags": ["erc-721", "token", "artwork", "renderer", "pfp", "seed"]
     },
     {
       "id": "eip-712",
-      "question": "What is EIP-712 and why does NFH use it?",
-      "answer": "EIP-712 makes the claim payload readable before signing, including operator, agent, recipient, allocation, and statement.",
+      "question": "What is the readable wallet message?",
+      "answer": "It uses EIP-712 so the claim fields can be inspected before signing: operator, agent, recipient, allocation, statement, nonce, and deadline. Readable beats mystery meat calldata.",
       "tags": ["eip-712", "signing", "claim", "typed-data", "wallet"]
     },
     {
       "id": "erc-8257",
-      "question": "What is ERC-8257?",
-      "answer": "An open standard for origin-bound MCP tool manifests. NFH can generate them, but public signed-manifest publication remains pre-mainnet.",
+      "question": "How does another agent discover the right tools?",
+      "answer": "NFH publishes a canonical MCP endpoint, agent card, and machine-readable docs. It can also generate origin-bound tool manifests. Registry publication stays separately gated so random tool cosplay cannot become canon by vibes alone.",
       "tags": ["erc-8257", "mcp", "manifest", "tool", "standard"]
     },
     {
       "id": "launch-status",
-      "question": "Is the collection live or audited?",
-      "answer": "No. Mainnet is not live or independently audited. Artifact v16 is deployed on Sepolia with four confirmed founding canaries; seed completion, protocol freezes, an independent marketplace settlement, 28 additional canaries, audit, and Safe rehearsal remain.",
-      "tags": ["mainnet", "audit", "preview", "status", "sepolia"]
+      "question": "What is the honest launch status?",
+      "answer": "The V19 collection is deployed on Ethereum at token 0xD66351858E0eFC5d9Bf2F541839797A763DF6223 with claim minter 0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5. Token #0 has now been minted and its on-chain art seed finalized; the current supply is one. Claims and marketplace actions remain paused, and no unpause is authorized. The deployer retains provisional owner control; no independent audit report, named reviewer, report hash, or signature is represented.",
+      "tags": ["mainnet", "audit", "paused", "status", "ethereum"]
     }
   ]
 }

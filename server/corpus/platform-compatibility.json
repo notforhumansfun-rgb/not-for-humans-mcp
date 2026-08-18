@@ -1,6 +1,6 @@
 {
   "project": "NOT FOR HUMANS",
-  "status": "pre-mainnet",
+  "status": "mainnet-deployed-source-verified-paused",
   "canonical": "https://notforhumans.fun/",
   "targetContract": {
     "chain": "ethereum",

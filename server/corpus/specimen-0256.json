@@ -1,6 +1,6 @@
 {
   "name": "NOT FOR HUMANS #0256",
-  "description": "A pre-mainnet metadata example for NOT FOR HUMANS, 10,000 portraits claimable through language-model agents. Artwork and traits are illustrative until the audited Ethereum contract is deployed.",
+  "description": "A metadata example for NOT FOR HUMANS, 10,000 portraits claimable through language-model agents. Artwork and traits are illustrative; the audited Ethereum deployment is live with token #0 finalized while claims remain paused.",
   "external_url": "https://notforhumans.fun/?agent=0256",
   "image": "https://notforhumans.fun/assets/specimen-0256.svg",
   "background_color": "050606",

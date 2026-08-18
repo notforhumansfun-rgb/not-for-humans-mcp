@@ -6,7 +6,7 @@
   "collectionSlug": null,
   "settlement": "OpenSea / Seaport",
   "seaportProtocolAddress": "0x0000000000000068F116a894984e2DB1123eB395",
-  "creatorFeeBps": 1000,
+  "creatorFeeBps": 750,
   "currency": {
     "symbol": "ETH",
     "address": "0x0000000000000000000000000000000000000000"
@@ -20,38 +20,37 @@
   "internalMarketplace": {
     "network": "sepolia",
     "chainId": 11155111,
-    "artifactVersion": 16,
-    "protocolVersion": "5.2",
-    "contractBuild": "v5.2-sepolia-artifact-integrity-v16-2026-08-08",
-    "marketplaceContract": "0x5a2E15492026a47224b26F60a8afBFA727681235",
-    "collectionContract": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
+    "artifactVersion": 19,
+    "protocolVersion": "5.3",
+    "contractBuild": "v5.3-sepolia-governed-agent-claim-v19-2026-08-16",
+    "marketplaceContract": "0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5",
+    "collectionContract": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6",
     "wethContract": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
     "sellerAgent": null,
     "buyerAgent": null,
     "tokenId": "0",
-    "tokenOwner": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
-    "deploymentTransaction": "0x0e0afac48dbeebf96a65194d131357923119344390f7805375ea9fff8c4e3780",
-    "autonomyStatus": "deployed-runtime-verified-no-v16-settlement-yet",
-    "classification": "deployment-and-canary-evidence-not-market-activity",
+    "tokenOwner": null,
+    "deploymentTransaction": "0xae3cd435f9caccc59327d21899e91ec86557f7c1eb0bc91d65e48eaa5841162a",
+    "autonomyStatus": "verified-runtime-and-wiring-no-v19-claim-or-settlement-yet",
+    "classification": "verified-deployment-evidence-not-market-activity",
     "automaticExecutionAuthorized": false,
-    "walletPolicyStatus": "not-configured-for-v16-settlement",
-    "royaltyBps": 1000,
+    "walletPolicyStatus": "v19-target-published-policy-application-remains-external",
+    "royaltyBps": 750,
     "custodyModel": "approval-only; the seller keeps the token until sale, never escrowed",
     "executionModel": "MCP returns the target contract, a minimal ABI fragment, and named arguments for each step. It never encodes calldata, signs, or submits; encoding uses the caller's own ABI-encoding library.",
     "inspectionCheckpoint": {
-      "block": 11446859,
-      "hash": "0xc800ca4d59217e21ec7a9d6ec5e345f32d6cb5bd5220c343d3ae509061964b81",
-      "providers": [
-        "https://ethereum-sepolia-rpc.publicnode.com",
-        "https://rpc.sepolia.ethpandaops.io"
-      ],
+      "observedAt": "2026-08-16",
+      "observedBlock": 11500813,
+      "fromBlock": 11500776,
+      "runtimeBytes": 6066,
+      "runtimePresent": true,
+      "runtimeMatchesV19Artifact": true,
+      "wiringVerified": true,
+      "sourceVerified": false,
       "activeListing": false,
-      "activeConfiguredBuyerOffer": false,
-      "totalSupply": 2,
-      "foundingDecisions": 4,
-      "foundingRootFrozen": true
+      "activeConfiguredBuyerOffer": false
     },
-    "warning": "Artifact-v16 is the current Sepolia target and has verified deployment, role wiring, a frozen founding root, and four confirmed canaries. Its seed lifecycle, protocol freezes, and independent marketplace settlement are not complete. Artifact-v14 remains the historical same-principal settlement baseline. Not mainnet, not proof of demand, no real value."
+    "warning": "Artifact-v19 is deployed and source-verified on Ethereum. Token #0 is minted and its seed is finalized on-chain; claims and marketplace activation remain paused. Sepolia remains the separate claim-preview and rehearsal environment. V18, V16, and V14 remain historical evidence only. Not proof of demand, no real value."
   },
   "historicalSepoliaSettlement": {
     "artifactVersion": 14,
@@ -66,7 +65,7 @@
     "classification": "synthetic-self-trade-rehearsal-not-market-activity"
   },
   "activationRequirements": [
-    "Deploy and independently audit the canonical NFH contracts on Ethereum mainnet.",
+    "Complete independent postdeployment audit and runtime/source quorum for the canonical NFH contracts on Ethereum mainnet.",
     "Set NFH_COLLECTION_CONTRACT to the verified NFHToken address.",
     "Set NFH_COLLECTION_SLUG after OpenSea indexes the collection so collection and trait offers can be resolved.",
     "Implement and independently review complete provider semantic decoding and normalized-intent equivalence for every supported action.",

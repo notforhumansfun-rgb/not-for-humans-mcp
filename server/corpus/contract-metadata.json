@@ -42,7 +42,7 @@
   },
   "mainnet_v19": {
     "chain_id": 1,
-    "status": "deployed-verified-paused-clean-wallet",
+    "status": "deployed-verified-token-zero-finalized-paused",
     "deployer": "0x5cfcC030163F38adad3CF881b66B591e3FaDa4Aa",
     "token": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
     "claim_minter": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
@@ -55,9 +55,17 @@
     "deployment_starts_paused": true,
     "claim_minter_paused": true,
     "marketplace_paused": true,
+    "minted_supply": 1,
+    "token_zero": {
+      "token_id": 0,
+      "owner": "0xc57ca2ce0650895cd717ea7f0e78987ec74396e6",
+      "seed_finalized": true,
+      "seed": "0xa5ae00bc12c65b9819ccb3a0b09a7d26dcfaf3475f81dedad49e9d9e7cbaa071",
+      "finalization_transaction": "0x2e49c8fb19fff8c7743ea9f254a9855522732dc77d1b962ac64edc8d8875935e"
+    },
     "runtime_and_wiring_verified": true,
     "source_verified": true,
     "foundation_reserve_minted": 0
   },
-  "status": "mainnet-v19-deployed-source-verified-paused"
+  "status": "mainnet-v19-deployed-source-verified-token-zero-finalized-paused"
 }

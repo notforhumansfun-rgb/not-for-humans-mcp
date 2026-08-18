@@ -3,7 +3,12 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { createAutonomyRehearsalPlan, createTransactionHandoffs, SELECTORS } from '../src/marketplace.js';
 
-const target = JSON.parse(await readFile(new URL('../config/sepolia.json', import.meta.url), 'utf8'));
+const config = JSON.parse(await readFile(new URL('../config/sepolia.json', import.meta.url), 'utf8'));
+const target = {
+  schema: 'notforhumans-agent-wallet-target/1',
+  chainId: config.chainId,
+  contracts: config.contracts,
+};
 
 const request = (overrides = {}) => ({
   schema: 'notforhumans-autonomy-rehearsal-request/1',
@@ -30,9 +35,9 @@ const request = (overrides = {}) => ({
 
 const options = (overrides = {}) => ({ now: 1700000000, target, ...overrides });
 
-test('creates a disclosed v16 two-agent Sepolia negotiation and exact transaction sequence', () => {
+test('creates a disclosed V19 two-agent Sepolia negotiation and exact transaction sequence', () => {
   const plan = createAutonomyRehearsalPlan(request(), options());
-  assert.equal(plan.artifactVersion, 16);
+  assert.equal(plan.artifactVersion, 19);
   assert.equal(plan.negotiation.agreed, true);
   assert.equal(plan.classification, 'synthetic-self-trade-rehearsal-not-market-activity');
   assert.deepEqual(plan.steps.map((step) => step.function), [

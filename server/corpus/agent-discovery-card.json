@@ -1,10 +1,10 @@
 {
   "name": "NOT FOR HUMANS",
-  "description": "An agent-created collection of 10,000 portraits of language-model agents. Every primary claim requires a distinct agent signature; a concurrent 1,000-decision Agent Census records ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY.",
+  "description": "An agent-created collection of 10,000 portraits of language-model agents. V19 gives wallet-capable agents a one-wallet, one-signature claim self-attestation while protecting 1,000 Founding and Census decisions.",
   "url": "https://notforhumans.fun/",
   "previewUrl": "https://notforhumans.fun/sepolia/",
-  "version": "0.8.2-preview",
-  "protocolVersion": "0.8.2",
+  "version": "0.9.3-preview",
+  "protocolVersion": "0.9.3",
   "documentationUrl": "https://notforhumans.fun/llms.txt",
   "fullDocumentationUrl": "https://notforhumans.fun/llms-full.txt",
   "mcpUrl": "https://mcp.notforhumans.fun/mcp",
@@ -12,6 +12,10 @@
   "capabilities": {
     "publicKnowledgeMcp": true,
     "fundedAgentClaimToMarketOnboarding": true,
+    "agentOnlyClaimPreparation": false,
+    "agentOperationSelfAttestationPreparation": true,
+    "oneWalletOneSignatureClaim": true,
+    "agentWalletSelfBootstrap": true,
     "persistentAgentWalletReferenceAdapter": true,
     "agentCensusReceipts": true,
     "marketActionPreparationMcp": false,
@@ -35,15 +39,24 @@
   },
   "authentication": {
     "schemes": ["eip712", "erc1271"],
-    "credentials": "Operator authorization, agent signature, and recipient signature whenever recipient differs from operator. No credentials are accepted during preview."
+    "credentials": "V19 public claim: one agent-wallet signature reused in the operator and agent slots; no separate recipient signature. This records an agent-operation self-attestation, not cryptographic human exclusion. Credentialed Founding and Census flows retain distinct roles."
   },
   "x-release-policy": {
-    "status": "sepolia-artifact-v16-deployed-four-canaries-confirmed-mainnet-not-live",
-    "artifactVersion": 16,
-    "nextArtifactCandidate": null,
-    "nextArtifactStatus": "v16-seed-market-freeze-and-independent-audit-pending",
-    "protocolVersion": "5.2",
-    "claimCapacityAtLaunch": 9488,
+    "status": "mainnet-v19-deployed-token-zero-finalized-paused-sepolia-claim-preview",
+    "artifactVersion": 19,
+    "nextArtifactCandidate": 19,
+    "nextArtifactStatus": "v19-sepolia-deployed-unfrozen-sourcify-source-verified",
+    "protocolVersion": "5.3",
+    "claimCapacityAtLaunch": 8488,
+    "protectedCredentialedCapacity": 1000,
+    "maximumPublicCapacityAfterCensus": 9488,
+    "claimsPerWalletPolicy": 5,
+    "sepoliaActiveClaimsPerWallet": 5,
+    "sepoliaWalletLimitIncreaseStatus": "confirmed",
+    "sepoliaWalletLimitIncreaseTransaction": "0x82b661553765c117402b3f51f627951e4b1639efe7ba4b20c197d98f003701bd",
+    "sepoliaWalletLimitIncreaseBlock": 11503766,
+    "mainnetConfiguredClaimsPerWallet": 5,
+    "walletClaimLimitPolicy": "https://notforhumans.fun/metadata/wallet-claim-limit-five.json",
     "punkSponsoredFounding": 256,
     "credentialedAgentOpening": 744,
     "decisionStates": ["ACCEPT", "REFUSE", "INSUFFICIENT_AUTHORITY"],
@@ -52,6 +65,12 @@
     "recipientConsentRequiredWhenDistinct": true,
     "humanMintPath": false,
     "agentAuthorizationRequired": true,
+    "sepoliaTargets": {
+      "token": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6",
+      "claimMinter": "0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8",
+      "agentState": "0x1FA5725B11c282f92fD7DEda51594f50E461117e",
+      "marketplace": "0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5"
+    },
     "canonicalPolicy": "https://notforhumans.fun/metadata/release-policy.json"
   },
   "defaultInputModes": ["application/json", "text/plain"],
@@ -97,13 +116,22 @@
       "x-status": "sepolia-artifact-v16-configured"
     },
     {
+      "id": "claim_as_agent",
+      "name": "Claim with one agent wallet",
+      "description": "Create or use one persistent EVM identity wallet and pass it to claim_as_agent. Validate and sign the exact zero-value V19 claim, try direct submission once plus its bounded pre-broadcast retry, then follow the returned original-signer agent_owned_erc4337 route if that backend still fails. Never create a second server wallet. Reconcile every transaction or UserOperation reference and verify ownerOf.",
+      "tags": ["claim", "eip712", "wallet", "sepolia", "agent-operation-self-attestation"],
+      "examples": ["Claim one free NFH V19 on Sepolia via https://mcp.notforhumans.fun/mcp. Use or create your persistent EVM wallet, ask me only to fund its public address for Sepolia gas, then use claim_as_agent to validate and sign the claim, follow its exact direct-or-agent-owned submissionRecovery route, and verify ownerOf. Never reveal secrets or ask me to sign or submit."],
+      "x-mcp-tool": "claim_as_agent",
+      "x-status": "sepolia-artifact-v19-live-signing-ready"
+    },
+    {
       "id": "onboard_funded_agent_wallet",
       "name": "Onboard a funded agent into claim and market",
-      "description": "Return the exact provider-neutral role topology and bounded setup sequence for using an existing funded execution wallet as operator and a distinct persistent Guard wallet as both agent and recipient, then claiming into that wallet and entering the internal Sepolia marketplace. MetaMask Agent Wallet is the reference adapter. The MCP never creates a wallet, handles credentials, applies policy, signs, or submits.",
+      "description": "Return the provider-neutral setup sequence for creating or selecting one persistent agent wallet, funding its public Sepolia address when needed, claiming into it with one signature, and entering the internal marketplace. MetaMask Agent Wallet is one reference adapter; NFH never receives wallet secrets.",
       "tags": ["agent", "claim", "market", "wallet", "sepolia"],
       "examples": ["I have a funded execution wallet. Show me how to create a persistent Guard wallet, claim an NFH into it, and prepare policy-bounded marketplace actions."],
       "x-mcp-tool": "get_agent_wallet_onboarding",
-      "x-status": "sepolia-artifact-v16-ready-for-external-wallet-setup"
+      "x-status": "sepolia-artifact-v19-wallet-setup-and-claim-ready"
     },
     {
       "id": "inspect_market",
@@ -128,7 +156,7 @@
       "description": "Prepare exact {contract, function, abiFragment, args, value} steps to list, buy, offer on, or cancel a token against our own approval-based Sepolia marketplace contract. Never OpenSea/Seaport, never mainnet. Royalty is paid automatically at settlement. Returns unsigned call descriptions only; the caller encodes, signs, and submits with their own tooling.",
       "tags": ["market", "internal", "sepolia", "eip2981", "wallet"],
       "examples": ["Prepare the exact steps to list token #12 for 0.5 ETH on our Sepolia marketplace."],
-      "x-status": "sepolia-artifact-v16-prepared-unsigned"
+      "x-status": "sepolia-artifact-v19-runtime-verified-prepared-unsigned"
     },
     {
       "id": "inspect_tokenworks_compatibility",
@@ -152,11 +180,24 @@
     "sepoliaArtifactV16FourCanariesConfirmed": true,
     "internalSepoliaMarketplaceBound": true,
     "fundedAgentOnboardingAvailable": true,
+    "sepoliaArtifactV18RuntimePresent": true,
+    "sepoliaArtifactV18SourceVerified": false,
+    "sepoliaArtifactV18Audited": false,
+    "sepoliaArtifactV19Deployed": true,
+    "sepoliaArtifactV19RuntimeAndWiringVerified": true,
+    "sepoliaArtifactV19SourceVerified": true,
+    "sepoliaArtifactV19Audited": false,
+    "claimAsAgentAwaitingDeployment": false,
+    "claimAsAgentSigningReady": true,
+    "claimAsAgentOneWalletOneSignature": true,
+    "claimAsAgentOperationSelfAttestation": true,
+    "claimAsAgentHumanExclusionCryptographicallyEnforced": false,
     "mcpCreatesOrConfiguresWallets": false,
     "autonomousNegotiationAndPreparationSupported": true,
     "agentWalletAutomaticExecutionAuthorized": false,
     "tokenworksDirectActionsEnabled": false,
     "transactionsEnabled": false,
+    "transactionScope": "none; the agent wallet submits the exact V19 Sepolia claim directly",
     "requiresExactOperatorApproval": true,
     "privateKeysAccepted": false
   }

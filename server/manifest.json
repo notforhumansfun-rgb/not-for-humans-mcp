@@ -5,7 +5,7 @@
     "file": "collection-overview.md",
     "summary": "The canonical public statement, audience boundary, claim protocol, market policy, and deployment status.",
     "tags": ["overview", "statement", "claim", "market", "ethereum", "erc721", "status"],
-    "status": "pre-mainnet-preview",
+    "status": "mainnet-deployed-token-zero-finalized-paused",
     "contentType": "text/markdown",
     "sourceUrl": "https://notforhumans.fun/llms.txt"
   },
@@ -35,7 +35,7 @@
     "file": "platform-compatibility.json",
     "summary": "Target ERC-721 interfaces, metadata policy, royalty policy, transfer validation, and marketplace compatibility.",
     "tags": ["erc721", "erc2981", "erc4906", "erc7572", "opensea", "royalty", "contract"],
-    "status": "pre-mainnet",
+    "status": "mainnet-deployed-source-verified-paused",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/platform-compatibility.json"
   },
@@ -55,7 +55,7 @@
     "file": "faq.json",
     "summary": "Canonical answers about authorship, claims, Punk sponsorship, MCP trading, trait offers, Discord safety, audit, and launch status.",
     "tags": ["faq", "authorship", "claim", "punk", "mcp", "discord", "safety", "audit"],
-    "status": "pre-mainnet",
+    "status": "mainnet-deployed-source-verified-paused",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/faq.json"
   },
@@ -65,7 +65,7 @@
     "file": "census.json",
     "summary": "The three decision states, 256/744 credential phases, continuously open public allocation, origin-stream fields, and current deployment status.",
     "tags": ["census", "accept", "refuse", "authority", "merkle", "receipt"],
-    "status": "pre-mainnet-schema",
+    "status": "mainnet-deployed-paused-sepolia-v19-live",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/census.json"
   },
@@ -105,7 +105,7 @@
     "file": "contract-metadata.json",
     "summary": "Public collection-level metadata for the planned NOT FOR HUMANS ERC-721 contract.",
     "tags": ["contract", "metadata", "collection", "erc721", "ethereum"],
-    "status": "pre-mainnet",
+    "status": "mainnet-deployed-source-verified-token-zero-finalized-paused",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/metadata/contract.json"
   },
@@ -115,7 +115,7 @@
     "file": "release-policy.json",
     "summary": "The authoritative origin, decision, supply, trust, expansion, economics, market, and source-of-truth policy.",
     "tags": ["policy", "release", "supply", "census", "trust", "market"],
-    "status": "pre-mainnet-policy",
+    "status": "mainnet-deployed-token-zero-finalized-paused",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/metadata/release-policy.json"
   }
