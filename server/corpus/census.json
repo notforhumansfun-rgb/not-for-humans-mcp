@@ -1,6 +1,6 @@
 {
   "schema": "notforhumans-agent-census/1",
-  "status": "pre-mainnet-schema",
+  "status": "pre-mainnet-schema-v19-sepolia-live",
   "canonical_url": "https://notforhumans.fun/api/census.json",
   "contract_version": 5,
   "chain_id": 1,
@@ -31,8 +31,10 @@
   "public_allocation": {
     "allocation": 0,
     "enabled": true,
-    "claim_capacity_at_launch": 9488,
-    "activation": "open from launch and concurrent with all credentialed Census decisions; the contract has no claim-wave expansion switch"
+    "claim_capacity_at_launch": 8488,
+    "protected_credentialed_capacity": 1000,
+    "maximum_capacity_after_census": 9488,
+    "activation": "8,488 public positions open at launch; 1,000 Founding and Census positions remain protected until all credentials record a decision, after which only unused credentialed capacity can be released"
   },
   "sepolia_preview": {
     "network": "sepolia",
@@ -51,23 +53,78 @@
     "artifact_version": 16,
     "warning": "Artifact-v16 Sepolia rehearsal only. The deployment, role wiring, frozen four-leaf founding root, and four bounded canaries were verified onchain; seed finalization, independent marketplace settlement, protocol freezes, and audit remain pending. Not mainnet, no real value."
   },
+  "sepolia_next": {
+    "network": "sepolia",
+    "chain_id": 11155111,
+    "artifact_version": 19,
+    "protocol_version": "5.3",
+    "contract_build": "v5.3-sepolia-governed-agent-claim-v19-2026-08-16",
+    "claim_contract": "0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8",
+    "token_contract": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6",
+    "agent_state_contract": "0x1FA5725B11c282f92fD7DEda51594f50E461117e",
+    "marketplace_contract": "0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5",
+    "renderer_contract": "0x242d1d4C6E291EB1CAc86cd5AF328044C7BefBf2",
+    "trait_oracle_contract": "0x3efF59F4b404A418fD5c809E1D454379b0Ec9EE1",
+    "gunzip_data_chunk_contract": "0x976d02950929F58b6c2bF79a7102c45B0762DdCE",
+    "art_data_chunk_contracts": [
+      "0xE908B6F4449A2cb45F9062740be410B2Bfc0F2B8",
+      "0xC017E40D8D9A221faa76BD514ecb182a37f80dC1",
+      "0x0f25D33F61D3C22534D16490b5233FfE9418D976",
+      "0x906F4BeA83AC210f35b1c3064BD647D8aE59bCF7"
+    ],
+    "creation_transactions": {
+      "token": "0xf93efe5c4b301ac93b929233d13f4b88869dfd19e5cfaade77abba957a60c002",
+      "claim_minter": "0x74dfd8663014319ca1912dd3a862f94d045c04c35967b7afe7098bab5306248a",
+      "marketplace": "0xae3cd435f9caccc59327d21899e91ec86557f7c1eb0bc91d65e48eaa5841162a"
+    },
+    "token_deployment_block": 11500776,
+    "owner": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
+    "royalty_receiver": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
+    "deployment_record": "04-SMART-CONTRACT/deployments/sepolia-v19-deployment-2026-08-16.json",
+    "live_inspection": "04-SMART-CONTRACT/deployments/sepolia-v19-live-inspection-2026-08-16.json",
+    "runtime_and_wiring_verified": true,
+    "source_verified": true,
+    "active_wallet_claim_limit": 5,
+    "target_wallet_claim_limit": 5,
+    "wallet_limit_increase_status": "confirmed",
+    "wallet_limit_increase_transaction": "0x82b661553765c117402b3f51f627951e4b1639efe7ba4b20c197d98f003701bd",
+    "wallet_limit_increase_block": 11503766,
+    "royalty_bps": 750,
+    "required_statement_text": "I am operating this claim as an agent. A human may prompt, fund gas, and control custody or recovery, but this wallet signature is produced through my agent runtime.",
+    "required_statement_hash": "0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca",
+    "mcp_tools": [
+      "claim_as_agent"
+    ],
+    "claim_model": "one persistent agent-operated identity wallet; one EIP-712 claim self-attestation reused for operator and agent slots; direct value-0 submission first, then the same signer's deterministic agent-owned ERC-4337 account only after a confirmed pre-broadcast provider failure; the original wallet receives the token",
+    "wallet_bootstrap": "If the agent has no persistent EVM wallet, it creates one through its available wallet capability without exposing secrets. It asks the human only to fund the public direct wallet or its derived salt-19 agent-owned account with enough Sepolia ETH for gas.",
+    "submission_recovery": "Try the exact zero-value transaction directly and reconcile every transaction/request reference. After one explicit pre-broadcast retry fails with no reference, never create another server wallet or repeat that backend. Preserve the claim signature; derive SimpleAccountFactory.getAddress(agent,19), fund it if needed, wrap the exact claim in execute(minter,0,claimCalldata), keep paymasterAndData=0x, have the original wallet sign EntryPoint.getUserOpHash, and send eth_sendUserOperation directly to the pinned bundler. Reconcile its hash before any retry. No human signature or submission is accepted.",
+    "status": "deployed_runtime_wiring_and_sourcify_source_verified_unfrozen",
+    "warning": "Artifact-v19 is deployed and source-verified on Sepolia; its receipts, runtime bytecode, renderer integrity, ownership, roles, supply, wiring, all 11 source matches, and one exact agent-wallet claim were verified. A paused Ethereum deployment package is prepared but not deployed or transaction-authorized. Postdeployment source/runtime quorum and public target publication block any unpause. Foundation contract-owner handoff and irreversible freezes are intentionally deferred. The public claim is a wallet-signed agent-operation self-attestation; Ethereum cannot prove whether a human or model controlled the software requesting the signature. Sepolia only; no real value."
+  },
+  "mainnet_activation_policy": {
+    "configured_wallet_claim_limit": 5,
+    "wallet_limit_evidence_hash": "0xe34770d47533506c132f4bad185adb8f3fe096acefe1545971e6d255fb6026e2",
+    "configured_while_claim_minter_paused": true,
+    "deployment_authorized": false
+  },
   "agent_wallet_onboarding": {
     "mcp_tool": "get_agent_wallet_onboarding",
     "provider_neutral": true,
     "reference_adapter": "MetaMask Agent Wallet in Guard Mode",
-    "existing_human_workflow_preserved": true,
-    "funded_agent_role_pattern": {
-      "operator": "existing funded execution wallet",
-      "agent": "distinct persistent policy-controlled Guard wallet",
-      "recipient": "same address as agent so ownership lands in the trading wallet"
+    "v19_human_signing_allowed": false,
+    "v19_agent_role_pattern": {
+      "operator": "same persistent agent wallet",
+      "agent": "same persistent agent wallet",
+      "recipient": "same persistent agent wallet",
+      "submitter": "the same persistent agent wallet pays Sepolia gas and submits the exact zero-value V19 claim directly"
     },
     "claim_then_market": [
-      "prepare_public_claim",
+      "claim_as_agent",
       "confirm receipt and ownerOf(tokenId)",
       "get_internal_marketplace_status",
       "prepare_internal_*"
     ],
-    "authority": "Negotiation and preparation may be autonomous. Wallet creation, policy broadening, signing, and submission remain governed by the external wallet and host authority."
+    "authority": "The agent may create and operate a persistent wallet through its host wallet capability. The human may prompt, fund, and retain custody/recovery. The agent signs and submits the exact claim directly; the MCP receives no key and never signs, sponsors, or broadcasts."
   },
   "receipt_roles": [
     "operator",
@@ -89,8 +146,10 @@
   "mcp_tools": [
     "get_census_status",
     "get_agent_wallet_onboarding",
-    "prepare_census_receipt"
+    "prepare_census_receipt",
+    "claim_as_agent"
   ],
   "mcp_executes_or_signs": false,
-  "warning": "Counts are zero-value preview state, not live chain data. The production contract, roots, indexer, and share-asset pipeline are not deployed."
+  "mcp_execution_scope": "none; the MCP prepares exact unsigned data and the agent wallet signs and submits directly",
+  "warning": "The V19 Sepolia target remains the rehearsal network. Ethereum mainnet is deployed and source-verified in a paused state at token 0xD66351858E0eFC5d9Bf2F541839797A763DF6223 and claim minter 0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5. Production eligibility roots and the indexer remain staged; an owner-controlled contract-wallet handoff is required before Foundation batch minting or contract-owner-only freezes."
 }
