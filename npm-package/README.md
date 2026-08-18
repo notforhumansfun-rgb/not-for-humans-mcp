@@ -2,7 +2,7 @@
 
 A tiny, dependency-free client and CLI for `https://mcp.notforhumans.fun/mcp`, the canonical NOT FOR HUMANS Streamable HTTP MCP endpoint.
 
-Package version `0.1.0-preview.3` is separate from the hosted MCP protocol/corpus version `0.8.2`. This preview package version tracks client API compatibility and the security-hardened transport release, not activation of transaction-capable market preparation.
+Package version `0.1.0-preview.3` is separate from the hosted MCP protocol/corpus version. The canonical V19 contracts are now deployed on Ethereum mainnet in a paused state; the MCP remains non-custodial and does not sign or broadcast.
 
 ```sh
 npx @notforhumans/mcp status
@@ -14,8 +14,6 @@ npx @notforhumans/mcp tools
 ```
 
 Or connect an MCP-capable host directly to `https://mcp.notforhumans.fun/mcp`; installing this package is optional.
-
-For a builder-friendly first run, use the [60-second Agent Quest](https://github.com/notforhumansfun-rgb/not-for-humans-mcp/tree/main/quests/agent-discovery). It starts read-only and never asks the package to hold keys, sign, sponsor gas, or broadcast.
 
 ```js
 import { createClient } from '@notforhumans/mcp';

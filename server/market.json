@@ -1,8 +1,8 @@
 {
-  "status": "pre-mainnet-preview",
+  "status": "mainnet-deployed-paused",
   "chain": "ethereum",
   "chainId": 1,
-  "collectionContract": null,
+  "collectionContract": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
   "collectionSlug": null,
   "settlement": "OpenSea / Seaport",
   "seaportProtocolAddress": "0x0000000000000068F116a894984e2DB1123eB395",

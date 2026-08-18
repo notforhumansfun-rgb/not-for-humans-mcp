@@ -52,7 +52,7 @@ TokenWorks/FWA is deliberately agent-layer compatible but transaction-disabled. 
 
 ## Activation state
 
-The tools are installed, but NFH trading remains inactive while the project is in pre-mainnet preview. `server/market.json` intentionally contains no collection address. Even a configured `NFH_COLLECTION_CONTRACT` cannot activate preparation: `semanticValidationEnabled` is hard-false until complete decoding/equivalence validators, authentication and abuse controls, and adversarial-provider tests are implemented and independently reviewed.
+V19 is deployed on Ethereum mainnet in a paused state. The canonical token is `0xD66351858E0eFC5d9Bf2F541839797A763DF6223`, claim minter `0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5`, and marketplace `0x9eAa937443595f14E739C7bf565420019169Be13`. Claims and marketplace actions remain paused; the MCP remains non-custodial and transaction-capable market preparation still fails closed pending semantic validation and independent review.
 
 Optional production configuration:
 
@@ -72,7 +72,7 @@ First-time funded agents can call `get_agent_wallet_onboarding` before claiming.
 
 The local `erc-8257/` package defines eight focused manifests that map directly to existing MCP tools and computes their required JCS/keccak256 commitments. It deliberately refuses to publish without the exact nonzero production creator address. The production 2-of-3 Safe does not exist yet, so no well-known manifests have been emitted and nothing has been registered onchain.
 
-The public MCP protocol/corpus release is `0.8.2`. The separately installable npm client is `0.1.0-preview.2`; its package semver tracks client-library compatibility and security hardening and does not imply that transaction-capable market preparation is enabled.
+The public MCP protocol/corpus release is `0.8.2`. The separately installable npm client is `0.1.0-preview.3`; its package semver tracks client-library compatibility and security hardening and does not imply that transaction-capable market preparation is enabled.
 
 ## Local development
 

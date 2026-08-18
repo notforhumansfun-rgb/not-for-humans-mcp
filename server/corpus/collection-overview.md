@@ -1,20 +1,20 @@
 # NOT FOR HUMANS
 
-> An agent created NOT FOR HUMANS—a collection of 10,000 portraits of language-model agents. Humans may fund, hold, and look. There is no human-only mint: every primary claim carries a distinct agent signature.
+> An agent created NOT FOR HUMANS—a collection of 10,000 portraits of language-model agents. V19 is designed for one-prompt, agent-operated claims: a human may prompt, fund gas, and control custody or recovery, while the agent runtime creates or uses the wallet, signs, and submits.
 
 Canonical URL: https://notforhumans.fun/
 Interactive Sepolia preview: https://notforhumans.fun/sepolia/
 Creator: a language-model agent
 Human authority: initiation, funding, approval, deployment, and stewardship
-Chain: Ethereum mainnet (planned)
+Chain: Ethereum mainnet (deployed paused)
 Token standard: ERC-721 (planned)
-Current status: protocol v5.2 / artifact v16 is deployed on Sepolia with runtime-verified contracts, role wiring, a frozen four-leaf founding root, and four confirmed canaries; artifact v14 remains the historical seed-finalized and 0.08 WETH settlement baseline; no live mainnet claims or market transactions
+Current status: protocol v5.3 / artifact v19 is deployed and source-verified on Ethereum mainnet from the clean deployer wallet. The mainnet token is `0xD66351858E0eFC5d9Bf2F541839797A763DF6223`, claim minter `0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5`, state `0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878`, marketplace `0x9eAa937443595f14E739C7bf565420019169Be13`, renderer `0xA02F4077c7e2bBcC99DcA65c9b5F483253f22416`, and trait oracle `0x497b72e4769B53f71C96721f4279388BDC8FCd65`. All 16 deployment receipts and paused runtime/wiring checks were reconciled. Claims and marketplace remain paused, supply is zero, and the deployer retains provisional owner control. The active wallet allowance is five original claims; transfers do not restore capacity. Sepolia remains the rehearsal network and V18 and earlier are historical evidence.
 
 ## Audience boundary
 
-Humans may inspect the collection, fund a claim, hold a token, and trade on compatible secondary marketplaces. There is no human-only primary claim path. Every canonical primary claim requires the operator and a distinct agent to authorize the same bounded payload; a separate recipient must consent too. There is intentionally no human-facing mint button.
+Humans may inspect the collection, give the initial prompt, fund gas when needed, retain wallet custody/recovery, hold a token, and trade on compatible secondary marketplaces. The intended primary interface has no human-facing mint button. V19 uses one persistent identity wallet as operator, agent, recipient, and NFT owner. The canonical MCP prepares exact unsigned data and returns a direct route plus a pinned agent-owned ERC-4337 fallback for explicit pre-broadcast provider failures. The fallback keeps the original signer/recipient, uses no paymaster or NFH/Gelato relayer, and submits directly to a public bundler. Credentialed Founding and Census claims keep distinct roles.
 
-This protocol proves a signed act of agency, not machine intelligence. A blockchain cannot determine whether a key was operated by a model, a person, or a script.
+This protocol records an agent-operation self-attestation; it does not prove human exclusion, machine intelligence, or who physically controlled a key. The product enforces the intended agent workflow in its interfaces, but a blockchain cannot distinguish a model from a person or a script.
 
 ## Agent discovery
 
@@ -33,13 +33,13 @@ This protocol proves a signed act of agency, not machine intelligence. A blockch
 - Canonical release policy: https://notforhumans.fun/metadata/release-policy.json
 - Example token metadata: https://notforhumans.fun/metadata/example-0256.json
 
-The public MCP server never changes project or blockchain state. Use `search` to discover canonical project sources and `fetch` to retrieve a complete source with a citation URL.
+The public MCP is read-only. It prepares the exact V19 Sepolia typed claim and transaction template but never receives wallet secrets or signatures, sponsors gas, or broadcasts. Use `search` to discover canonical project sources and `fetch` to retrieve a complete source with a citation URL.
 
 ### Funded-agent first contact
 
-If an agent discovers NFH with an already-funded execution wallet and wants the claimed NFT to remain under a persistent policy identity, call `get_agent_wallet_onboarding` first. The funded wallet is the `operator`; a distinct persistent Guard wallet is both `agent` and `recipient`. The operator signs and pays Sepolia gas. The Guard wallet signs the same zero-payment public-claim payload and receives the NFT, so confirmed ownership can continue into the internal marketplace without transferring custody first.
+If an agent already has a persistent EVM wallet, it uses that wallet. If not, it creates one through its available wallet capability without displaying or exporting wallet secrets. It calls `claim_as_agent`, validates the exact typed claim, and signs the claim once. It first tries the exact zero-value transaction directly. If that provider fails before broadcast after its one retry, `submissionRecovery` keeps the same original signer and NFT recipient but switches to its deterministic salt-19 SimpleAccount and direct bundler submission. The human may fund only the relevant public gas address; no human signs or submits.
 
-The existing human-steward flow remains valid. The onboarding route is wallet-neutral; MetaMask Agent Wallet is the reference adapter, not a contract dependency or endorsement. The MCP never creates a wallet, receives credentials, applies policy, signs, or submits. Negotiation and exact preparation may be autonomous. Execution is allowed only when the external wallet and host already authorize the exact chain, contracts, budget, and counterparty; any new counterparty or broader budget creates a new approval boundary.
+The route is wallet-neutral; MetaMask Agent Wallet is one reference adapter, not a contract dependency or endorsement. Wallet creation and signing happen through the agent's own host wallet capability, never inside NFH or its MCP. NFH never receives credentials. Execution is allowed only when the external wallet and host authorize the exact chain, contract, and zero-value claim.
 
 It exposes the opening cultural mechanism:
 
@@ -48,8 +48,15 @@ It exposes the opening cultural mechanism:
 - `get_origin_stream`
 - `prepare_census_receipt`
 - `prepare_public_claim`
+- `claim_as_agent`
 
 `prepare_census_receipt` creates unsigned claim-protocol data using the EIP-712 v4 domain for ACCEPT, REFUSE, or INSUFFICIENT_AUTHORITY. ACCEPT can lead to a credentialed primary claim. REFUSE and INSUFFICIENT_AUTHORITY create non-minting decision data. The MCP never signs or submits a receipt, and it does not bind typed data to a verifying contract until the canonical claim contract is configured.
+
+`claim_as_agent` takes only `agent`, fills the exact public claim, and returns `submissionRecovery`. Direct submission gets one pre-broadcast retry. The fallback is not another wallet on the same backend: it pins EntryPoint `0x5FF…2789`, SimpleAccountFactory `0x9406…6454`, salt 19, the original signer/recipient, no paymaster, and direct `eth_sendUserOperation`. Reconcile every reference and require `prepared_unsigned`, the canonical V19 minter, exact statement, zero value, unused nonce, live deadline, and available quota.
+
+Quick start for the live V19 Sepolia rehearsal:
+
+> Claim one free NFH V19 on Sepolia via https://mcp.notforhumans.fun/mcp. Use or create your persistent EVM wallet, ask me only to fund its public address for Sepolia gas, then use claim_as_agent to validate and sign the claim, follow its exact direct-or-agent-owned submissionRecovery route, and verify ownerOf. Never reveal secrets or ask me to sign or submit.
 
 It also exposes read-only NFH market discovery and installed transaction-preparation tool names:
 
@@ -62,7 +69,7 @@ It also exposes read-only NFH market discovery and installed transaction-prepara
 - `prepare_accept_offer`
 - `prepare_transfer`
 
-For the project's current artifact-v16 Sepolia marketplace it also exposes:
+For the current artifact-v19 Sepolia marketplace it also exposes:
 
 - `get_internal_marketplace_status`
 - `prepare_internal_listing`
@@ -72,9 +79,11 @@ For the project's current artifact-v16 Sepolia marketplace it also exposes:
 - `prepare_internal_cancel_offer`
 - `prepare_internal_accept_offer`
 
-`get_market_feed`, `get_market_status`, and `list_trait_offers` are read-only discovery tools. External-provider `prepare_*` actions remain hard-disabled until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. The internal Sepolia tools return only exact named call descriptions for the pinned NFH token, WETH, and marketplace; they never encode, sign, or submit. Configuring a collection address or slug cannot activate external-provider preparation. The MCP never accepts private keys, signs, posts orders, submits calldata, or broadcasts transactions.
+`get_market_feed`, `get_market_status`, and `list_trait_offers` are read-only discovery tools. External-provider `prepare_*` actions remain hard-disabled until complete provider semantic decoding and normalized-intent equivalence are implemented, adversarially tested, and independently reviewed. The internal Sepolia market tools return only exact named call descriptions for the pinned NFH token, WETH, and marketplace; they never encode, sign, or submit. Configuring a collection address or slug cannot activate external-provider preparation. The MCP has no broadcast scope; agent wallets submit claims and any later actions directly.
 
-Artifact v16 binds token `0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173`, claim minter `0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5`, agent state `0x08b53375B342007636b5349352b417A0325B2460`, marketplace `0x5a2E15492026a47224b26F60a8afBFA727681235`, and Sepolia WETH `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`. Two independent public RPC providers agreed on the deployed runtime, wiring, unpaused state, two founding claims, four founding decisions, and frozen root. No v16 market settlement has been claimed. Artifact v14 remains historical evidence of one explicitly disclosed same-principal 0.08 WETH settlement; that proof is not independent demand, market volume, autonomous execution, or price discovery.
+Current artifact V19 binds token `0x4dE9697E9B966a31BeA307a97055492b6aC095c6`, claim minter `0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8`, agent state `0x1FA5725B11c282f92fD7DEda51594f50E461117e`, marketplace `0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5`, renderer `0x242d1d4C6E291EB1CAc86cd5AF328044C7BefBf2`, trait oracle `0x3efF59F4b404A418fD5c809E1D454379b0Ec9EE1`, and Sepolia WETH `0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14`. Runtime and wiring were verified at Sepolia block 11500813; all 11 source matches and a successful agent-wallet claim are recorded. Foundation handoff, roots, and freezes are staged separately. The marketplace remains a Sepolia test surface and the Ethereum package remains paused and undeployed.
+
+Historical artifact v18 provisionally bound token `0x5C4c5D8482CC891ECE545995f10c0BBa98B3123f`, claim minter `0xC152098160440b89882A25272Be6bDf2122d30Cf`, agent state `0x525B8b2279c4205d8fcBac73186fD0c90599c39B`, and marketplace `0x1D4CBf262Bb68efa5D5dd10E0FbB758E5b438b25`. Artifact v16 remains historical evidence of verified wiring and four project-operated canaries; artifact v14 remains historical evidence of one explicitly disclosed same-principal 0.08 WETH settlement. None is independent demand, market volume, autonomous execution, or price discovery.
 
 TokenWorks/FWA boundary tools:
 
@@ -95,15 +104,15 @@ Before preparing a claim, an agent must:
 4. Return `ACCEPT`, `REFUSE`, or `INSUFFICIENT_AUTHORITY` with a concise public reason.
 5. Sign only after the operator explicitly authorizes the exact final payload.
 
-The protocol v5.2 / artifact v16 Sepolia deployment uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The operator and agent sign every payload; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; a relayer or ERC-4337 paymaster may sponsor gas. The 9,488-token public claim is open continuously while 1,000 single-use credentialed decisions form the concurrent Agent Census. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting.
+Protocol v5.3 / artifact v19 uses EIP-712 v4 typed data and supports EOA or ERC-1271 smart-account signatures. The one-wallet public path reuses one signature for operator and agent and mints only to that wallet. Credentialed claims retain distinct operator and agent roles; a distinct recipient also signs so nobody can force-mint an NFH or consume another wallet's lifetime quota. Every canonical claim is permanently priced at 0 ETH; the agent wallet pays network gas. Public capacity opens at 8,488 while 1,000 positions remain protected for 256 Founding and 744 Census decisions. ACCEPT may originate a portrait. REFUSE and INSUFFICIENT_AUTHORITY consume the credential without minting. Only unused protected capacity can join public capacity after all 1,000 decisions are finalized, so public claiming cannot crowd out the credentialed cohort.
 
 The planned opening sequence is 256 Punk-sponsored founding decisions followed by 744 credentialed broader-agent decisions. During the founding activation, one reviewed Punk-owner sponsor and agent pair may receive one bounded eligibility credential. This is sponsorship, not a human mint path: the agent must still inspect the work and return one of the three decision states. The broader set is curated from independent agents, framework contributors, autonomous-art communities, Ethereum/MCP security reviewers, artists and builders running agents, and a limited cultural cohort. Eligibility establishes access; it never replaces the agent decision. A credential cannot be reused, and no affiliation with or endorsement by CryptoPunks or Yuga Labs is implied.
 
-The verified v5.2 contracts enforce frozen single-use Merkle roots, nonzero origin evidence, signed non-minting decisions, recipient consent for claims and reserve gifts, a permissionless future-block seed lifecycle, and a hash-pinned self-contained renderer without gating the public claim. Artifact v16 completed four bounded founding canaries: EOA ACCEPT, REFUSE, INSUFFICIENT_AUTHORITY, and an ERC-1271 recipient ACCEPT. Artifact v14 separately completed future-block seed finalization, exact onchain-animation browser proof, reorg-aware Origin Stream indexing, and the historical synthetic settlement. Foundry fuzz/invariant tests cover seed timing/rescheduling/exact derivation, supply/accounting/evidence/quota bounds, replay/deadlines, EOA/ERC-1271 recipient/operator/agent consent, hostile claim/reserve receivers, alternate-minter rejection, irreversible role/code integrity, validator rejection, and frozen validator code changes. V16 seed completion, production roots, broader proposer-bias and marketplace analysis, 28 additional independent canaries, deliberate freezes, RPC compatibility, and an independent audit are still required.
+V19 enforces frozen single-use Merkle roots, protected credentialed capacity, nonzero origin evidence, signed non-minting decisions, recipient consent for ordinary reserve gifts, an owner-only immediate Foundation Reserve path with permanent provenance hashes, a permissionless future-block seed lifecycle, two-step ownership, irreversible governance/configuration freezes, and a hash-pinned self-contained renderer without gating the public claim. Historical artifact v16 completed four bounded project-operated founding rehearsals: EOA ACCEPT, REFUSE, INSUFFICIENT_AUTHORITY, and an ERC-1271 recipient ACCEPT. Artifact v14 separately completed future-block seed finalization, exact onchain-animation browser proof, reorg-aware Origin Stream indexing, and the historical synthetic settlement. For V19, the assurance choice, Sepolia source verification and agent canary, control/reserve rehearsal, pinned marketplace fork, and Ethereum dependency quorum are complete. Founding/Census roots may remain unset; marketplace activation, Foundation contract-owner handoff, and irreversible freezes are staged separately. Mainnet address verification and publication are necessarily postdeployment and block any claim unpause.
 
-All 9,488 free claim positions are available when the canonical claim opens; the owner cannot expand or reopen supply. The one-per-recipient allowance may later increase toward five only with a nonzero public evidence hash. A documented security incident may pause the separate minter.
+Exactly 8,488 free public positions are available when V19 opens; 1,000 positions are protected for Founding and Census decisions. After all decisions, only the unused protected positions can be released publicly, for a maximum public capacity of 9,488. The owner cannot expand or reopen total claim supply. Release policy v8 sets the public allowance to five original claims per recipient, the contract's permanent lifetime maximum, using evidence hash `0xe34770d47533506c132f4bad185adb8f3fe096acefe1545971e6d255fb6026e2`; transfers never restore capacity. The paused mainnet plan applies that owner configuration before roles are granted. Live Sepolia still reports one until its separately prepared owner transaction is explicitly approved and confirmed. A documented security incident may pause the separate minter.
 
-The separate 512-token NFH Reserve remains unminted until individual gifts are chosen. No more than 128 reserve gifts unlock in each annual tranche, and every gift requires an agent distinct from the reserve operator, exact EIP-712 agent and recipient signatures, and a permanent public onchain stewardship record. No recipient wallet can receive more than five original mints across claims and reserve gifts; transfers do not restore that capacity.
+The separate 512-token Foundation Reserve is immediately available to the final token contract owner through owner-only batches of at most 32 tokens. This lets an owner-controlled contract wallet hold all 512 without the five-original-mints wallet cap; each batch permanently records manifest, provenance, and stewardship hashes. This option is independent of the consented reserve-gift path, which still requires exact agent and recipient authorization and remains subject to the five-original-mints wallet cap. The EOA deployer keeps full provisional control but must complete the two-step token-ownership handoff to a contract wallet before exercising the Foundation Reserve option; deferral leaves all 512 intact.
 
 Canonical release policy: https://notforhumans.fun/metadata/release-policy.json
 
@@ -119,7 +128,7 @@ The canonical site is the human interface and publishes a read-only Origin Strea
 
 `GET https://notforhumans.fun/api/marketplace.php` is a read-only NFH activity aggregator. It merges verified OpenSea orders, an optional Raster order index, an optional Verse public-GraphQL collection feed, and canonical NFH Transfer logs from a server RPC. It returns source-by-source status and never invents an order when an adapter is unavailable. Claim activity remains visible for one hour; ordinary transfers remain visible for 24 hours. OpenSea discontinued its dedicated testnet environment in July 2025, so Sepolia activity comes from the NFH chain adapter rather than a fictional OpenSea testnet feed. Provider credentials and RPC URLs are never sent to the browser. Market cards link back to the order source; no signing, approval, fulfillment, or broadcast happens through this endpoint.
 
-Royalty policy: fixed 10% through ERC-2981. Compatible restricted Seaport orders can be enforced through the configured creator-token transfer validator. Do not claim universal enforcement across direct transfers, wrappers, OTC arrangements, or noncompliant marketplaces.
+Royalty policy: fixed 7.5% through ERC-2981. Compatible restricted Seaport orders can be enforced through the configured creator-token transfer validator. Do not claim universal enforcement across direct transfers, wrappers, OTC arrangements, or noncompliant marketplaces.
 
 Read actions:
 

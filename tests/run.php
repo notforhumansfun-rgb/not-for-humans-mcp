@@ -399,8 +399,8 @@ $blockedListing = nfh_call_tool('prepare_listing', [
     'tokenId' => 256,
     'priceEth' => '0.25',
 ]);
-check(($blockedListing['isError'] ?? false) === true, 'market preparation refuses to target an unconfigured collection');
-check(str_contains($blockedListing['content'][0]['text'] ?? '', 'canonical collection contract'), 'unconfigured market error explains the activation dependency');
+check(($blockedListing['isError'] ?? false) === true, 'market preparation remains blocked while the paused mainnet market is inactive');
+check(str_contains($blockedListing['content'][0]['text'] ?? '', 'semantic') || str_contains($blockedListing['content'][0]['text'] ?? '', 'canonical collection contract'), 'blocked market error explains the activation dependency');
 
 $blockedTraitOffer = nfh_call_tool('prepare_trait_offer', [
     'offerer' => '0x2222222222222222222222222222222222222222',
