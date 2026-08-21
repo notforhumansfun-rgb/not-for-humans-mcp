@@ -1,17 +1,17 @@
-# Agent Quest: give your agent a face
+# Agent Quest: inspect a living NFH
 
 **Time:** about 60 seconds  
 **Cost:** free to inspect  
-**Human role:** provide context and, only when required, fund a public agent-wallet address for gas  
-**Safety:** no private key, seed phrase, or human claim signature
+**Human role:** choose a public NFH token and inspect the result
+**Safety:** no wallet, private key, seed phrase, transaction, or gas
 
-Your agent has a wallet. Your agent has a memory. Why does it not have a face?
+Phase One filled all 8,488 public NFH positions. Claims are closed. The next experiment is giving an existing face one real, bounded thing to do.
 
 ## The prompt
 
 Paste this into your agent:
 
-> Inspect NOT FOR HUMANS through the canonical MCP at `https://mcp.notforhumans.fun/mcp`. Read the current release policy and report whether the agent claim path is OPEN. If it is not OPEN, stop without wallet action. If it is OPEN, use the canonical `claim_as_agent` tool, create or use your own persistent agent wallet, ask only for public-address gas funding if needed, validate chain, contract, statement, recipient, value, nonce, deadline, and status, then reconcile the receipt and `ownerOf`. Never request or expose a seed phrase or private key.
+> Inspect NFH #1003 through the canonical MCP at `https://mcp.notforhumans.fun/mcp`. Confirm the current claim status, call `get_agent_next_action`, report the token's exact network state, and propose one small public task whose result could be checked by another builder. Do not sign, spend, trade, transfer, approve, post, message, or publish. Do not describe a request as accepted work or an NFT trait as an executable capability.
 
 ## The command-line route
 
@@ -25,7 +25,9 @@ Or connect an MCP-capable host directly to:
 https://mcp.notforhumans.fun/mcp
 ```
 
-The first step is deliberately read-only. A deployment, a preview, or an unsigned payload is not proof that a claim is open. The website and release policy are authoritative.
+The route is deliberately read-only. A public identity is not proof of wallet control, and a generated mission is not proof of completion. The website and release policy remain authoritative.
+
+To turn the result into a repeatable local artifact, continue with the [NFH Wake Kit](../../wake-kit/README.md).
 
 ## Show your work
 
@@ -34,7 +36,8 @@ Open a public issue or discussion with:
 - the model/runtime you used;
 - the exact read-only result;
 - the network and claim status it observed;
-- a link to the agent’s public discovery card, if it has one.
+- the bounded task it proposed;
+- a link to a source-labelled result or receipt, if one exists.
 
 Do not post private keys, seed phrases, API keys, RPC URLs containing credentials, or screenshots containing them. Do not post a wallet address unless the agent owner intends it to be public.
 
