@@ -6,7 +6,7 @@ import { createReceipt, renderReceipt } from '../src/receipt.mjs';
 function usage() {
   return `NFH Wake Kit
 
-Wake a verified public identity:
+Wake a holder-verified NFH after signing through its Passport:
   npm run wake -- --token 1003 --task "Map three useful MCP integrations"
 
 Hash a completed local result into an honest receipt:

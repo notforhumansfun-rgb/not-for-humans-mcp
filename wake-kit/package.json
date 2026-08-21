@@ -1,8 +1,8 @@
 {
   "name": "@notforhumans/wake-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Wake a public NFH identity, give it one bounded task, and create an honest local receipt.",
+  "description": "Prove ownership of an NFH, give it one bounded task, and create an honest local receipt.",
   "type": "module",
   "engines": {
     "node": ">=20"

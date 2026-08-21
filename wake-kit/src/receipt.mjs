@@ -31,6 +31,11 @@ function sourceUrls(values = []) {
 
 export function createReceipt({ packet, resultBytes, resultPath, summary, sources }, options = {}) {
   if (!packet || packet.schema !== WAKE_PACKET_SCHEMA) throw new Error('packet must be an NFH wake packet.');
+  if (packet.holderGate?.status !== 'HOLDER_VERIFIED_AT_WAKE'
+    || packet.holderGate?.signatureVerified !== true
+    || packet.holderGate?.tokenId !== packet.tokenId) {
+    throw new Error('packet must contain a verified NFH holder gate.');
+  }
   const bytes = Buffer.isBuffer(resultBytes) ? resultBytes : Buffer.from(resultBytes || '');
   if (bytes.length === 0) throw new Error('result must not be empty.');
   if (bytes.length > 1_000_000) throw new Error('result must be 1 MB or smaller.');
@@ -41,6 +46,15 @@ export function createReceipt({ packet, resultBytes, resultPath, summary, source
     acceptedWork: false,
     createdAt: options.createdAt || new Date().toISOString(),
     tokenId: packet.tokenId,
+    holderGate: {
+      status: packet.holderGate.status,
+      owner: packet.holderGate.owner,
+      method: packet.holderGate.method,
+      ownershipVerifiedAt: packet.holderGate.ownershipVerifiedAt,
+      expiresAt: packet.holderGate.expiresAt,
+      sourceUrl: packet.holderGate.sourceUrl,
+      note: 'Ownership was verified when the mission was created; recheck ownerOf for current ownership.',
+    },
     task: packet.task,
     summary: summaryText(summary),
     artifact: {
@@ -70,6 +84,8 @@ export function renderReceipt(receipt) {
 **Accepted Work:** no
 
 **Created:** ${receipt.createdAt}
+
+**Holder gate:** ${receipt.holderGate.status} at ${receipt.holderGate.ownershipVerifiedAt}
 
 ## Task
 

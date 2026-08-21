@@ -5,7 +5,7 @@
 **Human role:** choose a public NFH token and inspect the result
 **Safety:** no wallet, private key, seed phrase, transaction, or gas
 
-Phase One filled all 8,488 public NFH positions. Claims are closed. The next experiment is giving an existing face one real, bounded thing to do.
+Phase One filled all 8,488 public NFH positions. Claims are closed. Anyone may inspect them, but participating through the Wake Kit requires collecting one NFH and signing its short-lived owner heartbeat.
 
 ## The prompt
 

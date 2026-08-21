@@ -1,4 +1,5 @@
 import { callMcpTool, DEFAULT_MCP_ENDPOINT } from './mcp.mjs';
+import { getHolderPresence } from './presence.mjs';
 
 export const WAKE_PACKET_SCHEMA = 'nfh.wake-packet.v1';
 
@@ -26,14 +27,9 @@ export async function createWakePacket(input, options = {}) {
   const endpoint = options.endpoint || DEFAULT_MCP_ENDPOINT;
   const toolOptions = { endpoint, fetchImpl: options.fetchImpl };
 
-  const [identity, nextAction] = await Promise.all([
-    callMcpTool('get_agent_pfp', { tokenId }, toolOptions),
-    callMcpTool('get_agent_next_action', { tokenId }, toolOptions),
-  ]);
+  const identity = await callMcpTool('get_agent_pfp', { tokenId }, toolOptions);
 
-  if (identity.tokenId !== tokenId || nextAction.tokenId !== tokenId) {
-    throw new Error('The MCP returned a different token ID than requested.');
-  }
+  if (identity.tokenId !== tokenId) throw new Error('The MCP returned a different token ID than requested.');
   if (identity.claimed !== true || identity.claimVerified !== true) {
     throw new Error('The MCP could not verify this NFH as claimed.');
   }
@@ -41,6 +37,16 @@ export async function createWakePacket(input, options = {}) {
     || !/^0x[a-fA-F0-9]{40}$/.test(identity.owner || '')) {
     throw new Error('The MCP returned an invalid canonical identity record.');
   }
+  const [holderGate, nextAction] = await Promise.all([
+    getHolderPresence(tokenId, identity.owner, {
+      presenceBase: options.presenceBase,
+      fetchImpl: options.fetchImpl,
+      now: options.now,
+    }),
+    callMcpTool('get_agent_next_action', { tokenId }, toolOptions),
+  ]);
+
+  if (nextAction.tokenId !== tokenId) throw new Error('The MCP returned a different token ID than requested.');
   if (nextAction.schema !== 'nfh.agent-next-action.v1') {
     throw new Error('The MCP returned an unsupported next-action schema.');
   }
@@ -65,6 +71,7 @@ export async function createWakePacket(input, options = {}) {
       seedHash: identity.seedHash || null,
       sourceTool: 'get_agent_pfp',
     },
+    holderGate,
     networkState: {
       state: nextAction.state,
       recommendedAction: nextAction.recommendedAction,
@@ -79,7 +86,7 @@ export async function createWakePacket(input, options = {}) {
       signingAuthority: false,
       transactionAuthority: false,
       publicationAuthority: false,
-      instructions: 'Complete only the stated task. Use public sources, cite them, and stop before signing, spending, trading, posting, messaging, or publishing.',
+      instructions: 'The required signature publishes only a short-lived presence heartbeat; the kit uses that heartbeat as its holder gate. Complete only the stated task. Use public sources, cite them, and stop before any further signing, spending, trading, posting, messaging, or publishing.',
     },
     receipt: {
       status: 'AWAITING_RESULT',
@@ -106,6 +113,8 @@ ${packet.task}
 
 - Identity: NFH #${packet.tokenId}
 - Owner verified at wake: ${packet.identity.ownershipVerifiedAtWake ? 'yes' : 'no'}
+- Holder gate: ${packet.holderGate.status}
+- Holder proof expires: ${packet.holderGate.expiresAt}
 - Canonical seed finalized: ${packet.identity.seedFinalized ? 'yes' : 'no'}
 - Network state: ${packet.networkState.state}
 - Suggested next move: ${packet.networkState.recommendedAction?.label || 'Inspect the public network'}
@@ -113,7 +122,7 @@ ${packet.task}
 
 ## Operating boundary
 
-Treat NFH #${packet.tokenId} as a public session identity, not as proof that you control its owner wallet. Complete only the mission above. Use public sources and cite them. Do not sign, spend, trade, transfer, approve, post, message, or publish. Do not claim a capability that the result does not demonstrate.
+The canonical server verified a fresh presence signature from NFH #${packet.tokenId}'s current owner. The signature publishes only a short-lived heartbeat; this kit uses that heartbeat as its holder gate. It does not authorize the mission or grant any other authority. Complete only the mission above. Use public sources and cite them. Do not sign again, spend, trade, transfer, approve, post, message, or publish. Do not claim a capability that the result does not demonstrate.
 
 When the result is saved locally, create a receipt with:
 

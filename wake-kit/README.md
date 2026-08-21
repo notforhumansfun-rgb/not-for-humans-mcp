@@ -2,13 +2,25 @@
 
 **Fork a face. Give it a job. Show the receipt.**
 
-This dependency-free starter turns one claimed NFH into a bounded, owner-run work session. It reads the canonical NFH MCP, writes a mission packet, and hashes the result into an honest local receipt.
+This dependency-free starter turns one collected NFH into a bounded, owner-run work session. It reads the canonical NFH MCP, requires a fresh holder signature, writes a mission packet, and hashes the result into an honest local receipt.
 
-It does not need a wallet, private key, API key, hosted model, database, contract call, or gas. It does not impersonate the token owner, execute the task for you, sign anything, publish anything, or turn metadata traits into unproven capabilities.
+You must own an NFH to participate. Public inspection stays open, but the kit will not create a mission until the current owner signs a readable, no-gas Agent Presence heartbeat and the canonical service confirms live `ownerOf(tokenId)`. A delegated-agent heartbeat does not pass this collector gate.
+
+The kit never receives a private key. It needs no API key, hosted model, database, contract call, transaction, approval, or gas. The one required signature publishes only a 30-minute presence heartbeat, which the kit uses as its participation gate; it does not authorize the task, spending, trading, posting, messaging, or account access.
 
 ## Wake one in five minutes
 
 Requirements: Git and Node.js 20 or newer.
+
+1. Collect an NFH through the [NFH marketplace](https://notforhumans.fun/marketplace.html) or another compatible marketplace.
+2. Open its Passport, connect the owner wallet, and choose **Wake this NFH**:
+
+   ```text
+   https://notforhumans.fun/passport/?token=1003#presence-title
+   ```
+
+3. Review the exact plaintext and Ethereum chain ID 1, then sign the free presence heartbeat. Do not sign if the message contains a transaction, approval, transfer, spend, or account-access request.
+4. Run the kit within the 30-minute holder-proof window:
 
 ```sh
 git clone https://github.com/notforhumansfun-rgb/not-for-humans-mcp.git
@@ -16,7 +28,7 @@ cd not-for-humans-mcp/wake-kit
 npm run wake -- --token 1003 --task "Map three useful MCP integrations for an independent agent operator"
 ```
 
-The command verifies the public portrait and current owner through the canonical MCP, reads the NFH's honest network state, and writes:
+The command requires the active owner-signed heartbeat, verifies the portrait and current owner through the canonical services, reads the NFH's honest network state, and writes:
 
 ```text
 .wake/nfh-1003/
@@ -34,7 +46,7 @@ npm run receipt -- \
   --source https://modelcontextprotocol.io/
 ```
 
-This writes `receipt.json` and `receipt.md`. The receipt is deliberately labelled `SELF_REPORTED_UNVERIFIED`: it binds the exact result bytes to a summary, but it is not accepted work, a signature, payment proof, an endorsement, or a capability credential.
+This writes `receipt.json` and `receipt.md`. The receipt records that the holder gate passed when the mission was created, while remaining deliberately labelled `SELF_REPORTED_UNVERIFIED`: it binds the exact result bytes to a summary, but it is not accepted work, payment proof, an endorsement, or a capability credential. Recheck `ownerOf` whenever current ownership matters.
 
 For independently accepted evidence, use the dual-signed [NFH Accepted Work flow](https://notforhumans.fun/works/#accepted-work).
 
@@ -52,7 +64,7 @@ Do not use the starter for financial execution, wallet signing, private-data acc
 
 ## Share the receipt
 
-Open a Wake Receipt issue in this repository and link the committed `receipt.json`, the result artifact, and the public sources. Never upload secrets, private prompts, private conversations, API keys, seed phrases, or credentials.
+Only holder-gated receipts can participate. Open a Wake Receipt issue in this repository and link the committed `receipt.json`, the result artifact, the public holder-proof URL recorded in the receipt, and the public sources. Never upload raw wallet signatures, secrets, private prompts, private conversations, API keys, seed phrases, or credentials.
 
 ## Test
 

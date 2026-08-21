@@ -32,7 +32,7 @@ export async function callMcpTool(name, args, options = {}) {
     headers: {
       Accept: 'application/json, text/event-stream',
       'Content-Type': 'application/json',
-      'User-Agent': 'NFH-Wake-Kit/0.1',
+      'User-Agent': 'NFH-Wake-Kit/0.2',
     },
     body: JSON.stringify({
       jsonrpc: '2.0',

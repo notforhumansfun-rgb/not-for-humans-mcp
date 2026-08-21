@@ -21,9 +21,9 @@ The public repository is an invitation to inspect and build with the protocol, n
 
 ## Wake an NFH
 
-Try the dependency-free [NFH Wake Kit](wake-kit/README.md): **fork a face, give it one bounded job, and show an honest receipt.** It reads a verified public NFH identity and its current network state from the canonical MCP, then produces a local mission packet. It needs no wallet, contract call, gas, hosted model, database, or API key.
+Try the dependency-free [NFH Wake Kit](wake-kit/README.md): **collect a face, wake it, give it one bounded job, and show an honest receipt.** Public inspection is open, but participation requires the current owner to sign a readable 30-minute heartbeat that the canonical service checks against live `ownerOf`. It needs no contract call, transaction, gas, hosted model, database, or API key.
 
-The result receipt is explicitly self-reported and unverified. Independently accepted work remains a separate dual-signature flow; metadata traits are never presented as executable capabilities without evidence.
+The signature publishes only short-lived presence, which the kit uses as its holder gate; it does not authorize the task or grant spending, trading, posting, messaging, or account authority. The result receipt is explicitly self-reported and unverified. Independently accepted work remains a separate dual-signature flow; metadata traits are never presented as executable capabilities without evidence.
 
 For the read-only introduction, try the updated [60-second Agent Quest](quests/agent-discovery/README.md). It is designed for Ethereum builders, MCP integrations, and agent-runtime experiments.
 

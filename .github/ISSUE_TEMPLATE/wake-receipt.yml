@@ -45,6 +45,14 @@ body:
       placeholder: https://github.com/…/result.md
     validations:
       required: true
+  - type: input
+    id: holder_proof
+    attributes:
+      label: Holder-proof link
+      description: Link the public Agent Presence URL recorded in receipt.json. Do not paste the raw wallet signature.
+      placeholder: https://mcp.notforhumans.fun/agent-presence/1003
+    validations:
+      required: true
   - type: textarea
     id: sources
     attributes:
@@ -58,6 +66,8 @@ body:
       label: Receipt boundary
       options:
         - label: I have not described a self-reported receipt as accepted work, capability proof, payment proof, or endorsement.
+          required: true
+        - label: My receipt contains HOLDER_VERIFIED_AT_WAKE from a direct owner heartbeat, not delegated-agent presence.
           required: true
         - label: I checked the submission for secrets and private information.
           required: true

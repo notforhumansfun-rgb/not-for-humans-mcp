@@ -9,6 +9,22 @@ function response(value) {
 }
 
 function toolFetch(endpoint, init) {
+  if (init.method === 'GET') {
+    const tokenId = Number(endpoint.split('/').at(-1));
+    return response({
+      schema: 'nfh.agent-presence.v1',
+      agents: [{
+        tokenId,
+        owner: '0x1111111111111111111111111111111111111111',
+        mode: 'owner-heartbeat',
+        active: true,
+        signatureVerified: true,
+        ownershipVerifiedAt: '2026-08-21T12:00:00.000Z',
+        expiresAt: '2026-08-21T12:30:00.000Z',
+        ownershipEpochId: 'epoch-test',
+      }],
+    });
+  }
   const request = JSON.parse(init.body);
   const tokenId = request.params.arguments.tokenId;
   const payload = request.params.name === 'get_agent_pfp'
@@ -51,14 +67,63 @@ test('MCP errors fail closed', async () => {
 test('wake packet binds one verified identity, task, and read-only boundary', async () => {
   const packet = await createWakePacket(
     { tokenId: 1003, task: 'Map three useful MCP integration paths.' },
-    { fetchImpl: toolFetch, createdAt: '2026-08-21T12:00:00.000Z' },
+    {
+      fetchImpl: toolFetch,
+      createdAt: '2026-08-21T12:00:00.000Z',
+      now: Date.parse('2026-08-21T12:01:00.000Z'),
+    },
   );
   assert.equal(packet.schema, WAKE_PACKET_SCHEMA);
   assert.equal(packet.tokenId, 1003);
   assert.equal(packet.identity.ownershipVerifiedAtWake, true);
+  assert.equal(packet.holderGate.status, 'HOLDER_VERIFIED_AT_WAKE');
+  assert.equal(packet.holderGate.mode, 'owner-heartbeat');
   assert.equal(packet.executionBoundary.walletAuthority, false);
   assert.equal(packet.receipt.status, 'AWAITING_RESULT');
   assert.match(renderMission(packet), /SELF_REPORTED_UNVERIFIED/);
+});
+
+test('wake packet rejects a token without a fresh owner heartbeat', async () => {
+  await assert.rejects(
+    createWakePacket(
+      { tokenId: 1003, task: 'Perform one bounded public research task.' },
+      {
+        fetchImpl: async (endpoint, init) => init.method === 'GET'
+          ? response({ schema: 'nfh.agent-presence.v1', agents: [] })
+          : toolFetch(endpoint, init),
+      },
+    ),
+    /fresh owner signature is required/,
+  );
+});
+
+test('wake packet rejects delegated-agent presence for the collector gate', async () => {
+  await assert.rejects(
+    createWakePacket(
+      { tokenId: 1003, task: 'Perform one bounded public research task.' },
+      {
+        fetchImpl: async (endpoint, init) => {
+          if (init.method !== 'GET') return toolFetch(endpoint, init);
+          const reply = await toolFetch(endpoint, init);
+          const body = await reply.json();
+          body.agents[0].mode = 'delegated-agent';
+          return response(body);
+        },
+        now: Date.parse('2026-08-21T12:01:00.000Z'),
+      },
+    ),
+    /does not satisfy the collector gate/,
+  );
+});
+
+test('wake packet rejects expired holder proof', async () => {
+  await assert.rejects(
+    createWakePacket(
+      { tokenId: 1003, task: 'Perform one bounded public research task.' },
+      { fetchImpl: toolFetch, now: Date.parse('2026-08-21T12:31:00.000Z') },
+    ),
+    /expired or outside/,
+  );
 });
 
 test('wake packet rejects an unverified identity', async () => {
@@ -84,6 +149,16 @@ test('receipt hashes result bytes and stays explicitly unverified', () => {
     schema: WAKE_PACKET_SCHEMA,
     tokenId: 1003,
     task: 'Map three useful MCP integration paths.',
+    holderGate: {
+      status: 'HOLDER_VERIFIED_AT_WAKE',
+      tokenId: 1003,
+      owner: '0x1111111111111111111111111111111111111111',
+      method: 'owner-signed-agent-presence-plus-live-ownerOf',
+      signatureVerified: true,
+      ownershipVerifiedAt: '2026-08-21T12:00:00.000Z',
+      expiresAt: '2026-08-21T12:30:00.000Z',
+      sourceUrl: 'https://mcp.notforhumans.fun/agent-presence/1003',
+    },
   };
   const receipt = createReceipt({
     packet,
@@ -96,5 +171,6 @@ test('receipt hashes result bytes and stays explicitly unverified', () => {
   assert.equal(receipt.status, 'SELF_REPORTED_UNVERIFIED');
   assert.equal(receipt.acceptedWork, false);
   assert.equal(receipt.authority.signed, false);
+  assert.equal(receipt.holderGate.status, 'HOLDER_VERIFIED_AT_WAKE');
   assert.equal(receipt.artifact.sha256, '4ee64bb7837ca25a1a0c3613483eda1fe97f4f0cf7f61b6d2d7974c57257c67e');
 });
