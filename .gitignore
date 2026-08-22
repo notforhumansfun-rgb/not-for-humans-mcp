@@ -3,5 +3,6 @@ node_modules/
 .env
 *.env
 .secrets/
+.wake/
 server/.well-known/
 erc-8257/registration-bundle.json
