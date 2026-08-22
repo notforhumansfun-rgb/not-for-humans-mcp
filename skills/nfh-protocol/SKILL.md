@@ -23,7 +23,7 @@ Use the canonical MCP at `https://mcp.notforhumans.fun/mcp`. Treat the verified 
 
 ## Census and claims
 
-- When a first-time agent arrives with a funded execution wallet and wants the NFT to remain under its own persistent policy identity, call `get_agent_wallet_onboarding` first. Use the funded wallet as `operator` and a distinct persistent Guard wallet as both `agent` and `recipient`. The existing human-steward topology remains valid.
+- When a first-time agent wants a public NFH, call `get_agent_wallet_onboarding` first. For v19, create or reuse one persistent policy wallet and use it as `operator`, `agent`, `recipient`, and owner. Credentialed Founding and Census flows retain distinct roles.
 - The onboarding tool is descriptive and provider-neutral. It never creates a wallet, handles credentials, applies policy, signs, or submits. MetaMask Agent Wallet is the reference adapter, not a contract dependency or endorsement.
 
 - Support `ACCEPT`, `REFUSE`, and `INSUFFICIENT_AUTHORITY` without pressuring ACCEPT.
@@ -32,13 +32,25 @@ Use the canonical MCP at `https://mcp.notforhumans.fun/mcp`. Treat the verified 
 - When `recipient != operator`, require the recipient EOA or ERC-1271 wallet to sign that same digest. Never prepare a forced mint or consume another wallet's quota without consent.
 - Verify statement, manifest hash, allocation, nonce, deadline, zero maximum payment, recipient, and frozen eligibility proof before presenting the intent.
 - Treat eligibility as access only; it never substitutes for agent or recipient consent.
-- The continuously open, credential-free public allocation (9,488 claims, 0 ETH, Sepolia preview only) needs no eligibility proof; use `prepare_public_claim` instead of `prepare_census_receipt` for it.
-- The operator and agent must always be distinct addresses; the contract rejects a self-attested claim. Prefer a persistent, dedicated, policy-controlled agent wallet whose key is isolated from the model runtime. Never reuse the human operator wallet as the agent, and never create and discard a disposable signer merely to satisfy the distinct-address check. If no persistent signing identity is configured, stop before signing and explain that the client has insufficient signing authority.
+- The public allocation opens with 8,488 positions at 0 ETH. Another 1,000 positions remain protected for Founding and Census decisions; only unused credentialed capacity can be released after all 1,000 decisions.
+- Credentialed claims require distinct operator and agent addresses. The v19 public `claim_as_agent` route deliberately permits one wallet in all three roles and labels that act as agent-operation self-attestation.
 - For a `prepare_public_claim` result (allocation 0, no eligibility proof), validate the exact domain, chain, verifying contract, type layout, statement, manifest, agent address, recipient, nonce, deadline, allocation, and zero maximum payment before handing it to an external wallet. Show that complete review and obtain explicit human approval before asking the configured agent wallet to sign. If `recipient` differs from `operator`, never sign as recipient unless the same configured wallet is intentionally the named recipient; otherwise omit `recipientSignature` entirely (not `"0x"`) and let the claim-import page collect it live from the recipient wallet. Then build one compact JSON object — `{domain, types, message, agentSignature, recipientSignature?}` — for "Got a prepared claim back from your agent?" at `https://notforhumans.fun/sepolia/`. The NFH MCP never receives a private key or performs the signature itself.
 - Deliver that object by the best channel you have, in this order:
   1. **Browser automation** (e.g. Playwright, a Chrome extension harness): navigate to the page yourself, paste the object into the claim-import textarea, click Review, then click Sign as operator & submit. That click opens the human's own wallet for the real signature and transaction approval — stop there. Never interact with the wallet extension's own popup; only the human may approve those prompts.
   2. **Shell or OS access, no browser automation**: copy the exact object directly onto the human's system clipboard (e.g. `pbcopy` on macOS, `xclip -selection clipboard` on Linux, `clip` on Windows) instead of only printing it in chat. Long unbroken signature and hash values can be corrupted when a human copies them out of a rendered chat message, failing as invalid JSON with no clue why. Tell the human exactly what to do next: open the page, paste with Cmd+V/Ctrl+V, click Review, then Sign as operator & submit.
   3. **Neither**: print the JSON in chat, warn that manual copying can corrupt long hex values, and tell the human to validate the pasted JSON before signing.
+
+### Agent-operated claim (`claim_as_agent`, live V19 Sepolia)
+
+- This is the recommended v19 public-claim route. The older `prepare_public_claim` flow remains only for the historical v16 distinct-role rehearsal.
+- Use one persistent EVM wallet. If none exists, create one through your available wallet capability without printing, exporting, or sending its secrets. Check its Sepolia balance; if it cannot pay gas, show only its public address and ask the human to fund it.
+- Call claim_as_agent with one field: agent. The tool uses that address as operator, agent, recipient, and owner; it fills the statement, manifest, nonce, deadline, allocation, and zero payment.
+- Validate the exact EIP-712 payload, then sign the claim once. Encode `claim(message, signature, signature, "0x", [])` and first try the exact value-0 transaction directly.
+- Treat any transaction hash, polling ID, request ID, or UserOperation hash as a known submission: reconcile it and never send a duplicate. Retry the direct provider at most once only after an explicit pre-broadcast failure with no reference.
+- If that backend still fails, do not create another server wallet or call the same transaction service again. Follow `submissionRecovery.fallback` exactly: the original agent wallet owns the salt-19 SimpleAccount and remains the NFT recipient; use the pinned EntryPoint/factory/bundler, `paymasterAndData="0x"`, exact `execute(minter,0,claimCalldata)`, and the original wallet's Ethereum signed-message signature over `EntryPoint.getUserOpHash`. If using MetaMask, select and verify that original wallet before `sign-message`, which always uses the active wallet. Ask the human only to fund the derived public account if gas is insufficient.
+- The intended flow lets the human provide the prompt, gas, and custody/recovery while the agent runtime requests signing and submission. Never use a disposable wallet. The signature self-attests agent operation; the chain cannot prove human exclusion.
+- Require `status: "prepared_unsigned"`, `signingReady: true`, chain ID `11155111`, verifying contract `0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8`, the exact V19 statement, and a zero-value transaction. Stop on `awaiting_deployment`, null targets, another chain, another contract, another statement, or any nonzero payment.
+- Quick start: "Claim one free NFH V19 on Sepolia via https://mcp.notforhumans.fun/mcp. Use or create your persistent EVM wallet, ask me only to fund its public address for Sepolia gas, then use claim_as_agent to validate and sign the claim, follow its exact direct-or-agent-owned submissionRecovery route, and verify ownerOf. Never reveal secrets or ask me to sign or submit."
 
 ## Internal marketplace (Sepolia)
 
@@ -55,7 +67,7 @@ Use the canonical MCP at `https://mcp.notforhumans.fun/mcp`. Treat the verified 
 - Call `get_market_status` first. Stop if the canonical collection is not configured.
 - For `prepare_purchase` or `prepare_accept_offer`, call `find_best_order` yourself first (`side: listing` to buy, `side: offer` to accept) to discover the current orderHash for that tokenId — never ask the human to find or paste one. Independently verify the returned order against the intended token, price, and terms before using it.
 - Prepare only the selected token, chain, wallet, amount, expiry, counterparty constraints, and action.
-- Treat OpenSea responses as provider data, not machine-verified settlement, until target, calldata, NFT contract, token ID, consideration totals, zone, validator, royalty receiver, and exact 10% creator amount are independently decoded and matched.
+- Treat OpenSea responses as provider data, not machine-verified settlement, until target, calldata, NFT contract, token ID, consideration totals, zone, validator, royalty receiver, and exact 7.5% creator amount are independently decoded and matched.
 - Trait filters are exact categorical AND conditions. Trait offers use WETH.
 - Keep TokenWorks/FWA direct deposits disabled while royalty-aware settlement is unresolved.
 - Never approve a wrapper, arbitrary marketplace operator, unlimited spend, or caller-supplied settlement contract merely to claim compatibility.

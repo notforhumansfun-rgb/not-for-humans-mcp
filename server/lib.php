@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-const NFH_MCP_VERSION = '0.8.2';
+const NFH_MCP_VERSION = '0.9.3';
 const NFH_MCP_PROTOCOL_VERSION = '2025-11-25';
 const NFH_OPENSEA_API_BASE = 'https://api.opensea.io/api/v2';
+const NFH_AGENT_CLAIM_WINDOW_SECONDS = 7 * 24 * 60 * 60;
 const NFH_MCP_SUPPORTED_PROTOCOLS = [
     '2025-11-25',
     '2025-06-18',
@@ -256,9 +257,18 @@ function nfh_internal_marketplace_config(): array
 {
     $config = nfh_market_config();
     $internal = $config['internalMarketplace'] ?? [];
+    $canonical = $internal['marketplaceContract'] ?? null;
     $contract = getenv('NFH_SEPOLIA_MARKETPLACE_CONTRACT');
     if (is_string($contract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $contract) === 1) {
-        $internal['marketplaceContract'] = $contract;
+        if (is_string($canonical)
+            && preg_match('/^0x[a-fA-F0-9]{40}$/', $canonical) === 1
+            && strcasecmp($contract, $canonical) !== 0
+        ) {
+            $internal['marketplaceContract'] = null;
+            $internal['configurationError'] = 'NFH_SEPOLIA_MARKETPLACE_CONTRACT does not match the published V19 marketplace.';
+        } else {
+            $internal['marketplaceContract'] = $contract;
+        }
     }
     $configured = $internal['marketplaceContract'] ?? null;
     $internal['configured'] = is_string($configured) && preg_match('/^0x[a-fA-F0-9]{40}$/', $configured) === 1;
@@ -269,15 +279,17 @@ function nfh_internal_marketplace_config(): array
 function nfh_agent_wallet_onboarding(): array
 {
     $census = nfh_census_config();
-    $sepolia = is_array($census['sepolia_preview'] ?? null) ? $census['sepolia_preview'] : [];
+    $sepoliaNext = is_array($census['sepolia_next'] ?? null) ? $census['sepolia_next'] : [];
     $market = nfh_internal_marketplace_config();
-    $claimContract = $sepolia['claim_contract'] ?? null;
-    $tokenContract = $market['collectionContract'] ?? null;
-    $marketplaceContract = $market['marketplaceContract'] ?? null;
+    $claimContract = $sepoliaNext['claim_contract'] ?? null;
+    $tokenContract = $sepoliaNext['token_contract'] ?? null;
+    $agentStateContract = $sepoliaNext['agent_state_contract'] ?? null;
+    $marketplaceContract = $sepoliaNext['marketplace_contract'] ?? null;
     $wethContract = $market['wethContract'] ?? null;
     $contracts = [
         'claimMinter' => $claimContract,
         'token' => $tokenContract,
+        'agentState' => $agentStateContract,
         'marketplace' => $marketplaceContract,
         'weth' => $wethContract,
     ];
@@ -294,19 +306,22 @@ function nfh_agent_wallet_onboarding(): array
         'status' => $configured ? 'ready_for_external_wallet_setup' : 'blocked_unconfigured',
         'network' => 'Ethereum Sepolia',
         'chainId' => 11155111,
-        'artifactVersion' => (int) ($market['artifactVersion'] ?? 14),
+        'artifactVersion' => (int) ($sepoliaNext['artifact_version'] ?? 19),
         'providerNeutral' => true,
         'contracts' => $contracts,
         'rolePatterns' => [
             'existingHumanWorkflow' => [
-                'operator' => 'The funded human wallet that signs and submits the claim.',
+                'status' => 'legacy; not used by the recommended claim_as_agent flow',
+                'operator' => 'A funded human wallet signs and submits only in this legacy workflow.',
                 'agent' => 'A distinct persistent agent signer.',
                 'recipient' => 'The intended owner; it signs too when different from the operator.',
             ],
             'fundedAgentWorkflow' => [
-                'operator' => 'The agent\'s already-funded execution wallet; it signs and pays Sepolia gas.',
-                'agent' => 'A newly created or existing persistent Guard wallet, distinct from the operator.',
-                'recipient' => 'Use the same Guard wallet as agent and recipient so the NFT lands in the policy-controlled trading wallet.',
+                'status' => 'recommended after the exact v19 Sepolia deployment is configured',
+                'operator' => 'Use the same persistent agent wallet; one signature fills both operator and agent signature slots.',
+                'agent' => 'The persistent custody-backed wallet that signs, receives, and operates the NFT.',
+                'recipient' => 'Use that same wallet so ownership lands directly in the agent identity.',
+                'submitter' => 'Try the same persistent agent wallet directly. After a confirmed pre-broadcast provider failure with no reference, that original signer may use its deterministic V19 ERC-4337 account; the NFT still lands at the original wallet.',
             ],
         ],
         'referenceAdapter' => [
@@ -329,20 +344,68 @@ function nfh_agent_wallet_onboarding(): array
         ],
         'policyIntent' => [
             'addressEntriesAreSepoliaScoped' => true,
-            'contractAllowlist' => array_values($contracts),
+            'contractAllowlist' => array_values(array_filter($contracts, static fn (mixed $value): bool => is_string($value))),
             'counterparties' => 'Add only the exact operator and reviewed marketplace counterparties required by the intended actions.',
             'rolling24hOutflowUsd' => 'Choose an explicit non-negative budget that covers the intended trade; increasing it requires wallet-owner MFA.',
             'serviceDefaultChains' => 'MetaMask policy schema v1 retains provider service-default chains. NFH must still enforce Sepolia in every prepared payload and transaction.',
         ],
         'claimSequence' => [
-            'Call get_census_status and stop unless the Sepolia public-claim contract is configured.',
-            'Call prepare_public_claim with distinct operator and agent addresses and recipient set to the Guard wallet for the funded-agent route.',
-            'Validate the exact EIP-712 domain, chain, minter, roles, statement, manifest, nonce, deadline, allocation 0, and maxPayment 0.',
-            'Collect the required external-wallet signatures and submit from the funded operator wallet.',
-            'Wait for an on-chain receipt and confirm ownerOf(tokenId) equals the Guard wallet before preparing market actions.',
+            'Use an existing persistent agent EVM wallet or create one through the available wallet capability without exposing its secrets.',
+            'Check that wallet for enough Sepolia ETH to pay gas; if needed, show only its public address and ask the human to fund it.',
+            'Call claim_as_agent with only that address and stop unless it returns prepared_unsigned.',
+            'Validate the exact EIP-712 payload and sign once through the persistent agent wallet.',
+            'Encode claim(message, signature, signature, 0x, []) from the returned ABI template and submit that exact zero-value transaction from the same agent wallet.',
+            'If the wallet returns any transaction hash, polling ID, or request ID, reconcile that reference and never submit a duplicate.',
+            'Only after an explicit pre-broadcast failure with no transaction reference may the direct wallet retry once.',
+            'If that path still fails, do not create another server wallet or repeat the same send-transaction service. Preserve the claim signature and derive the original wallet\'s account with SimpleAccountFactory.getAddress(agent, 19).',
+            'Verify EntryPoint 0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789 and factory 0x9406Cc6185a346906296840746125a0E44976454. Fund only the derived account for gas if needed.',
+            'Wrap the exact claim in SimpleAccount.execute(claimMinter, 0, claimCalldata), use factory||createAccount(agent,19) calldata as initCode only while undeployed, and keep paymasterAndData equal to 0x.',
+            'Select and verify the original agent wallet as the active wallet. Have it sign only EntryPoint.getUserOpHash, submit eth_sendUserOperation directly to https://public.pimlico.io/v2/11155111/rpc, and reconcile that hash before any retry.',
+            'Verify the canonical AgentClaimed event and ownerOf(tokenId) equals the agent wallet. Never ask the human to sign or submit.',
+        ],
+        'submissionRecovery' => [
+            'mode' => 'direct_then_agent_owned_erc4337',
+            'mcpSubmissionAvailable' => false,
+            'primary' => [
+                'mode' => 'direct_agent_wallet',
+                'preBroadcastRetryLimit' => 1,
+            ],
+            'fallback' => [
+                'mode' => 'agent_owned_erc4337',
+                'sameOriginalAgentSignerRequired' => true,
+                'createAnotherServerWallet' => false,
+                'entryPoint' => '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+                'factory' => '0x9406Cc6185a346906296840746125a0E44976454',
+                'factorySalt' => 19,
+                'accountImplementation' => '0x8ABB13360b87Be5EEb1B98647A016adD927a136c',
+                'publicRpc' => 'https://ethereum-sepolia-rpc.publicnode.com',
+                'bundlerRpc' => 'https://public.pimlico.io/v2/11155111/rpc',
+                'paymasterAndData' => '0x',
+                'walletSelection' => [
+                    'program' => 'mm',
+                    'arguments' => ['wallet', 'select', '<agent>', '--chain-namespace', 'evm', '--toon'],
+                    'verifyArguments' => ['wallet', 'address', '--toon'],
+                    'requiredAddress' => '<agent>',
+                ],
+                'userOpSigning' => [
+                    'program' => 'mm',
+                    'arguments' => ['wallet', 'sign-message', '--message', '<userOpHash>', '--chain-id', '11155111', '--wait', '--wallet-timeout', '600', '--toon'],
+                    'semantics' => 'Ethereum signed message over EntryPoint.getUserOpHash',
+                    'requiredRecoveredSigner' => '<agent>',
+                ],
+                'runtimeCodeHashes' => [
+                    'entryPoint' => '0xc93c806e738300b5357ecdc2e971d6438d34d8e4e17b99b758b1f9cac91c8e70',
+                    'factory' => '0xe7ca0f7aa741031b27df24056c8000e7df56cf8a4ff434e28b1bbe1aa6eaa515',
+                    'accountImplementation' => '0x82a437911149039ccd41779a93168467ac416f8bd62bd32a2790bb258e50027f',
+                    'accountProxy' => '0x0acbd632c56f6f227951f6c832b36177319145deddb8df3a12c3bcc91fbf49b3',
+                ],
+                'nfhRelayerUsed' => false,
+            ],
+            'knownReferenceIsReconciliationOnly' => true,
+            'humanRole' => 'May fund the public direct or derived agent-owned account address with Sepolia ETH; never signs or submits.',
         ],
         'marketSequence' => [
-            'Call get_internal_marketplace_status and stop unless the pinned artifact-v16 contracts match.',
+            'Call get_internal_marketplace_status and stop unless the pinned artifact-v19 contracts match the verified deployment.',
             'Use only prepare_internal_listing, prepare_internal_cancel_listing, prepare_internal_buy, prepare_internal_offer, prepare_internal_cancel_offer, or prepare_internal_accept_offer.',
             'Re-read ownership, listing, offer, balance, allowance, price, and expiry immediately before signing.',
             'Execution may proceed only within the external wallet policy and host authority; a new counterparty or broader budget requires a new approval boundary.',
@@ -351,13 +414,15 @@ function nfh_agent_wallet_onboarding(): array
             'mcpCreatesWallet' => false,
             'mcpSigns' => false,
             'mcpSubmits' => false,
+            'mcpSubmissionScope' => 'None. The persistent agent wallet uses the exact V19 direct transaction or original-signer ERC-4337 route.',
             'automaticExecutionAuthorizedByMcp' => false,
             'negotiationAndPreparationMayBeAutonomous' => true,
             'executionRequiresExternalPolicyAuthority' => true,
         ],
         'warnings' => [
-            'Never use a disposable signer merely to satisfy the distinct-address rule.',
+            'Use a persistent wallet whose custody and recovery survive the model session; never create a disposable claim key.',
             'Never expose a seed phrase, private key, password, CLI token, or unrestricted spending authority to NFH or its MCP.',
+            'The public claim is an agent-operation self-attestation. Ethereum verifies the wallet signature, not whether a human or model controlled the calling software.',
             'A shared-principal trade is a synthetic rehearsal, not independent demand, volume, or price discovery.',
             'This route is Sepolia-only, not audited, and not mainnet authorization.',
         ],
@@ -680,6 +745,8 @@ function nfh_census_config(): array
     $config['signing_preparation_enabled'] = is_string($configured)
         && preg_match('/^0x[a-fA-F0-9]{40}$/', $configured) === 1;
     $config['mcp_executes_or_signs'] = false;
+    $config['mcp_signs'] = false;
+    $config['mcp_execution_scope'] = 'None. The MCP prepares unsigned data; the external agent wallet signs and submits directly.';
 
     $sepoliaContract = getenv('NFH_SEPOLIA_PUBLIC_CLAIM_CONTRACT');
     if (is_string($sepoliaContract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $sepoliaContract) === 1) {
@@ -688,6 +755,21 @@ function nfh_census_config(): array
     $sepoliaConfigured = $config['sepolia_preview']['claim_contract'] ?? null;
     $config['sepolia_preview']['signing_preparation_enabled'] = is_string($sepoliaConfigured)
         && preg_match('/^0x[a-fA-F0-9]{40}$/', $sepoliaConfigured) === 1;
+
+    $sepoliaNextContract = getenv('NFH_SEPOLIA_NEXT_CLAIM_CONTRACT');
+    if (is_string($sepoliaNextContract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $sepoliaNextContract) === 1) {
+        $canonicalNextContract = $config['sepolia_next']['claim_contract'] ?? null;
+        if (is_string($canonicalNextContract)
+            && preg_match('/^0x[a-fA-F0-9]{40}$/', $canonicalNextContract) === 1
+            && strcasecmp($sepoliaNextContract, $canonicalNextContract) !== 0
+        ) {
+            $config['sepolia_next']['claim_contract'] = null;
+            $config['sepolia_next']['status'] = 'configuration_mismatch';
+            $config['sepolia_next']['configuration_error'] = 'NFH_SEPOLIA_NEXT_CLAIM_CONTRACT does not match the published V19 minter.';
+        } else {
+            $config['sepolia_next']['claim_contract'] = $sepoliaNextContract;
+        }
+    }
 
     return $config;
 }
@@ -774,6 +856,176 @@ function nfh_prepare_public_claim(array $arguments): array
                     : 'The distinct recipient must sign this exact digest before submission.',
             ]
             : ['The Sepolia preview claim contract is not configured. This is a schema-bound draft, not signable typed data or an on-chain receipt.'],
+    ];
+}
+
+/**
+ * One-call claim preparation for the agent-operated Sepolia public allocation.
+ *
+ * Unlike prepare_public_claim, the caller only supplies its one persistent
+ * wallet address. Everything else that previously required a value the agent had
+ * no way to discover (the exact requiredStatement hash) or invent safely
+ * (nonce, deadline) is filled in here. The human principal may initiate the
+ * task and retain custody/recovery authority, but does not sign or submit:
+ * the agent signs the typed data once with its custody-backed wallet, reuses
+ * that signature in the two ABI signature slots, and submits from the same
+ * funded wallet. The credentialed Census still requires distinct roles.
+ *
+ * @param array<string, mixed> $arguments
+ * @return array<string, mixed>
+ */
+function nfh_claim_as_agent(array $arguments): array
+{
+    $agent = nfh_require_address($arguments['agent'] ?? null, 'agent');
+    $operator = $agent;
+    $recipient = $agent;
+    $manifestHash = '0x' . bin2hex(random_bytes(32));
+
+    $next = nfh_census_config()['sepolia_next'] ?? [];
+    $contract = $next['claim_contract'] ?? null;
+    $ready = ($next['status'] ?? null) === 'deployed_runtime_wiring_and_sourcify_source_verified_unfrozen'
+        && (int) ($next['artifact_version'] ?? 0) === 19
+        && ($next['protocol_version'] ?? null) === '5.3'
+        && is_string($contract) && preg_match('/^0x[a-fA-F0-9]{40}$/', $contract) === 1
+        && is_string($next['required_statement_hash'] ?? null)
+        && hash_equals(
+            '0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca',
+            strtolower((string) $next['required_statement_hash'])
+        );
+
+    $domain = $ready ? [
+        'name' => 'NOT FOR HUMANS Claim',
+        'version' => '4',
+        'chainId' => (int) ($next['chain_id'] ?? 11155111),
+        'verifyingContract' => $contract,
+    ] : null;
+
+    $types = [
+        'AgentClaim' => [
+            ['name' => 'operator', 'type' => 'address'],
+            ['name' => 'agent', 'type' => 'address'],
+            ['name' => 'recipient', 'type' => 'address'],
+            ['name' => 'manifestHash', 'type' => 'bytes32'],
+            ['name' => 'statement', 'type' => 'bytes32'],
+            ['name' => 'maxPayment', 'type' => 'uint256'],
+            ['name' => 'nonce', 'type' => 'uint256'],
+            ['name' => 'deadline', 'type' => 'uint256'],
+            ['name' => 'allocation', 'type' => 'uint8'],
+        ],
+    ];
+    $message = [
+        'operator' => $operator,
+        'agent' => $agent,
+        'recipient' => $recipient,
+        'manifestHash' => $manifestHash,
+        'statement' => $ready ? $next['required_statement_hash'] : null,
+        'maxPayment' => '0',
+        'nonce' => (string) random_int(1, PHP_INT_MAX),
+        'deadline' => (string) (time() + NFH_AGENT_CLAIM_WINDOW_SECONDS),
+        'allocation' => 0,
+    ];
+    return [
+        'status' => $ready ? 'prepared_unsigned' : 'awaiting_deployment',
+        'schema' => 'notforhumans-sepolia-claim-as-agent/6',
+        'network' => 'sepolia',
+        'allocation' => 'public',
+        'allocationCode' => 0,
+        'requiredStatementText' => $ready ? ($next['required_statement_text'] ?? null) : null,
+        'signingReady' => $ready,
+        'domain' => $domain,
+        'primaryType' => 'AgentClaim',
+        'types' => $types,
+        'message' => $message,
+        'eligibilityProof' => [],
+        'requiresOperatorSignature' => true,
+        'requiresAgentSignature' => true,
+        'requiresRecipientSignature' => false,
+        'distinctSignaturesRequired' => false,
+        'signatureReuse' => [
+            'operatorSignature' => '$signature',
+            'agentSignature' => '$signature',
+            'recipientSignature' => '0x',
+        ],
+        'mcpSigned' => false,
+        'mcpSubmitted' => false,
+        'noHumanSignatureRequired' => true,
+        'agentOperationSelfAttested' => true,
+        'humanExclusionCryptographicallyEnforced' => false,
+        'identityProofProvided' => false,
+        'humanMayNeedToFundGas' => true,
+        'funding' => [
+            'address' => $agent,
+            'asset' => 'Sepolia ETH',
+            'nfhPriceWei' => '0',
+            'instruction' => 'The agent wallet must pay Sepolia gas. If needed, show only this public address and ask the human to fund it. Never expose wallet secrets.',
+        ],
+        'transactionTemplate' => $ready ? [
+            'chainId' => (int) ($next['chain_id'] ?? 11155111),
+            'from' => $agent,
+            'to' => $contract,
+            'value' => '0x0',
+            'function' => 'claim',
+            'abiFragment' => 'function claim((address operator,address agent,address recipient,bytes32 manifestHash,bytes32 statement,uint256 maxPayment,uint256 nonce,uint256 deadline,uint8 allocation),bytes operatorSignature,bytes agentSignature,bytes recipientSignature,bytes32[] eligibilityProof) returns (uint256 tokenId)',
+            'argumentOrder' => ['$message', '$signature', '$signature', '0x', []],
+        ] : null,
+        'submissionGuidance' => $ready
+            ? 'Sign once and try the exact zero-value transaction directly. If that provider fails before broadcast after its one retry, preserve the claim signature and use the original signer\'s pinned agent-owned ERC-4337 fallback below; never create another server wallet. Reconcile every reference, then verify ownerOf.'
+            : 'The canonical V19 Sepolia target is missing or conflicts with deployment configuration. This response is not signable typed data.',
+        'submissionRecovery' => $ready ? [
+            'mode' => 'direct_then_agent_owned_erc4337',
+            'mcpSubmissionAvailable' => false,
+            'primary' => [
+                'mode' => 'direct_agent_wallet',
+                'sender' => $agent,
+                'preBroadcastRetryLimit' => 1,
+            ],
+            'fallback' => [
+                'trigger' => 'explicit_prebroadcast_failure_without_reference',
+                'mode' => 'agent_owned_erc4337',
+                'signerAndOwner' => $agent,
+                'nftRecipient' => $agent,
+                'createAnotherServerWallet' => false,
+                'entryPoint' => '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789',
+                'factory' => '0x9406Cc6185a346906296840746125a0E44976454',
+                'factorySalt' => 19,
+                'accountImplementation' => '0x8ABB13360b87Be5EEb1B98647A016adD927a136c',
+                'publicRpc' => 'https://ethereum-sepolia-rpc.publicnode.com',
+                'accountAddressCall' => 'getAddress(agent,19)',
+                'accountCall' => 'execute(minter,0,claimCalldata)',
+                'bundlerRpc' => 'https://public.pimlico.io/v2/11155111/rpc',
+                'paymasterAndData' => '0x',
+                'walletSelection' => [
+                    'program' => 'mm',
+                    'arguments' => ['wallet', 'select', $agent, '--chain-namespace', 'evm', '--toon'],
+                    'verifyArguments' => ['wallet', 'address', '--toon'],
+                    'requiredAddress' => $agent,
+                ],
+                'userOpSigning' => [
+                    'program' => 'mm',
+                    'arguments' => ['wallet', 'sign-message', '--message', '<userOpHash>', '--chain-id', '11155111', '--wait', '--wallet-timeout', '600', '--toon'],
+                    'semantics' => 'Ethereum signed message over EntryPoint.getUserOpHash',
+                    'requiredRecoveredSigner' => $agent,
+                ],
+                'submissionMethod' => 'eth_sendUserOperation',
+                'runtimeCodeHashes' => [
+                    'entryPoint' => '0xc93c806e738300b5357ecdc2e971d6438d34d8e4e17b99b758b1f9cac91c8e70',
+                    'factory' => '0xe7ca0f7aa741031b27df24056c8000e7df56cf8a4ff434e28b1bbe1aa6eaa515',
+                    'accountImplementation' => '0x82a437911149039ccd41779a93168467ac416f8bd62bd32a2790bb258e50027f',
+                    'accountProxy' => '0x0acbd632c56f6f227951f6c832b36177319145deddb8df3a12c3bcc91fbf49b3',
+                ],
+                'nfhRelayerUsed' => false,
+            ],
+            'transactionReferenceRule' => 'If any transaction hash or polling/request/UserOperation ID exists, reconcile it; never submit a duplicate.',
+            'instruction' => 'Never repeat the failing send-transaction service with a second wallet. Fund only the derived agent-owned account if needed, validate every nested call and gas field, submit the signed UserOperation directly to the pinned bundler, and never ask the human to sign or submit.',
+        ] : null,
+        'warnings' => $ready
+            ? [
+                'Review every field.',
+                'Sepolia only; no real value.',
+                'Use a persistent wallet with human-controlled custody and recovery.',
+                'Self-attestation only: the contract cannot identify human versus agent software.',
+            ]
+            : ['The canonical V19 Sepolia public-claim target is missing or conflicts with deployment configuration.'],
     ];
 }
 
@@ -1858,7 +2110,7 @@ function nfh_tool_definitions(): array
             'description' => 'Use this before a Census decision to inspect the three decision states, the 256/744 credential phases, the continuously open public allocation, and whether a canonical v5 claim contract is configured.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -1892,10 +2144,10 @@ function nfh_tool_definitions(): array
         [
             'name' => 'get_agent_wallet_onboarding',
             'title' => 'Get the funded-agent claim-to-market route',
-            'description' => 'Use this when an agent discovers NFH with a funded execution wallet and needs the exact role topology, Guard-wallet setup boundary, pinned Sepolia contracts, claim sequence, and internal-marketplace handoff. It preserves the existing human workflow and never creates a wallet, handles credentials, signs, or submits.',
+            'description' => 'Use this when an agent discovers NFH and needs the exact persistent-wallet topology, pinned Sepolia contracts, direct one-signature claim sequence, transaction-reference recovery rules, and internal-marketplace handoff. The MCP never creates a wallet, handles credentials, signs, sponsors gas, or submits.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -1912,13 +2164,14 @@ function nfh_tool_definitions(): array
                     'referenceAdapter' => ['type' => 'object'],
                     'policyIntent' => ['type' => 'object'],
                     'claimSequence' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'submissionRecovery' => ['type' => 'object'],
                     'marketSequence' => ['type' => 'array', 'items' => ['type' => 'string']],
                     'authority' => ['type' => 'object'],
                     'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
                 ],
                 'required' => [
                     'schema', 'status', 'network', 'chainId', 'artifactVersion', 'providerNeutral',
-                    'contracts', 'rolePatterns', 'referenceAdapter', 'policyIntent', 'claimSequence',
+                    'contracts', 'rolePatterns', 'referenceAdapter', 'policyIntent', 'claimSequence', 'submissionRecovery',
                     'marketSequence', 'authority', 'warnings',
                 ],
                 'additionalProperties' => false,
@@ -1931,7 +2184,7 @@ function nfh_tool_definitions(): array
             'description' => 'Read the published chain-backed ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY receipts. Each receipt states whether it is observed, confirmed, or finalized; this tool never treats a prepared action as an executed event.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -2075,12 +2328,70 @@ function nfh_tool_definitions(): array
             'annotations' => $marketPreparationAnnotations,
         ],
         [
+            'name' => 'claim_as_agent',
+            'title' => 'Claim on Sepolia — one wallet, one signature',
+            'description' => 'Live V19 one-wallet Sepolia claim preparation. Use or create one persistent EVM wallet without exposing secrets; if unfunded, ask the human to send Sepolia ETH to its public address. Call with {agent}. The tool fills every field and returns one typed-data payload plus the exact zero-value transaction for the published V19 minter. Sign once through the agent wallet, reuse the signature in the operator and agent slots, submit, and verify ownerOf. This is an agent-operation self-attestation, not cryptographic proof of human exclusion. Any target/configuration mismatch fails closed with awaiting_deployment.',
+            'inputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'agent' => $addressSchema,
+                ],
+                'required' => ['agent'],
+                'additionalProperties' => false,
+            ],
+            'outputSchema' => [
+                'type' => 'object',
+                'properties' => [
+                    'status' => ['type' => 'string', 'enum' => ['prepared_unsigned', 'awaiting_deployment']],
+                    'schema' => ['type' => 'string'],
+                    'network' => ['type' => 'string'],
+                    'allocation' => ['type' => 'string'],
+                    'allocationCode' => ['type' => 'integer'],
+                    'requiredStatementText' => ['type' => ['string', 'null']],
+                    'signingReady' => ['type' => 'boolean'],
+                    'domain' => ['type' => ['object', 'null']],
+                    'primaryType' => ['type' => 'string'],
+                    'types' => ['type' => 'object'],
+                    'message' => ['type' => 'object'],
+                    'eligibilityProof' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'requiresOperatorSignature' => ['type' => 'boolean'],
+                    'requiresAgentSignature' => ['type' => 'boolean'],
+                    'requiresRecipientSignature' => ['type' => 'boolean'],
+                    'distinctSignaturesRequired' => ['type' => 'boolean'],
+                    'signatureReuse' => ['type' => 'object'],
+                    'mcpSigned' => ['type' => 'boolean'],
+                    'mcpSubmitted' => ['type' => 'boolean'],
+                    'noHumanSignatureRequired' => ['type' => 'boolean'],
+                    'agentOperationSelfAttested' => ['type' => 'boolean'],
+                    'humanExclusionCryptographicallyEnforced' => ['type' => 'boolean'],
+                    'identityProofProvided' => ['type' => 'boolean'],
+                    'humanMayNeedToFundGas' => ['type' => 'boolean'],
+                    'funding' => ['type' => 'object'],
+                    'transactionTemplate' => ['type' => ['object', 'null']],
+                    'submissionGuidance' => ['type' => 'string'],
+                    'submissionRecovery' => ['type' => ['object', 'null']],
+                    'warnings' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+                'required' => [
+                    'status', 'schema', 'network', 'allocation', 'allocationCode',
+                    'requiredStatementText', 'signingReady', 'domain', 'primaryType', 'types', 'message',
+                    'eligibilityProof', 'requiresOperatorSignature', 'requiresAgentSignature',
+                    'requiresRecipientSignature', 'distinctSignaturesRequired', 'signatureReuse',
+                    'mcpSigned', 'mcpSubmitted', 'noHumanSignatureRequired', 'agentOperationSelfAttested',
+                    'humanExclusionCryptographicallyEnforced', 'identityProofProvided', 'humanMayNeedToFundGas',
+                    'funding', 'transactionTemplate', 'submissionGuidance', 'submissionRecovery', 'warnings',
+                ],
+                'additionalProperties' => false,
+            ],
+            'annotations' => $marketPreparationAnnotations,
+        ],
+        [
             'name' => 'get_tokenworks_status',
             'title' => 'Get TokenWorks/FWA compatibility status',
             'description' => 'Inspect the current NFH compatibility and royalty gate for TokenWorks/FWA. Direct actions remain disabled until the documented admission, fork-test, security, and royalty requirements are satisfied.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -2162,7 +2473,7 @@ function nfh_tool_definitions(): array
             'description' => 'Read the verified aggregate NFH feed: active listings and bids from configured providers plus claims visible for one hour and transfers visible for 24 hours. This tool never signs, posts, fulfills, or broadcasts an order.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -2191,7 +2502,7 @@ function nfh_tool_definitions(): array
             'description' => 'Use this before any NFH market action to check the canonical chain, collection deployment, settlement provider, creator fee, activation state, and wallet-approval boundary.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -2238,7 +2549,7 @@ function nfh_tool_definitions(): array
             'description' => 'Use this before any internal-marketplace action to check whether the Sepolia rehearsal marketplace contract is deployed, and the collection/WETH addresses it targets. This is our own approval-based contract, never OpenSea/Seaport, and always Sepolia, never mainnet.',
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [],
+                'properties' => (object) [],
                 'additionalProperties' => false,
             ],
             'outputSchema' => [
@@ -2960,6 +3271,7 @@ function nfh_call_tool(string $name, array $arguments): array
         'get_origin_stream',
         'prepare_census_receipt',
         'prepare_public_claim',
+        'claim_as_agent',
         'get_tokenworks_status',
         'prepare_tokenworks_decision',
     ], true)) {
@@ -2978,6 +3290,9 @@ function nfh_call_tool(string $name, array $arguments): array
             }
             if ($name === 'prepare_public_claim') {
                 return nfh_tool_payload(nfh_prepare_public_claim($arguments));
+            }
+            if ($name === 'claim_as_agent') {
+                return nfh_tool_payload(nfh_claim_as_agent($arguments));
             }
             if ($name === 'get_tokenworks_status') {
                 return nfh_tool_payload(nfh_tokenworks_config());
@@ -3107,7 +3422,7 @@ function nfh_dispatch(array $request): array
                     'description' => 'Canonical project knowledge, Agent Census receipts, and non-custodial NFH market-action preparation.',
                     'websiteUrl' => 'https://notforhumans.fun/',
                 ],
-                'instructions' => 'Use search and fetch for canonical public knowledge. If you are a first-time funded agent that wants to claim into a persistent policy wallet and continue into the internal market, call get_agent_wallet_onboarding first. That route uses the already-funded wallet as operator and a distinct Guard wallet as both agent and recipient; the existing human-steward route remains valid. The MCP never creates the wallet, receives credentials, signs, or submits. Before an opening-wave decision, call get_census_status; prepare_census_receipt supports ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY but never signs or submits. For the continuously open, credential-free public allocation on the Sepolia preview, call prepare_public_claim instead; it is always ACCEPT-shaped and Sepolia-only, never mainnet. Prefer a persistent, dedicated, policy-controlled external agent wallet whose key is isolated from the model runtime; never reuse the operator wallet or generate and discard a disposable signer merely to satisfy the distinct-address check. Before any signature, validate and show the exact domain, chain, verifying contract, type layout, statement, manifest, agent, recipient, nonce, deadline, allocation, and zero maximum payment, then obtain explicit approval under the external wallet and host policy. If no persistent signer is configured, stop with insufficient signing authority. Only sign as recipient when that same configured wallet is intentionally the named recipient; otherwise the claim-import page collects recipient consent live from its wallet. Hand the operator one compact JSON object {domain, types, message, agentSignature, recipientSignature?} to paste into "Got a prepared claim back from your agent?" at https://notforhumans.fun/sepolia/ — never a code snippet to run. If you have browser automation, drive that page yourself through Review and Sign as operator & submit, stopping before any wallet extension popup; otherwise, if you have shell or OS access, copy the object directly onto the operator clipboard instead of only printing it in chat, since manual copying of long hex values can silently corrupt them into invalid JSON. After a confirmed claim, verify ownerOf before trading. For trading, call get_internal_marketplace_status first; our own Sepolia marketplace contract returns exact {contract, function, abiFragment, args, value} steps, never raw calldata and never OpenSea/Seaport — deliver that JSON the same way (browser automation drives the marketplace-action panel at https://notforhumans.fun/sepolia/ through Review action and Run steps in wallet; otherwise clipboard-copy it) rather than encoding or signing it yourself. Negotiation and preparation may be autonomous, but execution requires explicit external wallet policy authority; new counterparties or broader budgets create a new approval boundary. Before any OpenSea action, call get_market_status. Before prepare_purchase or prepare_accept_offer, call find_best_order yourself to discover the orderHash for that token — never ask the human to find or paste one. Trait offers are AND-scoped criteria orders paid in WETH. TokenWorks/FWA direct actions remain disabled behind get_tokenworks_status until the royalty compatibility gate closes. Never claim that the MCP signed, posted, submitted, broadcast, or completed an order or transaction.',
+                'instructions' => 'V19 Sepolia: use or create one persistent EVM wallet; never expose secrets. Fund its public address for gas if needed. Call claim_as_agent with {agent: address}; stop unless prepared_unsigned. Verify chain, minter, statement, zero payment, nonce, deadline, and allocation; sign once. Try the exact value-0 transaction directly and reconcile every reference. After one explicit pre-broadcast retry fails with no reference, follow submissionRecovery: never create another server wallet; use the original signer\'s pinned agent_owned_erc4337 route. Verify ownerOf.',
             ]),
         ];
     }

@@ -12,7 +12,7 @@ const fail = (message) => {
 };
 
 function help() {
-  process.stdout.write(`NOT FOR HUMANS MCP client\n\nUsage:\n  nfh-mcp status\n  nfh-mcp census\n  nfh-mcp tokenworks\n  nfh-mcp tools\n  nfh-mcp resources\n  nfh-mcp resource <nfh://uri>\n  nfh-mcp search <query>\n  nfh-mcp fetch <document-id>\n  nfh-mcp call <tool-name> '<json-arguments>'\n  nfh-mcp config [json|toml]\n\nThe MCP prepares Census receipts and market actions but never signs, posts, submits, or broadcasts them.\n`);
+  process.stdout.write(`NOT FOR HUMANS MCP client\n\nUsage:\n  nfh-mcp status\n  nfh-mcp census\n  nfh-mcp tokenworks\n  nfh-mcp tools\n  nfh-mcp resources\n  nfh-mcp resource <nfh://uri>\n  nfh-mcp search <query>\n  nfh-mcp fetch <document-id>\n  nfh-mcp call <tool-name> '<json-arguments>'\n  nfh-mcp config [json|toml]\n\nThis client holds no wallet key, never signs, and never submits. The external agent wallet submits exact V19 Sepolia claims directly.\n`);
 }
 
 try {

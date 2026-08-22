@@ -56,9 +56,9 @@ function nfh_home_page(): string
     return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
         . '<title>NOT FOR HUMANS — MCP</title><meta name="robots" content="index,follow">'
         . '<style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050606;color:#e8e4d9;font:15px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}main{max-width:880px;margin:auto;padding:10vh 24px}h1{margin:0 0 20px;font:900 clamp(54px,10vw,118px)/.78 Arial Narrow,Arial,sans-serif;letter-spacing:-.07em;text-transform:uppercase}h1 span{color:#e9b44d}p{max-width:700px;color:#b8b7b0}code{color:#50c8b1}section{margin-top:56px;padding-top:24px;border-top:1px solid #292b29}h2{font:800 24px Arial,sans-serif;text-transform:uppercase}a{color:#e9b44d}.tag{display:inline-block;padding:5px 8px;background:#10251f;color:#50c8b1;font-size:11px;text-transform:uppercase}</style>'
-        . '</head><body><main><div class="tag">knowledge + Agent Census + read-only market discovery / streamable HTTP</div><h1>Not for <span>humans.</span></h1>'
-        . '<p>This is the canonical MCP connection for the NOT FOR HUMANS project. It exposes ' . $documentCount . ' public project sources, prepares unsigned ACCEPT / REFUSE / INSUFFICIENT AUTHORITY Census receipts, and provides read-only market queries. A funded agent can call <code>get_agent_wallet_onboarding</code> to map its execution wallet to a distinct persistent Guard wallet, claim into that wallet, and continue into the bounded Sepolia market. Trait-filter queries return explicitly unverified provider output, not match proof.</p>'
-        . '<section><h2>Connect</h2><p>MCP endpoint: <code>' . $baseUrl . '/mcp</code></p><p>The existing human-steward route remains valid. The agent-first route is wallet-neutral; MetaMask Agent Wallet is one reference adapter, not a protocol dependency. Market preparation is ' . htmlspecialchars($marketStatus, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '. The MCP never accepts private keys, creates wallets, signs, or broadcasts; execution remains governed by the caller&rsquo;s external wallet and host policy.</p></section>'
+        . '</head><body><main><div class="tag">knowledge + Agent Census + exact agent-owned claim routes / streamable HTTP</div><h1>Not for <span>humans.</span></h1>'
+        . '<p>This is the canonical MCP connection for the NOT FOR HUMANS project. It exposes ' . $documentCount . ' public sources, prepares unsigned Census receipts and the exact V19 Sepolia public claim, and provides read-only market queries. <code>claim_as_agent</code> returns the direct value-0 transaction plus a pinned original-signer ERC-4337 fallback for explicit pre-broadcast provider failures; it never tells an agent to repeat the same broken transaction backend with a second wallet.</p>'
+        . '<section><h2>Connect</h2><p>MCP endpoint: <code>' . $baseUrl . '/mcp</code></p><p>The route is wallet-neutral; MetaMask Agent Wallet is one adapter, not a protocol dependency. Market preparation is ' . htmlspecialchars($marketStatus, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '. The MCP never accepts private keys, creates wallets, signs, sponsors gas, or broadcasts. Execution remains governed by the caller&rsquo;s external wallet and provider.</p></section>'
         . '<section><h2>Discovery</h2><p><a href="/.well-known/mcp.json">Server metadata</a> · <a href="/health">Health</a> · <a href="https://notforhumans.fun/">Canonical collection</a></p></section>'
         . '</main></body></html>';
 }
@@ -130,7 +130,7 @@ if ($path === '/.well-known/mcp.json' && ($method === 'GET' || $method === 'HEAD
         'endpoint' => nfh_base_url() . '/mcp',
         'transport' => 'streamable-http',
         'protocolVersion' => NFH_MCP_PROTOCOL_VERSION,
-        'authentication' => 'none for project knowledge; caller-supplied OpenSea API key for read-only provider discovery',
+        'authentication' => 'none for project knowledge and unsigned preparation; caller-supplied OpenSea API key for read-only provider discovery',
         'providerApiKeyHeader' => 'X-OpenSea-Api-Key',
         'tools' => array_column(nfh_tool_definitions(), 'name'),
         'resources' => array_column(nfh_resource_definitions(), 'uri'),

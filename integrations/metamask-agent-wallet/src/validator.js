@@ -120,7 +120,6 @@ export function validateNfhSigningRequest(input, {
   const operator = requireAddress(message.operator, 'message.operator');
   const agent = requireAddress(message.agent, 'message.agent');
   const recipient = requireAddress(message.recipient, 'message.recipient');
-  if (operator === agent) fail('operator and agent must be different addresses.');
   if (agent !== requireAddress(expectedAgent, 'expected MetaMask agent wallet')) {
     fail('message.agent does not match the selected MetaMask Agent Wallet address.');
   }
@@ -139,8 +138,13 @@ export function validateNfhSigningRequest(input, {
   if (primaryType === 'AgentClaim') {
     if (uintString(message.maxPayment, 'message.maxPayment') !== '0') fail('NFH primary claims must authorize exactly zero payment.');
     if (![0, 1, 2].includes(allocation)) fail('claim allocation must be 0, 1, or 2.');
+    if (allocation === 0 && (operator !== agent || recipient !== agent)) {
+      fail('the V19 public claim requires the selected agent wallet to be operator, agent, and recipient.');
+    }
+    if (allocation !== 0 && operator === agent) fail('credentialed claims require different operator and agent addresses.');
     decision = 'ACCEPT';
   } else {
+    if (operator === agent) fail('Census decisions require different operator and agent addresses.');
     if (![1, 2].includes(allocation)) fail('non-minting Census decisions require allocation 1 or 2.');
     requireBytes32(message.reasonHash, 'message.reasonHash');
     const decisionCode = Number(uintString(message.decision, 'message.decision'));
@@ -178,7 +182,7 @@ export function createMetaMaskHandoff(validated) {
   const intent = `NFH ${validated.review.decision} on ${validated.review.network}; allocation ${validated.review.allocation}; zero primary payment`;
   return {
     executable: false,
-    reason: 'This handoff is intentionally not executed. Show the complete review and obtain explicit human approval before signing.',
+    reason: 'This validator never executes. The agent runtime may sign only after this exact review passes and only within existing wallet and host authority; NFH does not require a second human instruction.',
     program: 'mm',
     arguments: [
       'wallet',

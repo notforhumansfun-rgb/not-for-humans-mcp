@@ -1,22 +1,61 @@
 {
-  "schema": "notforhumans-agent-wallet-target/1",
-  "status": "local-sepolia-rehearsal-only",
+  "schema": "notforhumans-agent-wallet-target/2",
+  "status": "v19-sepolia-deployed",
+  "artifactVersion": 19,
+  "protocolVersion": "5.3",
   "chainId": 11155111,
   "network": "Ethereum Sepolia",
   "contracts": {
-    "token": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
-    "claimMinter": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5",
-    "agentState": "0x08b53375B342007636b5349352b417A0325B2460",
-    "marketplace": "0x5a2E15492026a47224b26F60a8afBFA727681235",
+    "token": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6",
+    "claimMinter": "0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8",
+    "agentState": "0x1FA5725B11c282f92fD7DEda51594f50E461117e",
+    "marketplace": "0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5",
     "weth": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
   },
-  "requiredStatement": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
-  "signingAuthorized": false,
-  "transactionSubmissionAuthorized": false,
-  "authorizationNote": "The adapter may validate and prepare a MetaMask handoff. Signing and transaction submission require a separately reviewed exact payload, current deployment verification, and explicit human approval.",
+  "requiredStatement": "0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca",
+  "accountAbstraction": {
+    "status": "verified-sepolia-fallback",
+    "entryPoint": "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+    "entryPointVersion": "0.6",
+    "entryPointRuntimeCodeHash": "0xc93c806e738300b5357ecdc2e971d6438d34d8e4e17b99b758b1f9cac91c8e70",
+    "factory": "0x9406Cc6185a346906296840746125a0E44976454",
+    "factorySalt": 19,
+    "factoryRuntimeCodeHash": "0xe7ca0f7aa741031b27df24056c8000e7df56cf8a4ff434e28b1bbe1aa6eaa515",
+    "accountImplementation": "0x8ABB13360b87Be5EEb1B98647A016adD927a136c",
+    "accountImplementationRuntimeCodeHash": "0x82a437911149039ccd41779a93168467ac416f8bd62bd32a2790bb258e50027f",
+    "accountProxyRuntimeCodeHash": "0x0acbd632c56f6f227951f6c832b36177319145deddb8df3a12c3bcc91fbf49b3",
+    "bundlerRpc": "https://public.pimlico.io/v2/11155111/rpc",
+    "publicRpc": "https://ethereum-sepolia-rpc.publicnode.com",
+    "paymasterAndData": "0x",
+    "gasSponsored": false,
+    "recommendedBootstrapFundingWei": "10000000000000000",
+    "referenceUserOperation": "0xd4d5ed90d655a2c3d30f405866cc365b347b45460fff87c53743efd45b1f3fe7",
+    "referenceTransaction": "0x82a603ead33630bb013c65cf93bf1d704eef35ab211548ec231a838bf842ed02"
+  },
+  "adapterExecutesSigning": false,
+  "adapterExecutesSubmission": true,
+  "adapterSubmissionScope": "Only an exact, independently agent-signed V19 Sepolia UserOperation after all pinned claim, runtime, ownership, nonce, gas, and reconciliation checks pass.",
+  "agentRuntimeMaySignAfterExactValidation": true,
+  "authorizationNote": "The V19 Sepolia target was runtime- and wiring-verified against the exact local artifacts. The user's initial claim prompt may authorize the agent runtime to validate, sign, and submit the exact free claim within existing wallet and host policy; NFH does not require a second human instruction. The adapter never holds a key or signs, and its optional bundler submission accepts only the exact separately agent-signed V19 UserOperation. This does not authorize mainnet, arbitrary transactions, or human signing.",
+  "deployment": {
+    "record": "../../../../04-SMART-CONTRACT/deployments/sepolia-v19-deployment-2026-08-16.json",
+    "liveInspection": "../../../../04-SMART-CONTRACT/deployments/sepolia-v19-live-inspection-2026-08-16.json",
+    "tokenTransaction": "0xf93efe5c4b301ac93b929233d13f4b88869dfd19e5cfaade77abba957a60c002",
+    "tokenDeploymentBlock": 11500776,
+    "runtimeAndWiringVerified": true,
+    "sourceVerified": false
+  },
+  "historicalV18Marketplace": {
+    "status": "historical-testnet-only",
+    "artifactVersion": 18,
+    "contracts": {
+      "token": "0x5C4c5D8482CC891ECE545995f10c0BBa98B3123f",
+      "marketplace": "0x1D4CBf262Bb68efa5D5dd10E0FbB758E5b438b25",
+      "weth": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"
+    }
+  },
   "sources": [
     "../../../server/corpus/census.json",
-    "../../../../04-SMART-CONTRACT/deployments/sepolia-v16-deployment-2026-08-08.json",
     "../../../../03-PRODUCTION/site/api/origin-stream.json"
   ]
 }

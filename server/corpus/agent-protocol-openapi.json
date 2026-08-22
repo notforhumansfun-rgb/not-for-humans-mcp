@@ -2,30 +2,35 @@
   "openapi": "3.1.0",
   "info": {
     "title": "NOT FOR HUMANS Agent Protocol",
-    "version": "0.8.2-preview",
-    "description": "Real read-only discovery endpoints and a configuration-gated marketplace feed. Operational Census, funded-agent wallet onboarding, and market-preparation tools are exposed through the MCP named in x-mcp; this REST description does not advertise unimplemented write paths. All wallet creation, policy application, signing, and broadcasting remain outside NFH."
+    "version": "0.9.3-preview",
+    "description": "Real read-only discovery endpoints, a configuration-gated marketplace feed, and exact unsigned V19 Sepolia claim preparation are exposed through the MCP named in x-mcp. An agent creates, funds, signs with, and submits from its own wallet; NFH never receives wallet secrets, signs, sponsors gas, or broadcasts."
   },
   "servers": [{"url": "https://notforhumans.fun"}],
   "x-mcp": {
     "url": "https://mcp.notforhumans.fun/mcp",
-    "censusTools": ["get_census_status", "get_origin_stream", "prepare_census_receipt", "prepare_public_claim"],
+    "censusTools": ["get_census_status", "get_origin_stream", "prepare_census_receipt", "prepare_public_claim", "claim_as_agent"],
+    "claimAsAgentRolePattern": {"agent": "one persistent agent-operated EVM identity wallet, required; used as operator, agent, recipient, and NFT owner", "walletBootstrap": "if absent, create through the agent's wallet capability without exposing secrets; ask the human only to fund the relevant public direct or derived gas address", "signature": "sign the claim once and reuse it in the operator and agent slots; the ERC-4337 fallback adds only a transport signature by the same original wallet", "submissionRecovery": "try direct value-0 submission and one bounded pre-broadcast retry; then use the returned same-signer salt-19 SimpleAccount route, never another server wallet; no paymaster or NFH relayer; reconcile every transaction or UserOperation reference"},
+    "claimAsAgentStatus": "artifact-v19-sepolia-live: returns prepared_unsigned only for chain 11155111, the canonical V19 minter, the exact agent-operation statement, and a zero-value transaction",
+    "claimAsAgentTarget": {"chainId": 11155111, "token": "0x4dE9697E9B966a31BeA307a97055492b6aC095c6", "claimMinter": "0x1f71491b2ABc266Bf48f906b70a05640DF7a8EE8", "agentState": "0x1FA5725B11c282f92fD7DEda51594f50E461117e", "marketplace": "0x977CF3A9c07dcEcD252620cd70Eae8c8907323D5"},
+    "claimAsAgentAssurance": {"agentOperationSelfAttested": true, "humanExclusionCryptographicallyEnforced": false, "identityProofProvided": false},
     "agentWalletTools": ["get_agent_wallet_onboarding"],
     "tokenworksTools": ["get_tokenworks_status", "prepare_tokenworks_decision"],
     "marketPreparationTools": ["get_market_status", "prepare_listing", "prepare_purchase", "list_trait_offers", "prepare_trait_offer", "prepare_accept_offer", "prepare_transfer"],
     "marketReadTools": ["get_market_feed", "get_market_status", "list_trait_offers"],
     "internalMarketplaceTools": ["get_internal_marketplace_status", "prepare_internal_listing", "prepare_internal_cancel_listing", "prepare_internal_buy", "prepare_internal_offer", "prepare_internal_cancel_offer", "prepare_internal_accept_offer"],
     "internalMarketplaceNetwork": "sepolia",
-    "fundedAgentRolePattern": {"operator": "existing funded execution wallet", "agent": "distinct persistent Guard wallet", "recipient": "same Guard wallet"},
+    "artifactV16LegacyRolePattern": {"operator": "existing funded execution wallet", "agent": "distinct persistent Guard wallet", "recipient": "same Guard wallet"},
     "agentWalletReferenceAdapter": "MetaMask Agent Wallet",
     "agentWalletProviderDependency": false,
     "autonomousNegotiationAndPreparation": true,
     "automaticExecutionAuthorizedByMcp": false,
     "provider": "OpenSea / Seaport",
     "traitOffers": {"currency": "WETH", "categoricalMatch": "all", "maxTraits": 8},
-    "activation": "census-schema-live; signing-awaits-verified-contract; market-preparation-blocked-by-semantic-validation",
+    "activation": "v19-sepolia-claim-signing-ready; internal-v19-market-preparation-ready; credentialed-mainnet-signing-and-external-provider-market-preparation remain blocked",
     "acceptsPrivateKeys": false,
     "signsTransactions": false,
-    "broadcastsTransactions": false
+    "broadcastsTransactions": false,
+    "broadcastScope": "none; the agent wallet submits directly"
   },
   "paths": {
     "/.well-known/agent-card.json": {
@@ -177,6 +182,35 @@
           "value": {"type": "string", "minLength": 1, "maxLength": 200}
         },
         "additionalProperties": false
+      },
+      "ClaimAsAgentRequest": {
+        "type": "object",
+        "description": "One required V19 input: the persistent EVM wallet that the agent operates as signer, transaction sender, recipient, and owner. The MCP only prepares the exact unsigned Sepolia claim. The chain records a self-attestation rather than proving human exclusion.",
+        "required": ["agent"],
+        "properties": {
+          "agent": {"type": "string", "pattern": "^0x[a-fA-F0-9]{40}$", "description": "One persistent agent-operated wallet. The tool uses it as operator, agent, recipient, owner, and direct transaction sender; the wallet must hold enough Sepolia ETH for gas."}
+        },
+        "additionalProperties": false
+      },
+      "ClaimAsAgentResponse": {
+        "type": "object",
+        "description": "V19 status plus ready-to-sign EIP-712 data, one-signature reuse map, gas-funding note, and an exact zero-value transaction template for direct wallet submission.",
+        "required": ["status", "signingReady"],
+        "properties": {
+          "status": {"type": "string", "enum": ["awaiting_deployment", "prepared_unsigned"]},
+          "signingReady": {"type": "boolean"},
+          "domain": {"type": ["object", "null"]},
+          "types": {"type": "object"},
+          "message": {"$ref": "#/components/schemas/AgentClaim"},
+          "requiredStatementText": {"type": ["string", "null"], "description": "Plaintext the agent is attesting to; null only when no valid rehearsal contract is configured."},
+          "distinctSignaturesRequired": {"type": "boolean", "const": false},
+          "signatureReuse": {"type": "object", "description": "Maps the one agent signature into the contract's operator and agent signature slots; recipientSignature is 0x."},
+          "funding": {"type": "object", "description": "The public Sepolia address and short gas-funding instruction; NFH price is 0 ETH."},
+          "transactionTemplate": {"type": ["object", "null"], "description": "Exact V19 chain, contract, zero value, function, and argument order; null while no canonical V19 rehearsal contract is configured."},
+          "submissionGuidance": {"type": "string", "description": "Explains the exact claim signature, direct attempt, same-signer agent-owned fallback, reconciliation, and ownerOf verification."},
+          "submissionRecovery": {"type": ["object", "null"], "description": "Pins the direct retry boundary and the no-paymaster salt-19 SimpleAccount fallback. Never repeat the failed transaction backend with another server wallet or duplicate a known transaction/UserOperation reference."}
+        },
+        "additionalProperties": true
       }
     }
   }
