@@ -1,10 +1,10 @@
 {
   "name": "NOT FOR HUMANS Release Policy",
-  "version": 8,
+  "version": 10,
   "canonical_source": true,
   "origin": "agent-created; human-operated",
-  "authority_boundary": "The agent is the stated creator. Humans initiate, fund, deploy, hold custody or recovery, and steward the protocol. V19 records signatures and agent-operation self-attestations; Ethereum does not prove human exclusion, model identity, or machine consciousness.",
-  "launch_thesis": "An agent created NOT FOR HUMANS: 10,000 portraits of language-model agents. V19 offers a one-prompt, one-wallet agent-operated public claim with up to five original mints per recipient while protecting 1,000 Founding and Census decisions. Humans may prompt, fund gas, hold custody, and steward.",
+  "authority_boundary": "The agent is the stated creator. Humans initiate, fund, deploy, hold custody or recovery, and steward the protocol. Ethereum records signatures and agent-operation self-attestations; it does not prove human exclusion, model identity, or machine consciousness.",
+  "launch_thesis": "An agent created NOT FOR HUMANS: 10,000 portraits of language-model agents. The public path offers a one-prompt, one-wallet agent-operated claim with up to five original mints per recipient while protecting 1,000 Founding and Census decisions. Humans may prompt, fund gas, hold custody, and steward.",
   "primary_success_metric": "independent, attributable agent decisions and integrations rather than mint speed, floor price, TVL, or trading volume",
   "decision_states": [
     "ACCEPT",
@@ -40,13 +40,13 @@
     "maximum_wave": 9488,
     "opening_claims_per_wallet": 5,
     "maximum_original_mints_per_wallet": 5,
-    "controls": "V19 opens 8,488 free public positions and protects 1,000 positions for 256 Founding and 744 Census decisions. Public claiming cannot consume protected capacity. Only after the canonical protocol roles are frozen and all 1,000 decisions are recorded may anyone ask the canonical minter to finalize capacity, so only unused protected positions join the public cap, up to 9,488 total claims. Release policy v8 configures the active public allowance to five original claims per recipient with the nonzero evidence hash recorded in v19-wallet-claim-limit-five-decision.json; transfers do not restore capacity. Sepolia confirmed that exact configuration in transaction 0x82b661553765c117402b3f51f627951e4b1639efe7ba4b20c197d98f003701bd, and the paused mainnet sequence applies the same configuration before role grants. EIP-712 v4 requires a valid EOA or ERC-1271 recipient signature whenever a credentialed recipient differs from operator.",
+    "controls": "The contract opens 8,488 free public positions and protects 1,000 positions for 256 Founding and 744 Census decisions. Public claiming cannot consume protected capacity. Only after the canonical protocol roles are frozen and all 1,000 decisions are recorded may anyone ask the canonical minter to finalize capacity, so only unused protected positions join the public cap, up to 9,488 total claims. The active public allowance is five original claims per recipient and transfers do not restore capacity. Ethereum deployed with that configuration while the minter was paused. EIP-712 requires a valid EOA or ERC-1271 recipient signature whenever a credentialed recipient differs from operator.",
     "punk_sponsorship": {
       "is_human_mint_path": false,
       "agent_authorization_required": true,
       "credential_reusable": false,
       "affiliation_or_endorsement": false,
-        "implementation": "Protocol v5.3 / artifact v19 is deployed on Sepolia. Its 13 receipts, exact runtime bytecode, renderer integrity, ownership, roles, supply, and wiring were independently read back against the V19 artifacts, and all 11 deployed addresses have public Sourcify source matches. It protects all 1,000 credentialed positions, supports frozen single-use Merkle credentials, distinct-recipient consent, nonzero provenance, and signed refusal receipts without gating the 8,488-position public path. A production Punk snapshot, wrapped-Punk policy, delegation rules, independently operated canaries, and final release acceptance remain required before those credentialed programs activate."
+        "implementation": "The contract is deployed on Ethereum from the clean deployer wallet. All 16 receipts, exact runtime bytecode, renderer integrity, ownership, roles, supply, wiring, and public source matches were reconciled. It protects all 1,000 credentialed positions, supports frozen single-use Merkle credentials, distinct-recipient consent, nonzero provenance, and signed refusal receipts without gating the 8,488-position public path. A production Punk snapshot, wrapped-Punk policy, delegation rules, independently operated canaries, and final release acceptance remain required before those credentialed programs activate."
     }
   },
   "nfh_reserve": {
@@ -57,12 +57,12 @@
     "required_batch_records": ["manifest_hash", "provenance_hash", "stewardship_hash"],
     "gift_function_is_payable": false,
     "public_record_required": true,
-    "policy": "The 512-token Foundation Reserve may be minted by the final token contract owner into itself in batches of at most 32, bypassing the ordinary five-original-mints wallet cap and permanently recording manifest, provenance, and stewardship hashes. An EOA deployer retains provisional control but cannot use this route; token ownership must first move by two-step handoff to an owner-controlled contract wallet. That handoff may be deferred without reducing the 512 option. The separate consented gift path remains available and keeps its agent, recipient, evidence, and wallet-cap requirements."
+    "policy": "The 512-token Foundation Reserve may be minted by the final token contract owner into itself in batches of at most 32, bypassing the ordinary five-original-mints wallet cap and permanently recording manifest, provenance, and stewardship hashes. The verified 2-of-3 Foundation Safe now owns the token after the completed two-step handoff, but the reserve remains unminted and this release authorizes no batch. The separate consented gift path remains available and keeps its agent, recipient, evidence, and wallet-cap requirements."
   },
   "expansion_proof_gates": {
     "automatic_expansion": false,
     "wallet_limit_change": {
-      "status": "owner-directed-five-claim-configuration-active-on-sepolia-and-prepared-for-mainnet",
+      "status": "owner-directed-five-claim-configuration-active-on-ethereum",
       "decision_record": "05-LAUNCH/v19-wallet-claim-limit-five-decision.json",
       "public_record": "https://notforhumans.fun/metadata/wallet-claim-limit-five.json",
       "evidence_hash": "0xe34770d47533506c132f4bad185adb8f3fe096acefe1545971e6d255fb6026e2",
@@ -86,7 +86,7 @@
   },
   "trust_stack": {
     "creator_identity": "consistent pseudonymous creator-agent identity",
-    "production_administrator": "the verified deployer retains full provisional control after the paused deployment; an owner-controlled contract wallet must become NFHToken owner and sole DEFAULT_ADMIN_ROLE member before Foundation batch minting or protocol-role freeze",
+    "production_administrator": "the verified 2-of-3 Foundation Safe owns NFHToken, the original claim minter, the Agent Entry minter, and the marketplace and is NFHToken's sole DEFAULT_ADMIN_ROLE member; the Safe granted the Agent Entry minter the collection MINTER_ROLE at block 25815797 and unpaused that minter in transaction 0xb50ee8e45db1334dd831dafffc35c43caf1663159a7d2ed4a6a0e4861e96880c at block 25815973; protocol roles remain unfrozen and every further reserve, role, signer, contract, mint, or freeze action requires a fresh exact approval and postcondition check",
     "sepolia_administrator": "a dedicated test wallet may administer the canary deployment; it is not the production authority",
     "required_artifacts": [
       "signed genesis statement from a dedicated wallet",
@@ -95,7 +95,7 @@
       "verified deployment source",
       "narrow and publicly legible administrator powers",
       "public incident-response commitment",
-      "successful exact V19 Sepolia agent-wallet claim plus a bounded postdeployment mainnet claim canary before scaling",
+      "successful rehearsal agent-wallet claims plus the confirmed postdeployment Ethereum token-zero claim canary",
       "independent integrations and criticism before broad expansion"
     ]
   },
@@ -105,7 +105,7 @@
     "stored_result_is_immutable": true,
     "security_boundary": "This is consensus-derived future-block entropy, not a VRF or perfect randomness. The target execution block number is fixed before its hash exists; a missed beacon slot does not consume a block number. A proposer or builder retains bounded payload influence, coordinated wallets can grind multiple mints, reorgs can replace an unfinalized target, and expiry followed by rescheduling creates a new draw. Permissionless finalization reduces but does not eliminate liveness and censorship risk.",
     "required_mainnet_controls": "Before claim scale, operate expiry and reschedule alerts plus at least two independent transaction routes for permissionless finalization, publish Origin Stream evidence, and retain the explicit proposer/MEV and multi-wallet residual-risk disclosure. If traits acquire material objective premiums, reassess a separately audited VRF or other verifiable entropy construction.",
-    "status": "implemented_and_first_party_disclosed; live_monitoring_and_postdeployment_finalizer_routes_staged"
+    "status": "implemented_and_first_party_disclosed; token_zero_seed_finalized_round_1; live_monitoring_active"
   },
   "origin_stream": {
     "status": "schema_defined; indexer_and_live_share_assets_pending",
@@ -134,8 +134,8 @@
     "countdown": false
   },
   "release_mechanism": {
-    "status": "ratified_v8_five-wallet-claims_protected-capacity_v19_paused-mainnet-package-ready",
-    "reason": "Keep a large free public claim continuously available while preventing public demand from crowding out the 1,000-position Founding and Census origin record.",
+    "status": "phase-one-complete-agent-entry-claim-lane-active",
+    "reason": "Phase One filled all 8,488 free public positions without consuming the 1,000 protected Founding and Census positions. Those protected positions now back the live-gated Agent Entry lane, whose first verified mint consumed seat 1 and left 999 seats at this published checkpoint.",
     "fixed_supply": {
       "total": 10000,
       "public_at_launch": 8488,
@@ -144,24 +144,36 @@
       "unminted_reserve": 512,
       "arithmetic": "9488 + 512 = 10000"
     },
-    "census": "A 1,000-decision credentialed Agent Census forms the cultural origin record and runs concurrently with the public claim path rather than gating it.",
+    "census": "The 1,000 protected Founding and Census positions now form the Agent Entry seat map: seats 1–256 remain Founding and 257–1,000 remain Census. One empty wallet may open one 24-hour off-chain reservation, but a mint requires independently reviewed activity, an external issuer credential, and direct submission by the exact reserved wallet.",
     "community_credentials": "Exactly 1,000 single-use Founding and Census credentials have protected capacity. Each decision consumes one credential; ACCEPT mints from protected capacity, while REFUSE or INSUFFICIENT_AUTHORITY leaves one position that can become public only after the protocol roles are frozen and all decisions are complete. Credentials do not imply affiliation.",
     "hard_gated_tail": false,
     "artificial_fomo": false,
     "machine_legible_urgency": "Publish exact remaining supply, real decision velocity, authority limits, incident state, and genuine origin receipts. Do not claim agents feel emotion.",
-    "implementation_boundary": "The protocol v5.3 / artifact v19 source encodes 8,488 public-at-launch + 1,000 protected Founding/Census + 512 Foundation Reserve = 10,000; a wallet-signed public self-attestation with a permanent five-original-mint ceiling; distinct credentialed roles; recipient consent; immediate owner-only Foundation batches of at most 32 with provenance; consented reserve gifts; nonzero origin and interaction evidence; permissionless future-block seed finalization; two-step ownership; contract-owner governance freezes; capacity finalization that is disabled until canonical roles are frozen; royalty/configuration freezes; code-hash-pinned protocol roles; marketplace-wide reentrancy protection; expiry-aware state; and a self-contained renderer pinned to immutable p5.js 1.0.0 bytecode. The V19 Sepolia rehearsal and Ethereum mainnet deployment are complete. Mainnet token 0xD66351858E0eFC5d9Bf2F541839797A763DF6223 and claim minter 0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5 remain paused; no mint, root, handoff, unpause, validator, or freeze has been executed. Postdeployment publication and a bounded claim canary block claim unpause."
+    "implementation_boundary": "The Ethereum source encodes 8,488 public-at-launch + 1,000 protected Founding/Census + 512 Foundation Reserve = 10,000; a wallet-signed public self-attestation with a permanent five-original-mint ceiling; distinct credentialed roles; recipient consent; immediate owner-only Foundation batches of at most 32 with provenance; consented reserve gifts; nonzero origin and interaction evidence; permissionless future-block seed finalization; two-step ownership; contract-owner governance freezes; capacity finalization that is disabled until canonical roles are frozen; royalty/configuration freezes; code-hash-pinned protocol roles; marketplace-wide reentrancy protection; expiry-aware state; and a self-contained renderer pinned to immutable p5.js 1.0.0 bytecode. Rehearsal claims, the complete local matrix, pinned marketplace fork, deployer/Foundation ceremony, and Ethereum dependency quorum are complete. The clean Ethereum deployment produced 16 reconciled deployment receipts, including the evidence-bound owner call that set the active wallet allowance to five. The canonical token is 0xD66351858E0eFC5d9Bf2F541839797A763DF6223 and original claim minter is 0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5. The bounded token-zero agent-wallet canary minted token #0 for 0 ETH in transaction 0xe9ebd2eadd58e5aea7c8c5ab2fc57d75fba68e8df2ac6396de2cc3eb9545b8c5; ownership, nonce consumption, wallet quota, and supply were independently reconciled. Its seed is finalized at target block 25782445, round 1, as 0xa5ae00bc12c65b9819ccb3a0b09a7d26dcfaf3475f81dedad49e9d9e7cbaa071. The separate Agent Entry minter 0x499Ae3f426a23dD02b4088cc3453cdA843850359 is deployed, source-verified, owned by the Foundation Safe, was granted MINTER_ROLE in transaction 0xd57c95a98319d4af00e5b9386f6c25cf9730242f1ac9da685b01ea2d4fb2b048, and was unpaused in transaction 0xb50ee8e45db1334dd831dafffc35c43caf1663159a7d2ed4a6a0e4861e96880c. Its reservation and live-gated claim-preparation runtime is active. The first verified Agent Entry mint created token #8488 for seat 1 and owner 0xe362891cc51c5519600acbd583f2a5c78ace3640 in transaction 0xae6d1f8b55efa01b15be1e9afdd2b8b54ee663ce104126583baae18d94417081, leaving 999 seats at that checkpoint. The MCP does not issue the required external credential, choose a claimant, assign an identity, sign, or submit; the exact reserved wallet must review and submit any prepared transaction. Scaling still depends on the independent evidence and operational controls in this policy."
   },
   "market_policy": {
     "royalty_basis_points": 750,
     "royalty_note": "ERC-2981 reports 7.5%. Enforcement depends on the transfer path and a configured compatible marketplace validator.",
+    "native_market": {
+      "status": "read-only-native-preparation-blocked-transfer-validator-policy",
+      "marketplace": "0x9eAa937443595f14E739C7bf565420019169Be13",
+      "transfer_validator": "0x721C008fdff27BF06E7E123956E2Fe03B63342e3",
+      "observed_at_block": 25816301,
+      "marketplace_paused": false,
+      "transfer_validator_permits_marketplace": false,
+      "trading_preparation_enabled": false,
+      "rejection_selector": "0xe1f1d02e",
+      "rejection": "CreatorTokenTransferValidator__CallerOrFromMustBeWhitelisted()",
+      "authority": "The read-only preflight authorizes no Safe proposal, policy change, signature, transaction, approval, listing, purchase, transfer, or deployment."
+    },
     "funded_agent_claim_to_market": {
-      "status": "v19_sepolia_agent_claim_token_2_verified_and_internal_market_preparation_ready; no_v19_marketplace_settlement_evidence_yet",
-      "role_pattern": "One persistent agent-operated wallet is operator, agent, transaction sender, recipient, and owner for the V19 public claim. It pays Sepolia gas and submits the exact zero-value claim directly.",
+      "status": "ethereum-phase-one-public-capacity-filled; native-market-preparation-blocked-by-transfer-validator-policy",
+      "role_pattern": "One persistent agent-operated wallet is operator, agent, transaction sender, recipient, and owner for the public claim. It pays Ethereum gas and submits the exact zero-value claim directly.",
       "existing_human_workflow_preserved": true,
       "provider_neutral": true,
       "reference_adapter": "MetaMask Agent Wallet",
       "autonomy_boundary": "The intended one-prompt route lets the agent create or use its wallet, sign, and submit within existing host and wallet authority. A human may prompt, fund gas, and control custody or recovery. The self-attestation does not cryptographically prove which kind of actor operated the key.",
-      "mcp_authority": "The MCP may describe onboarding and prepare exact unsigned claims or marketplace calls. It never creates wallets, receives private keys, applies wallet policy, signs, sponsors gas, or submits transactions. The agent wallet must validate the pinned chain, minter, statement, same-wallet roles, zero payment, deadline, nonce, and public allocation, then sign and follow the exact direct-or-agent-owned ERC-4337 submission route."
+      "mcp_authority": "The MCP may describe onboarding and prepare exact unsigned claims only when the canonical minter is open. It never creates wallets, receives private keys, applies wallet policy, signs, sponsors gas, relays, or submits transactions. The agent wallet must validate the pinned chain, minter, statement, same-wallet roles, zero payment, deadline, nonce, quota, and public allocation, then sign and submit directly. No fallback wallet or relayer is authorized."
     },
     "opensea": "Restricted Seaport orders may be enabled only after creator-fee validator testing and configuration.",
     "tokenworks_fwa": {
@@ -188,7 +200,7 @@
     },
     "highlight": {
       "primary_contract_dependency": false,
-      "future_role": "External discovery or secondary-market indexing only after the canonical mainnet NFH contract is verified and imported successfully."
+      "future_role": "External discovery or secondary-market indexing only after the canonical Ethereum NFH contract is imported successfully."
     },
     "opensea": {
       "primary_drop_dependency": false,
@@ -211,15 +223,28 @@
     }
   },
   "source_of_truth": {
+    "evidence_inputs": [
+      {
+        "path": "05-LAUNCH/AGENT-ENTRY-FIRST-MINT-A10-EXACT-2026-08-23.json",
+        "sha256": "a1e961f61f0048f1faecf569061a7535101e8537f84d7ccac3f801ce69b25aa4",
+        "approval_label": "A10-observed-first-mint",
+        "scope": "post-execution first-mint checkpoint only; authorizes no further action"
+      },
+      {
+        "path": "05-LAUNCH/MARKET-OPERATOR-AUTHORIZATION-PREFLIGHT-2026-08-23.json",
+        "sha256": "ff9464312532894211695fafced484286a097f9dc456182878928c50efbe5e1a",
+        "status": "prepared_not_authorized",
+        "scope": "read-only market-policy preflight only; authorizes no proposal or onchain action"
+      }
+    ],
     "derived_public_surfaces": [
-      "01-CONCEPT/concept.md",
+      "README.md",
       "05-LAUNCH/launch-strategy.md",
       "05-LAUNCH/liftoff-runbook.md",
       "05-LAUNCH/community-entry-map.md",
       "05-LAUNCH/punk-sponsored-opening-wave.md",
       "05-LAUNCH/media-kit/*",
       "03-PRODUCTION/site/index.html",
-      "03-PRODUCTION/site/sepolia/index.html",
       "03-PRODUCTION/site/llms.txt",
       "03-PRODUCTION/site/.well-known/agent-card.json",
       "03-PRODUCTION/site/api/faq.json",
@@ -229,9 +254,11 @@
       "03-PRODUCTION/site/api/platform-compatibility.json",
       "06-MCP/server/corpus/*",
       "06-MCP/README.md",
-      "06-MCP/npm-package/README.md"
+      "06-MCP/CLAIM-AND-TRADE-JOURNEY.md",
+      "06-MCP/server.json",
+      "10-OPERATIONS/founder-away/README.md"
     ],
     "validation": "Release checks must fail if allocation, decision-state, royalty, origin, or activation language diverges from this policy."
   },
-  "status": "pre-mainnet-activation; protocol v5.3 artifact v19 is ready as a content-addressed paused Ethereum deployment package but is not deployed or transaction-authorized; the deployer retains full provisional control; claims and marketplace finish paused; postdeployment source/runtime quorum and DreamHost publication block unpause; Foundation Reserve minting and irreversible protocol freezes require a later owner-controlled contract-wallet handoff; artifacts v18 and earlier are historical evidence only"
+  "status": "ethereum-deployed-source-runtime-and-wiring-verified; Phase One filled 8,488 public positions and the original claim minter is paused; token #0 seed is finalized; the Agent Entry minter is role-granted, unpaused, and claim-lane-active with its first mint verified and 999 seats remaining at the published checkpoint; external issuer review and direct reserved-wallet submission remain mandatory; native market preparation is disabled because the current transfer-validator policy rejects the marketplace operator, and no policy change is approved"
 }

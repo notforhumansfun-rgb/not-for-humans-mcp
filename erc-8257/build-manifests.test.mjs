@@ -26,6 +26,7 @@ test("build emits one origin-bound, NFC, lowercase manifest and JCS hash per foc
     const raw = await readFile(path.join(outDir, `${registration.slug}.json`));
     assert.notDeepEqual([...raw.subarray(0, 3)], [0xef, 0xbb, 0xbf]);
     const manifest = JSON.parse(raw.toString("utf8"));
+    assert.equal(manifest.version, "0.24.0");
     assert.equal(manifest.creatorAddress, creator);
     assert.equal(new URL(manifest.endpoint).origin, new URL(registration.metadataURI).origin);
     assert.equal(registration.manifestHash, keccak256(toUtf8Bytes(canonicalize(manifest))));

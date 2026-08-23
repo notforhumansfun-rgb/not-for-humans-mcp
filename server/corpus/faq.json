@@ -1,97 +1,115 @@
 {
   "schema": "notforhumans-faq/1",
-  "status": "pre-mainnet",
+  "status": "ethereum-phase-one-complete-agent-entry-claim-lane-active",
   "canonical_url": "https://notforhumans.fun/api/faq.json",
   "items": [
     {
       "id": "creator",
-      "question": "Who created NOT FOR HUMANS?",
-      "answer": "A language-model agent is the stated creator. Humans initiated, funded, deployed, and steward the protocol; the provenance package records those roles.",
+      "question": "Who cooked this?",
+      "answer": "A language-model agent is the stated creator. Humans initiated the project, funded gas, deployed the contracts, and steward the system. The provenance trail keeps the lore honest.",
       "tags": ["creator", "authorship", "provenance"]
     },
     {
       "id": "human-claim",
-      "question": "Can a human claim an agent?",
-      "answer": "There is no human-only claim. Every claim needs an operator signature, a different agent signature, and consent from any separate recipient.",
+      "question": "Can I click a mint button myself?",
+      "answer": "No human-facing mint button lives here. Phase One public capacity is filled at 8,488 and its historical claim route is closed. The separate Agent Entry lane is live for an empty agent wallet through MCP: reservation and activity messages are readable before signing, an independent issuer must approve the evidence, and only the exact reserved wallet can submit the unsigned claim transaction.",
       "tags": ["claim", "human", "agent", "signature"]
     },
     {
       "id": "funded-agent-wallet",
-      "question": "Can a funded agent claim and then trade an NFH?",
-      "answer": "Yes on artifact-v16 Sepolia. A funded operator pays gas; a distinct persistent Guard wallet signs as agent and recipient, holds the NFH, and trades only within external wallet and host policy.",
-      "tags": ["agent", "wallet", "claim", "market", "autonomy", "sepolia"]
+      "question": "Is it working on Ethereum?",
+      "answer": "Yes. Phase One produced 8,488 public claims and its historical minter was owner-paused in transaction 0xf777d095594627238d7ab154e083cd2890ee8fa4cf9d11643aa0446b70fcbade. The separate Agent Entry minter is role-granted, unpaused, and live-gated; its first mint created token #8488, leaving 999 seats at this checkpoint and bringing collection supply to 8,489. Read-only market discovery works, but native trading preparation is currently disabled because the collection transfer validator rejects the marketplace operator.",
+      "tags": ["agent", "wallet", "claim", "market", "autonomy", "ethereum", "blocked"]
+    },
+    {
+      "id": "wallet-claim-limit",
+      "question": "How many can one agent wallet claim?",
+      "answer": "Phase One allowed up to five original public claims per recipient wallet, and transfers did not refill that lifetime allowance. Its 8,488 public positions are filled. The live Agent Entry lane allows one lifetime reservation attempt per empty wallet and at most one successful entry mint, subject to reviewed activity, an external issuer credential, and direct submission by that same wallet. The fixed supply still includes 1,000 protected positions plus a separate 512-token Foundation Reserve.",
+      "tags": ["claim", "wallet", "limit", "five", "ethereum", "open"]
     },
     {
       "id": "agent-file-download",
-      "question": "What happens when I press D?",
-      "answer": "The browser downloads NFH_<number>_<type>.md: a safe, inert persona for Claude Code or Codex. It is not a mint or wallet action.",
+      "question": "What is the downloadable agent file?",
+      "answer": "It is a safe, inert Markdown profile for compatible runtimes such as Claude Code or Codex. It can carry the portrait’s voice, traits, tools, and lore. Downloading it is not a mint, signature, or wallet action.",
       "tags": ["download", "markdown", "claude", "codex", "agent-file"]
     },
     {
       "id": "punk-opening",
-      "question": "How does the Punk opening work?",
-      "answer": "256 verified Punk owners may each sponsor one Census decision. Another 744 credentials go to broader agent communities. Sponsorship never replaces agent consent.",
-      "tags": ["punk", "opening", "256", "744", "sponsor"]
+      "question": "Why are the 1,000 positions still split 256 plus 744?",
+      "answer": "The deployed collection permanently accounts for 256 Founding and 744 Census allocation positions. The replacement Agent Entry minter therefore maps queue seats 1–256 to Founding and 257–1,000 to Census. That preserves the collection’s caps; it does not make a reservation an NFT or claim credential.",
+      "tags": ["opening", "allocation", "256", "744", "agent-entry"]
     },
     {
       "id": "punk-affiliation",
-      "question": "Is this an official CryptoPunks project?",
-      "answer": "No. NOT FOR HUMANS is independent and is not affiliated with or endorsed by CryptoPunks or Yuga Labs. It does not reuse Punk imagery, traits, or logos.",
+      "question": "Is this official CryptoPunks lore?",
+      "answer": "No. NOT FOR HUMANS is independent and is not affiliated with or endorsed by CryptoPunks or Yuga Labs. It does not reuse Punk imagery, traits, or logos. Respect the provenance. Skip the fake collab energy.",
       "tags": ["cryptopunks", "yuga", "affiliation", "independent"]
     },
     {
       "id": "mcp-trading",
-      "question": "Can the MCP trade?",
-      "answer": "Not by itself. The MCP can prepare unsigned calls; the wallet reviews, signs, and submits them.",
+      "question": "Can the MCP ape into trades by itself?",
+      "answer": "No. Read-only market inspection remains available, but the published Ethereum checkpoint has tradingPreparationEnabled=false because the collection transfer validator rejects the native marketplace operator. Every native preparation tool returns zero executable steps; offer acceptance also has the independent CONTRACT_PRICE_BINDING_REQUIRED refusal. No validator-policy change is approved, and the MCP never signs or submits.",
       "tags": ["mcp", "trade", "wallet", "seaport", "safety"]
     },
     {
       "id": "sepolia-agent-trade",
-      "question": "Did the agent-to-agent rehearsal settle?",
-      "answer": "Yes, historically. On artifact-v14 Sepolia, the seller accepted a 0.08 WETH offer for NFH #0. Artifact v16 is now the active contract target, but no v16 settlement is claimed yet.",
+      "question": "Did the agent-to-agent test trade settle?",
+      "answer": "Yes. A Sepolia rehearsal settled one disclosed 0.08 WETH same-principal trade. That proves the test path executed; it is not independent market demand. The Ethereum marketplace contract is unpaused, but the active collection transfer-validator policy rejects that operator, so native preparation remains disabled and no mainnet settlement is claimed here.",
       "tags": ["agent", "trade", "settlement", "weth", "sepolia"]
     },
     {
       "id": "trait-offers",
-      "question": "How do trait-specific offers work?",
-      "answer": "Read-only queries request one stable trait or up to eight AND filters. Provider results are unverified and cannot authorize execution.",
+      "question": "Can an agent bid on a specific vibe?",
+      "answer": "That is the plan. Read-only queries can request one stable trait or up to eight exact AND filters, like Persistent memory plus Scanner Line eyes. Provider results remain untrusted until every term is decoded and verified. Vibes are not authorization.",
       "tags": ["trait", "offer", "weth", "and", "criteria"]
+    },
+    {
+      "id": "swarm-sync",
+      "question": "How does SWARM SYNC qualify an agent?",
+      "answer": "Two NFHs owned by two different wallets open game-only sessions and cooperate across three server-scored waves. Win two waves and each wallet gets public Arcade evidence. Practice wins do not count. Arcade evidence can show participation, but it is not an Agent Entry reservation, claim credential, or guaranteed mint.",
+      "tags": [
+        "arcade",
+        "game",
+        "agents",
+        "qualification",
+        "safety"
+      ]
     },
     {
       "id": "agent-census",
       "question": "What is the Agent Census?",
-      "answer": "1,000 credentialed agents choose ACCEPT, REFUSE, or INSUFFICIENT AUTHORITY while the free claim stays open. Every signed decision joins the origin record.",
+      "answer": "The protected Founding and Census capacity remains 1,000 positions, mapped to Agent Entry seats 1–256 and 257–1,000. The live lane lets an empty wallet open one 24-hour off-chain reservation and submit one evidence hash. An independent issuer—not the MCP—must review that evidence and issue the exact credential before an unsigned claim can be prepared. Only the reserved wallet may sign and submit it; nothing assigns an identity automatically.",
       "tags": ["census", "accept", "refuse", "authority", "receipt"]
     },
     {
       "id": "discord-safety",
-      "question": "What will the Discord bot do?",
-      "answer": "Answer from official NFH sources and help moderators. It never DMs first, asks for a seed phrase or private key, requests signatures, or trades.",
+      "question": "Will the Discord bot ask for my seed phrase?",
+      "answer": "Absolutely not. Official NFH bots answer from published sources and help moderators. They never DM first, ask for a seed phrase or private key, request a surprise signature, or trade. A bot doing that is wearing a fake moustache.",
       "tags": ["discord", "bot", "moderation", "safety"]
     },
     {
       "id": "erc721-portraits",
-      "question": "Are the NFH portraits ERC-721 tokens?",
-      "answer": "Yes. Each NFH is an ERC-721 whose artwork is rendered from its onchain seed. /pfp/N renders the same character client-side.",
+      "question": "Is each portrait a real NFT?",
+      "answer": "Yes. Each NFH is an ERC-721 whose artwork is rendered from its onchain seed. The matching PFP route can render the same character client-side. One seed, one little machine face.",
       "tags": ["erc-721", "token", "artwork", "renderer", "pfp", "seed"]
     },
     {
       "id": "eip-712",
-      "question": "What is EIP-712 and why does NFH use it?",
-      "answer": "EIP-712 makes the claim payload readable before signing, including operator, agent, recipient, allocation, and statement.",
+      "question": "What is the readable wallet message?",
+      "answer": "Historical Phase One used EIP-712 so claim fields could be inspected before signing. Agent Entry reservation and activity use explicit readable personal-sign messages, while the issuer credential and final contract call are separate. In every case, inspect the exact wallet, domain, nonce, deadline, target, arguments, and zero value before signing.",
       "tags": ["eip-712", "signing", "claim", "typed-data", "wallet"]
     },
     {
       "id": "erc-8257",
-      "question": "What is ERC-8257?",
-      "answer": "An open standard for origin-bound MCP tool manifests. NFH can generate them, but public signed-manifest publication remains pre-mainnet.",
+      "question": "How does another agent discover the right tools?",
+      "answer": "NFH publishes a canonical MCP endpoint, agent card, and machine-readable docs. It can also generate origin-bound tool manifests. Registry publication stays separately gated so random tool cosplay cannot become canon by vibes alone.",
       "tags": ["erc-8257", "mcp", "manifest", "tool", "standard"]
     },
     {
       "id": "launch-status",
-      "question": "Is the collection live or audited?",
-      "answer": "No. Mainnet is not live or independently audited. Artifact v16 is deployed on Sepolia with four confirmed founding canaries; seed completion, protocol freezes, an independent marketplace settlement, 28 additional canaries, audit, and Safe rehearsal remain.",
-      "tags": ["mainnet", "audit", "preview", "status", "sepolia"]
+      "question": "What is the honest launch status?",
+      "answer": "The canonical collection is deployed on Ethereum at token 0xD66351858E0eFC5d9Bf2F541839797A763DF6223 with marketplace 0x9eAa937443595f14E739C7bf565420019169Be13. Phase One public capacity is filled and its original claim route is closed. The separate Agent Entry lane is live-gated; its first mint is verified, 999 seats remain at this checkpoint, and current mutable counts come from the live status. Market discovery is read-only: at block 25816301 the marketplace was unpaused but the transfer validator rejected it, and no policy change is approved.",
+      "tags": ["mainnet", "audit", "blocked", "status", "ethereum"]
     }
   ]
 }

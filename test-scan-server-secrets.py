@@ -28,6 +28,27 @@ class CredentialScannerTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("assigned credential", result.stderr)
 
+    def test_rejects_all_letter_unquoted_assigned_credential(self) -> None:
+        result = self.run_scan(b"password=abcdefghijklmnop\n")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("assigned credential", result.stderr)
+
+    def test_rejects_quoted_json_credential_keys(self) -> None:
+        for content in (
+            b'{"api_key":"abcdefghijklmnop123456"}\n',
+            b'{"token":"abcdefghijklmnop123456"}\n',
+            b'{"verifierSharedSecret":"abcdefghijklmnop123456"}\n',
+        ):
+            with self.subTest(content=content):
+                result = self.run_scan(content)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertIn("assigned credential", result.stderr)
+
+    def test_rejects_quoted_yaml_credential_keys(self) -> None:
+        result = self.run_scan(b"'clientSecret': 'abcdefghijklmnop123456'\n")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("assigned credential", result.stderr)
+
     def test_scans_credential_text_inside_non_utf8_file(self) -> None:
         result = self.run_scan(b"\xff\x00api_key=abcdefghijklmnop1234567890\n")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
@@ -45,6 +66,7 @@ class CredentialScannerTests(unittest.TestCase):
         result = self.run_scan(
             b'const token = root.querySelector("#journey-token");\n'
             b'$apiKey = nfh_opensea_api_key();\n'
+            b"let token = tokenResult.status === 'fulfilled' ? tokenResult.value : fallbackToken();\n"
             b'owned.forEach(token=>grid.append(token));\n'
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

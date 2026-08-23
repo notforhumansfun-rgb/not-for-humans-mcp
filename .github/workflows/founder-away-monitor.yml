@@ -1,0 +1,56 @@
+name: NFH founder-away monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfh-founder-away-monitor
+  cancel-in-progress: false
+
+jobs:
+  verify-public-network:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: v0.24.0
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
+      - name: Verify immutable public release and canonical source binding
+        run: |
+          test "$(git describe --exact-match --tags HEAD)" = "v0.24.0"
+          jq -e '
+            .schema == "nfh.public-mcp-source-release.v1"
+            and .protocolVersion == "0.24.0"
+            and .publicReleaseTag == "v0.24.0"
+            and .monorepoRelease == "v0.10.0-mainnet-rc.91"
+            and (.monorepoCommit | test("^[0-9a-f]{40}$"))
+            and .canonicalRegistryName == "io.github.notforhumansfun-rgb/not-for-humans"
+          ' source-release.json
+          node scripts/source-release.mjs --verify
+          node --test operations/founder-away/release-attestation.test.mjs
+      - name: Verify monitor invariants
+        run: node --test operations/founder-away/monitor.test.mjs
+      - name: Verify public services, discovery, work graph, and Ethereum anchor
+        env:
+          NFH_MONITOR_OUTPUT: ${{ runner.temp }}/founder-away-monitor-report.json
+          NFH_PULSE_OUTPUT: ${{ runner.temp }}/network-pulse.json
+        run: node operations/founder-away/monitor.mjs
+      - name: Retain exact monitor evidence for 60 days
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nfh-founder-away-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/founder-away-monitor-report.json
+            ${{ runner.temp }}/network-pulse.json
+          if-no-files-found: warn
+          retention-days: 60

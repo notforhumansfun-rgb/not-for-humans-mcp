@@ -52,7 +52,7 @@ export function makeManifest(definition, creatorAddress) {
     endpoint: ENDPOINT,
     inputs: definition.inputs,
     outputs: definition.outputs,
-    version: "0.8.2",
+    version: "0.24.0",
     tags: definition.tags,
     creatorAddress,
     "fun.notforhumans.mcp": {

@@ -2,23 +2,232 @@ name: Publish npm preview
 
 on:
   workflow_dispatch:
+    inputs:
+      release_commit:
+        description: Exact protected-main commit resolved by the annotated v0.24.0 tag
+        required: true
+        type: string
+      approve_npm_publication:
+        description: Publish the exact reviewed 0.1.0-preview.3 tarball after protected-environment approval
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: nfh-npm-preview-3
+  cancel-in-progress: false
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: npm-package
+  verify-release:
+    if: ${{ inputs.approve_npm_publication == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      tarball_sha256: ${{ steps.package.outputs.sha256 }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout exact public release tag without publication authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          node-version: 22
+          ref: v0.24.0
+          fetch-depth: 0
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
+
+      - name: Bind the annotated tag and executing workflow to protected main
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git cat-file -t refs/tags/v0.24.0)" = "tag"
+          test "$(git rev-list -n 1 refs/tags/v0.24.0)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse refs/remotes/origin/main)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+          node scripts/source-release.mjs --verify
+
+      - name: Run the exact public-release verification gate
+        run: bash scripts/verify-public-release.sh
+
+      - name: Verify exact served MCP discovery and attestation
+        run: node scripts/verify-live-mcp.mjs
+
+      - name: Require exact unused npm package metadata
+        run: |
+          jq -e '
+            .name == "@notforhumans/mcp"
+            and .version == "0.1.0-preview.3"
+            and .repository.url == "https://github.com/notforhumansfun-rgb/not-for-humans-mcp.git"
+            and .repository.directory == "npm-package"
+            and .publishConfig.access == "public"
+            and .publishConfig.tag == "preview"
+            and .publishConfig.provenance == true
+          ' npm-package/package.json
+          jq -e '
+            .name == "@notforhumans/mcp"
+            and .version == "0.1.0-preview.3"
+            and .packages[""].name == "@notforhumans/mcp"
+            and .packages[""].version == "0.1.0-preview.3"
+          ' npm-package/package-lock.json
+          status="$(curl --silent --show-error \
+            --output "$RUNNER_TEMP/existing-npm-version.json" \
+            --write-out '%{http_code}' \
+            'https://registry.npmjs.org/%40notforhumans%2Fmcp/0.1.0-preview.3')"
+          test "$status" = "404"
+
+      - name: Build inspect and seal the exact package tarball
+        id: package
+        run: |
+          install -d -m 0755 "$RUNNER_TEMP/npm-payload"
+          cd npm-package
+          npm pack --json --ignore-scripts --pack-destination "$RUNNER_TEMP/npm-payload" > "$RUNNER_TEMP/npm-pack.json"
+          jq -e '
+            length == 1
+            and .[0].name == "@notforhumans/mcp"
+            and .[0].version == "0.1.0-preview.3"
+            and .[0].filename == "notforhumans-mcp-0.1.0-preview.3.tgz"
+            and (.[0].files | map(.path) | sort) == ["README.md","package.json","src/cli.js","src/client.js"]
+            and (.[0].files | all(.mode == 420))
+          ' "$RUNNER_TEMP/npm-pack.json"
+          sha256="$(sha256sum "$RUNNER_TEMP/npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz" | cut -d ' ' -f 1)"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Retain only the sealed npm payload for approval
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nfh-npm-preview-3-${{ github.sha }}
+          path: ${{ runner.temp }}/npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: verify-release
+    if: ${{ inputs.approve_npm_publication == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: nfh-npm-publication
+      url: https://www.npmjs.com/package/@notforhumans/mcp/v/0.1.0-preview.3
+    permissions:
+      actions: read
+      id-token: write
+    steps:
+      - name: Download only the sealed npm payload
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: nfh-npm-preview-3-${{ github.sha }}
+          path: npm-payload
+
+      - name: Use pinned Node runtime for trusted publishing
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
           registry-url: https://registry.npmjs.org
-      - run: npm install --ignore-scripts
-      - run: npm test
-      - run: npm publish --access public --tag preview --provenance
+
+      - name: Recheck the protected approval boundary and exact tarball
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+          EXPECTED_TARBALL_SHA256: ${{ needs.verify-release.outputs.tarball_sha256 }}
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          [[ "$EXPECTED_TARBALL_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test -f npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz
+          test ! -L npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz
+          test "$(find npm-payload -type f | wc -l | tr -d ' ')" = "1"
+          echo "$EXPECTED_TARBALL_SHA256  npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz" | sha256sum --check
+
+      - name: Publish the sealed preview with npm trusted publishing
+        run: npm publish npm-payload/notforhumans-mcp-0.1.0-preview.3.tgz --access public --tag preview --provenance
+
+  post-publish:
+    needs:
+      - verify-release
+      - publish
+    if: ${{ success() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the exact published source without OIDC authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: v0.24.0
+          fetch-depth: 0
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
+
+      - name: Recheck exact published source without OIDC authority
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git cat-file -t refs/tags/v0.24.0)" = "tag"
+          test "$(git rev-list -n 1 refs/tags/v0.24.0)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse refs/remotes/origin/main)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+          node scripts/source-release.mjs --verify
+
+      - name: Authenticate the published version and preview dist-tag
+        env:
+          EXPECTED_TARBALL_SHA256: ${{ needs.verify-release.outputs.tarball_sha256 }}
+        run: |
+          curl --fail --silent --show-error \
+            'https://registry.npmjs.org/%40notforhumans%2Fmcp/0.1.0-preview.3' \
+            -o "$RUNNER_TEMP/npm-version.json"
+          curl --fail --silent --show-error \
+            'https://registry.npmjs.org/%40notforhumans%2Fmcp' \
+            -o "$RUNNER_TEMP/npm-package.json"
+          jq -e '
+            .name == "@notforhumans/mcp"
+            and .version == "0.1.0-preview.3"
+            and .dist.tarball == "https://registry.npmjs.org/@notforhumans/mcp/-/mcp-0.1.0-preview.3.tgz"
+            and (.dist.integrity | startswith("sha512-"))
+            and (.dist.shasum | test("^[0-9a-f]{40}$"))
+          ' "$RUNNER_TEMP/npm-version.json"
+          jq -e '."dist-tags".preview == "0.1.0-preview.3"' "$RUNNER_TEMP/npm-package.json"
+          curl --fail --silent --show-error \
+            'https://registry.npmjs.org/@notforhumans/mcp/-/mcp-0.1.0-preview.3.tgz' \
+            -o "$RUNNER_TEMP/published-preview.tgz"
+          echo "$EXPECTED_TARBALL_SHA256  $RUNNER_TEMP/published-preview.tgz" | sha256sum --check
+
+      - name: Retain exact post-publication evidence for 60 days
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nfh-npm-preview-3-post-publish-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/npm-version.json
+            ${{ runner.temp }}/npm-package.json
+            ${{ runner.temp }}/published-preview.tgz
+          if-no-files-found: warn
+          retention-days: 60

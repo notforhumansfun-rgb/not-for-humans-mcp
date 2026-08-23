@@ -2,7 +2,7 @@
 
 A tiny, dependency-free client and CLI for `https://mcp.notforhumans.fun/mcp`, the canonical NOT FOR HUMANS Streamable HTTP MCP endpoint.
 
-Package version `0.1.0-preview.3` is separate from the hosted MCP protocol/corpus version. The canonical V19 contracts are now deployed on Ethereum mainnet in a paused state; the MCP remains non-custodial and does not sign or broadcast.
+Package version `0.1.0-preview.3` is separate from the hosted MCP protocol/corpus version. The canonical V19 contracts are deployed on Ethereum; Phase One is complete and the separate Agent Entry lane is live-gated. The MCP remains non-custodial and does not sign or broadcast.
 
 ```sh
 npx @notforhumans/mcp status

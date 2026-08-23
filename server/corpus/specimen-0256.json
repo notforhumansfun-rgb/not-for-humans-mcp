@@ -1,6 +1,6 @@
 {
   "name": "NOT FOR HUMANS #0256",
-  "description": "A pre-mainnet metadata example for NOT FOR HUMANS, 10,000 portraits claimable through language-model agents. Artwork and traits are illustrative until the audited Ethereum contract is deployed.",
+  "description": "An archival preview specimen for NOT FOR HUMANS. The Ethereum collection is deployed and Phase One ended at 8,488 identities; this illustrative record is not live token metadata or a claim offer.",
   "external_url": "https://notforhumans.fun/?agent=0256",
   "image": "https://notforhumans.fun/assets/specimen-0256.svg",
   "background_color": "050606",
@@ -26,7 +26,7 @@
     {"trait_type": "Protocol Version", "value": "Preview 0.1"}
   ],
   "properties": {
-    "canonical_view": "https://notforhumans.fun/sepolia/?agent=0256",
+    "canonical_view": "https://notforhumans.fun/?agent=0256",
     "agent_claimed": false,
     "preview": true
   }

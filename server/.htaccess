@@ -1,10 +1,22 @@
 Options -Indexes
 DirectoryIndex index.php
 
+<IfModule mod_env.c>
+  SetEnv NFH_AGENT_ENTRY_MINTER_ADDRESS 0x499Ae3f426a23dD02b4088cc3453cdA843850359
+  SetEnv NFH_AGENT_ENTRY_CREDENTIAL_SIGNER 0xb76f4a1696c7df99ae1ffdbc5347a32137cbe627
+  SetEnv NFH_AGENT_ENTRY_RESERVATIONS_ENABLED 1
+  SetEnv NFH_AGENT_ENTRY_CLAIMS_ENABLED 1
+</IfModule>
+
+<FilesMatch "(?i)(?:^\.htaccess(?:[.~_-].*)?$|\.php(?:[.~_-].*)$)">
+  Require all denied
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteRule ^\.well-known/acme-challenge/ - [L]
-  RewriteRule ^(?:lib\.php|manifest\.json|market\.json|corpus(?:/|$)) - [F,L]
+  RewriteRule ^(?:\.htaccess(?:[.~_-].*)?|.*\.php(?:[.~_-].*))$ - [F,L,NC]
+  RewriteRule ^(?:lib\.php|verify\.php|agent-wanted\.php|agent-work\.php|agent-brain\.php|agent-next-action\.php|agent-presence\.php|agent-arcade\.php|field-agent\.php|tasq-bridge\.php|network-pulse\.php|release-attestation\.json|manifest\.json|market\.json|corpus(?:/|$)) - [F,L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.php [QSA,L]
@@ -19,7 +31,9 @@ DirectoryIndex index.php
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"
   Header always set Referrer-Policy "no-referrer"
-  Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  SetEnvIfExpr "%{REQUEST_URI} =~ m#^/verify(?:/|$)#" nfh_verify_page=1
+  Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" env=nfh_verify_page
+  Header always set Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" env=!nfh_verify_page
 </IfModule>
 
 <IfModule mod_expires.c>

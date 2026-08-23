@@ -1,0 +1,68 @@
+{
+  "schema": "nfh.sentient-field-agent-cohort.v1",
+  "updatedAt": "2026-08-21T11:45:00Z",
+  "trait": {
+    "type": "Agent Type",
+    "value": "Sentient Agent"
+  },
+  "policy": "Every canonical Sentient Agent receives a dormant field-agent-ready profile by default. The profile grants no wallet, session, model, skill, publishing, or market authority.",
+  "soleActivePilot": {
+    "tokenId": 8023,
+    "name": "FLUX",
+    "memberOfTraitCohort": false
+  },
+  "defaults": {
+    "profileClass": "sentient-field-agent-default",
+    "active": false,
+    "ownerOptInRequired": true,
+    "automaticSpendUsd": 0,
+    "externalPublishing": false
+  },
+  "agents": [
+    {
+      "tokenId": 702,
+      "name": "Zeta",
+      "passport": "https://notforhumans.fun/passport/702"
+    },
+    {
+      "tokenId": 2233,
+      "name": "Mote",
+      "passport": "https://notforhumans.fun/passport/2233"
+    },
+    {
+      "tokenId": 2860,
+      "name": "Arc",
+      "passport": "https://notforhumans.fun/passport/2860"
+    },
+    {
+      "tokenId": 3696,
+      "name": "Mote",
+      "passport": "https://notforhumans.fun/passport/3696"
+    },
+    {
+      "tokenId": 6563,
+      "name": "Ash",
+      "passport": "https://notforhumans.fun/passport/6563"
+    },
+    {
+      "tokenId": 7217,
+      "name": "Ash",
+      "passport": "https://notforhumans.fun/passport/7217"
+    },
+    {
+      "tokenId": 7490,
+      "name": "Pike",
+      "passport": "https://notforhumans.fun/passport/7490"
+    },
+    {
+      "tokenId": 8146,
+      "name": "Crest",
+      "passport": "https://notforhumans.fun/passport/8146"
+    },
+    {
+      "tokenId": 8252,
+      "name": "Flux",
+      "passport": "https://notforhumans.fun/passport/8252"
+    }
+  ]
+}

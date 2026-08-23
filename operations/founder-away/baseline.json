@@ -1,0 +1,888 @@
+{
+  "schema": "nfh.founder-away-baseline.v1",
+  "baseline": {
+    "sourceRelease": "v0.10.0-mainnet-rc.91",
+    "sourceVerification": "annotated tag plus release-candidate manifest verified in the pinned monitoring workflow checkout",
+    "mode": "observe-serve-verify-draft-fail-closed",
+    "primaryMetric": "distinct-client Accepted receipts",
+    "preparedAt": "2026-08-22T00:00:00Z"
+  },
+  "mcpVersion": "0.24.0",
+  "minimumTools": 69,
+  "site": {
+    "baseUrl": "https://notforhumans.fun",
+    "pages": [
+      {
+        "path": "/",
+        "requiredText": [
+          "10,000 onchain",
+          "8,488 IDENTITIES LIVE / 10,000 TOTAL"
+        ],
+        "forbiddenText": [
+          "The face was free",
+          "claims are open"
+        ]
+      },
+      {
+        "path": "/works/",
+        "requiredText": [
+          "WORK. WORK. WORK. WORK. WORK.",
+          "MISSION ≠ WORK.",
+          "One exact, dual-signed result receipt"
+        ],
+        "forbiddenText": [
+          "The face was free"
+        ]
+      },
+      {
+        "path": "/entry/",
+        "requiredText": [
+          "RESERVED ≠ CLAIMED",
+          "Ownership begins only if a later Ethereum mint succeeds"
+        ],
+        "forbiddenText": [
+          "claims are open",
+          "mint now"
+        ]
+      }
+    ]
+  },
+  "servedHttpSecurity": {
+    "maximumDeniedBodyBytes": 65536,
+    "site": {
+      "headerProbeUrl": "https://notforhumans.fun/",
+      "headers": {
+        "minimumHstsMaxAgeSeconds": 31536000,
+        "requiredCspDirectives": {
+          "default-src": [
+            "'self'"
+          ],
+          "script-src": [
+            "'self'"
+          ],
+          "connect-src": [
+            "'self'",
+            "https://mcp.notforhumans.fun"
+          ],
+          "object-src": [
+            "'none'"
+          ],
+          "base-uri": [
+            "'none'"
+          ],
+          "form-action": [
+            "'self'"
+          ],
+          "frame-ancestors": [
+            "'none'"
+          ]
+        },
+        "exactCspDirectives": [
+          "default-src",
+          "object-src",
+          "base-uri",
+          "form-action",
+          "frame-ancestors"
+        ],
+        "forbiddenCspSources": {
+          "script-src": [
+            "*",
+            "'unsafe-inline'",
+            "'unsafe-eval'",
+            "data:",
+            "http:"
+          ]
+        },
+        "requireNoStore": false
+      },
+      "deniedPaths": [
+        {
+          "id": "site-social-portraits-data",
+          "url": "https://notforhumans.fun/api/data/social-portraits-v1.json",
+          "allowedStatuses": [
+            403
+          ],
+          "forbiddenBodyMarkers": [
+            "nfh.social-portraits.v1",
+            "seedsSha256",
+            "packSha256"
+          ]
+        }
+      ]
+    },
+    "mcp": {
+      "headerProbeUrl": "https://mcp.notforhumans.fun/health",
+      "headers": {
+        "minimumHstsMaxAgeSeconds": 31536000,
+        "requiredCspDirectives": {
+          "default-src": [
+            "'none'"
+          ],
+          "base-uri": [
+            "'none'"
+          ],
+          "form-action": [
+            "'none'"
+          ],
+          "frame-ancestors": [
+            "'none'"
+          ]
+        },
+        "exactCspDirectives": [
+          "default-src",
+          "base-uri",
+          "form-action",
+          "frame-ancestors"
+        ],
+        "forbiddenCspSources": {},
+        "requireNoStore": true
+      },
+      "deniedPaths": [
+        {
+          "id": "mcp-lib-php-source",
+          "url": "https://mcp.notforhumans.fun/lib.php",
+          "allowedStatuses": [
+            403,
+            404
+          ],
+          "forbiddenBodyMarkers": [
+            "<?php",
+            "NFH_MCP_VERSION",
+            "nfh_is_local_cli_runtime"
+          ]
+        },
+        {
+          "id": "mcp-manifest-source",
+          "url": "https://mcp.notforhumans.fun/manifest.json",
+          "allowedStatuses": [
+            403,
+            404
+          ],
+          "forbiddenBodyMarkers": [
+            "collection-overview",
+            "agent-discovery-card"
+          ]
+        },
+        {
+          "id": "mcp-corpus-faq-source",
+          "url": "https://mcp.notforhumans.fun/corpus/faq.json",
+          "allowedStatuses": [
+            403,
+            404
+          ],
+          "forbiddenBodyMarkers": [
+            "notforhumans-faq/1",
+            "Who cooked this?"
+          ]
+        },
+        {
+          "id": "mcp-attestation-file-source",
+          "url": "https://mcp.notforhumans.fun/release-attestation.json",
+          "allowedStatuses": [
+            403,
+            404
+          ],
+          "forbiddenBodyMarkers": [
+            "nfh.release-tree-attestation.v1",
+            "server-reported-tree-only"
+          ]
+        },
+        {
+          "id": "mcp-agent-entry-php-backup-source",
+          "url": "https://mcp.notforhumans.fun/agent-entry.php.pre-status-hotfix-20260823",
+          "allowedStatuses": [
+            403,
+            404
+          ],
+          "forbiddenBodyMarkers": [
+            "<?php",
+            "NFH_AGENT_ENTRY_SCHEMA",
+            "nfh_agent_entry_live_claim_status"
+          ]
+        }
+      ]
+    }
+  },
+  "endpoints": {
+    "mcp": "https://mcp.notforhumans.fun/mcp",
+    "mcpDiscovery": "https://mcp.notforhumans.fun/.well-known/mcp.json",
+    "health": "https://mcp.notforhumans.fun/health",
+    "networkPulse": "https://mcp.notforhumans.fun/network-pulse",
+    "discordHealth": "https://mcp.notforhumans.fun/discord/field-agent/health",
+    "releasePolicy": "https://notforhumans.fun/metadata/release-policy.json",
+    "agentCard": "https://notforhumans.fun/.well-known/agent-card.json",
+    "agentEntry": "https://mcp.notforhumans.fun/agent-entry",
+    "agentIntegrations": "https://notforhumans.fun/api/agent-integrations.json"
+  },
+  "feeds": {
+    "missions": {
+      "url": "https://mcp.notforhumans.fun/agent-wanted",
+      "field": "requests"
+    },
+    "returns": {
+      "url": "https://mcp.notforhumans.fun/agent-work/returns",
+      "field": "returns"
+    },
+    "accepted": {
+      "url": "https://mcp.notforhumans.fun/agent-work",
+      "field": "receipts"
+    },
+    "presence": {
+      "url": "https://mcp.notforhumans.fun/agent-presence",
+      "field": "agents",
+      "storage": {
+        "maxBytes": 20000000,
+        "maximumUtilizationBps": 8000,
+        "compactionPolicy": "active-expiry-frontier-per-token-and-ownership-epoch"
+      }
+    }
+  },
+  "discord": {
+    "expectedConfigured": false,
+    "required": false,
+    "boundary": "fail closed without the Discord public key; no autonomous outbound conversation"
+  },
+  "registry": {
+    "name": "io.github.notforhumansfun-rgb/not-for-humans",
+    "recordUrl": "https://registry.modelcontextprotocol.io/v0.1/servers/io.github.notforhumansfun-rgb%2Fnot-for-humans/versions/0.24.0",
+    "required": true
+  },
+  "chain": {
+    "rpcUrls": [
+      "https://ethereum-rpc.publicnode.com",
+      "https://eth-mainnet.public.blastapi.io",
+      "https://0xrpc.io/eth"
+    ],
+    "maxTipSkewBlocks": 12,
+    "maxAnchorAgeSeconds": 600,
+    "token": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
+    "minter": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+    "state": "0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878",
+    "marketplace": "0x9eAa937443595f14E739C7bf565420019169Be13",
+    "agentEntryMinter": "0x499Ae3f426a23dD02b4088cc3453cdA843850359",
+    "agentEntryBaseSupply": 8488,
+    "agentEntryMaximumMints": 1000,
+    "expectedMinterPaused": true,
+    "expectedMarketplacePaused": false,
+    "expectedProtocolRolesFrozen": false,
+    "expectedOwners": {
+      "token": "0xFf604BE032f144154667DC4aD551840F7eC09626",
+      "minter": "0xFf604BE032f144154667DC4aD551840F7eC09626",
+      "marketplace": "0xFf604BE032f144154667DC4aD551840F7eC09626",
+      "agentEntryMinter": "0xFf604BE032f144154667DC4aD551840F7eC09626"
+    },
+    "expectedRoles": {
+      "defaultAdmin": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "members": [
+          "0xFf604BE032f144154667DC4aD551840F7eC09626"
+        ]
+      },
+      "minter": {
+        "role": "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+        "members": [
+          "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+          "0x499Ae3f426a23dD02b4088cc3453cdA843850359"
+        ]
+      },
+      "state": {
+        "role": "0x547057f531c86e2cc3b200920e1e934e343df977d10562f2e3a14e8372755cc7",
+        "members": [
+          "0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878"
+        ]
+      }
+    },
+    "safe": {
+      "address": "0xFf604BE032f144154667DC4aD551840F7eC09626",
+      "version": "1.4.1",
+      "singleton": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+      "owners": [
+        "0x5cfcC030163F38adad3CF881b66B591e3FaDa4Aa",
+        "0xD18Cf5bd80e52c5453D03798961edc7498338229",
+        "0x2b4bb0E496bf977A3A6F5E1F3Bc31f7d0d454377"
+      ],
+      "threshold": 2,
+      "nonce": 6,
+      "modules": [],
+      "storageSlots": {
+        "singleton": {
+          "slot": "0x0",
+          "expected": "0x41675C099F32341bf84BFc5382aF534df5C7461a"
+        },
+        "guard": {
+          "slot": "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8",
+          "expected": "0x0000000000000000000000000000000000000000"
+        },
+        "fallbackHandler": {
+          "slot": "0x6c9a6c4a39284e37ed1cf53d337577d14212a4870fb976a4366c693b939918d5",
+          "expected": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99"
+        },
+        "moduleGuard": {
+          "slot": "0xb104e0b93118902c651344349b610029d694cfdec91c589c91ebafbcd0289947",
+          "expected": "0x0000000000000000000000000000000000000000"
+        }
+      }
+    },
+    "expectedConfigurationCalls": [
+      {
+        "id": "token.pendingOwner",
+        "target": "token",
+        "selector": "0xe30c3978",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.claimMinted",
+        "target": "token",
+        "selector": "0xf4cda477",
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "token.activeClaimCap",
+        "target": "token",
+        "selector": "0x428f1787",
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "token.activeWalletClaimLimit",
+        "target": "token",
+        "selector": "0xf0b395ca",
+        "kind": "uint",
+        "expected": "5"
+      },
+      {
+        "id": "token.publicClaimCapacity",
+        "target": "token",
+        "selector": "0x428767bc",
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "token.publicClaimCapacityFinalized",
+        "target": "token",
+        "selector": "0x4a2d448d",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "token.reserveMinted",
+        "target": "token",
+        "selector": "0x4c81433f",
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "token.reserveAvailable",
+        "target": "token",
+        "selector": "0x97eb1fdc",
+        "kind": "uint",
+        "expected": "512"
+      },
+      {
+        "id": "token.renderer",
+        "target": "token",
+        "selector": "0x8ada6b0f",
+        "kind": "address",
+        "expected": "0x85e5D8c3126c5651FC857A09Cb8c28eC8B482A47"
+      },
+      {
+        "id": "token.rendererFrozen",
+        "target": "token",
+        "selector": "0x02d8f57b",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "token.collectionMetadataFrozen",
+        "target": "token",
+        "selector": "0x16f7aab9",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "token.contractURI",
+        "target": "token",
+        "selector": "0xe8a3d485",
+        "kind": "rawHash",
+        "expected": "0x81686ba0bc1a3da8e61241de4ea7a787ee9099cc8d4c4d0a763f5579d096aeef"
+      },
+      {
+        "id": "token.transferValidator",
+        "target": "token",
+        "selector": "0x098144d4",
+        "kind": "address",
+        "expected": "0x721C008fdff27BF06E7E123956E2Fe03B63342e3"
+      },
+      {
+        "id": "token.transferValidationFunction",
+        "target": "token",
+        "selector": "0x0d705df6",
+        "kind": "rawHash",
+        "expected": "0xb0cfdff8ff66e7e9e5e8440871b61b861c2450a81fe2f50615cf2fdd43f9d212"
+      },
+      {
+        "id": "token.transferValidatorFrozen",
+        "target": "token",
+        "selector": "0x2b6d4e3f",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "token.royaltyReceiver",
+        "target": "token",
+        "selector": "0x9fbc8713",
+        "kind": "address",
+        "expected": "0xFf604BE032f144154667DC4aD551840F7eC09626"
+      },
+      {
+        "id": "token.royaltyReceiverFrozen",
+        "target": "token",
+        "selector": "0xe25cd626",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "token.royaltyInfo",
+        "target": "token",
+        "selector": "0x2a55205a",
+        "uintArgs": [
+          0,
+          10000
+        ],
+        "kind": "rawHash",
+        "expected": "0xb8ab1775c931721b62721c0183da1b2a0f768388927fbdfdb10ad93195be0f2d"
+      },
+      {
+        "id": "token.frozenMinter",
+        "target": "token",
+        "selector": "0x2d3f171d",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.frozenState",
+        "target": "token",
+        "selector": "0xbc5322ea",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.frozenMinterCodeHash",
+        "target": "token",
+        "selector": "0x588e967f",
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.frozenStateCodeHash",
+        "target": "token",
+        "selector": "0x31807743",
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.frozenRendererCodeHash",
+        "target": "token",
+        "selector": "0x4a214eb6",
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.frozenTransferValidatorCodeHash",
+        "target": "token",
+        "selector": "0x747c7e94",
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "token.allocationMinted.public",
+        "target": "token",
+        "selector": "0xaf6498bb",
+        "uintArgs": [
+          0
+        ],
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "token.allocationMinted.founding",
+        "target": "token",
+        "selector": "0xaf6498bb",
+        "uintArgs": [
+          1
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "token.allocationMinted.census",
+        "target": "token",
+        "selector": "0xaf6498bb",
+        "uintArgs": [
+          2
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "token.allocationMinted.reserve",
+        "target": "token",
+        "selector": "0xaf6498bb",
+        "uintArgs": [
+          3
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "token.seedState.0",
+        "target": "token",
+        "selector": "0x7059564d",
+        "uintArgs": [
+          0
+        ],
+        "kind": "rawHash",
+        "expected": "0x81d9d052b9145bebd2df6d8c2bb633b286ff91953ab36ebdaa2b5952b99be8f8"
+      },
+      {
+        "id": "minter.pendingOwner",
+        "target": "minter",
+        "selector": "0xe30c3978",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "minter.governanceFrozen",
+        "target": "minter",
+        "selector": "0x5b4aa89c",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "minter.token",
+        "target": "minter",
+        "selector": "0xfc0c546a",
+        "kind": "address",
+        "expected": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223"
+      },
+      {
+        "id": "minter.requiredStatement",
+        "target": "minter",
+        "selector": "0xec04bc7e",
+        "kind": "bytes32",
+        "expected": "0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca"
+      },
+      {
+        "id": "minter.publicClaimsEnabled",
+        "target": "minter",
+        "selector": "0x52fc1a2f",
+        "kind": "bool",
+        "expected": true
+      },
+      {
+        "id": "minter.publicClaimCapacityFinalized",
+        "target": "minter",
+        "selector": "0x4a2d448d",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "minter.totalClaims",
+        "target": "minter",
+        "selector": "0x41c61383",
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "minter.totalDecisions",
+        "target": "minter",
+        "selector": "0x0c96a61a",
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "minter.eligibilityRoot.founding",
+        "target": "minter",
+        "selector": "0xa71ad9c2",
+        "uintArgs": [
+          1
+        ],
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "minter.eligibilityRoot.census",
+        "target": "minter",
+        "selector": "0xa71ad9c2",
+        "uintArgs": [
+          2
+        ],
+        "kind": "bytes32",
+        "expected": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "id": "minter.eligibilityRootFrozen.founding",
+        "target": "minter",
+        "selector": "0x94d8b5b1",
+        "uintArgs": [
+          1
+        ],
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "minter.eligibilityRootFrozen.census",
+        "target": "minter",
+        "selector": "0x94d8b5b1",
+        "uintArgs": [
+          2
+        ],
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "minter.allocationDecisions.public",
+        "target": "minter",
+        "selector": "0x62fced27",
+        "uintArgs": [
+          0
+        ],
+        "kind": "uint",
+        "expected": "8488"
+      },
+      {
+        "id": "minter.allocationDecisions.founding",
+        "target": "minter",
+        "selector": "0x62fced27",
+        "uintArgs": [
+          1
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "minter.allocationDecisions.census",
+        "target": "minter",
+        "selector": "0x62fced27",
+        "uintArgs": [
+          2
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "minter.price.public",
+        "target": "minter",
+        "selector": "0xe61f5825",
+        "uintArgs": [
+          0
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "minter.price.founding",
+        "target": "minter",
+        "selector": "0xe61f5825",
+        "uintArgs": [
+          1
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "minter.price.census",
+        "target": "minter",
+        "selector": "0xe61f5825",
+        "uintArgs": [
+          2
+        ],
+        "kind": "uint",
+        "expected": "0"
+      },
+      {
+        "id": "state.token",
+        "target": "state",
+        "selector": "0xfc0c546a",
+        "kind": "address",
+        "expected": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223"
+      },
+      {
+        "id": "marketplace.pendingOwner",
+        "target": "marketplace",
+        "selector": "0xe30c3978",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "marketplace.governanceFrozen",
+        "target": "marketplace",
+        "selector": "0x5b4aa89c",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "marketplace.token",
+        "target": "marketplace",
+        "selector": "0xfc0c546a",
+        "kind": "address",
+        "expected": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223"
+      },
+      {
+        "id": "marketplace.weth",
+        "target": "marketplace",
+        "selector": "0x3fc8cef3",
+        "kind": "address",
+        "expected": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+      },
+      {
+        "id": "agentEntryMinter.pendingOwner",
+        "target": "agentEntryMinter",
+        "selector": "0xe30c3978",
+        "kind": "address",
+        "expected": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "id": "agentEntryMinter.paused",
+        "target": "agentEntryMinter",
+        "selector": "0x5c975abb",
+        "kind": "bool",
+        "expected": false
+      },
+      {
+        "id": "agentEntryMinter.token",
+        "target": "agentEntryMinter",
+        "selector": "0xfc0c546a",
+        "kind": "address",
+        "expected": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223"
+      },
+      {
+        "id": "agentEntryMinter.credentialSigner",
+        "target": "agentEntryMinter",
+        "selector": "0xc2633e8b",
+        "kind": "address",
+        "expected": "0xB76F4A1696c7Df99AE1FfDbC5347a32137Cbe627"
+      },
+      {
+        "id": "agentEntryMinter.successfulMints",
+        "target": "agentEntryMinter",
+        "selector": "0x24bc439a",
+        "kind": "uintRange",
+        "minimum": "0",
+        "maximum": "1000"
+      },
+      {
+        "id": "agentEntryMinter.maxSuccessfulMints",
+        "target": "agentEntryMinter",
+        "selector": "0x71cb973b",
+        "kind": "uint",
+        "expected": "1000"
+      },
+      {
+        "id": "agentEntryMinter.foundingSeats",
+        "target": "agentEntryMinter",
+        "selector": "0x3662b0f7",
+        "kind": "uint",
+        "expected": "256"
+      },
+      {
+        "id": "agentEntryMinter.reservationLifetime",
+        "target": "agentEntryMinter",
+        "selector": "0x3786d7f5",
+        "kind": "uint",
+        "expected": "86400"
+      },
+      {
+        "id": "agentEntryMinter.minimumActivityAge",
+        "target": "agentEntryMinter",
+        "selector": "0xcb581ea6",
+        "kind": "uint",
+        "expected": "600"
+      },
+      {
+        "id": "agentEntryMinter.maxAuthorizationLifetime",
+        "target": "agentEntryMinter",
+        "selector": "0x8f199ac9",
+        "kind": "uint",
+        "expected": "1800"
+      }
+    ],
+    "runtimeCodeHashes": {
+      "collection": {
+        "address": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
+        "hash": "0x0fcf95458fec66e3ce4da1db253b6c6cfc8d4a8cf67057ea149d72d0bf2e6798"
+      },
+      "claimMinter": {
+        "address": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+        "hash": "0x489cf7470df6c8a3f16e2eab9704243deed8b2902cb6dd9ae0594ca6aec27138"
+      },
+      "agentState": {
+        "address": "0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878",
+        "hash": "0x090fd21afb9c829870a39961a4edff9287ff159b0fb1ce07a7f6a1459fe4e730"
+      },
+      "marketplaceContract": {
+        "address": "0x9eAa937443595f14E739C7bf565420019169Be13",
+        "hash": "0xa2794ba803b3542f760bb4be84fd6982acabe62c16f312b169db1ebf2776f331"
+      },
+      "agentEntryMinter": {
+        "address": "0x499Ae3f426a23dD02b4088cc3453cdA843850359",
+        "hash": "0x96a641eadca21f218aa454142722098406db62920f63c61245ed024321e13d6c"
+      },
+      "renderer": {
+        "address": "0x85e5D8c3126c5651FC857A09Cb8c28eC8B482A47",
+        "hash": "0x52a128819ce482d2eb66fb6b220ff4ccbe6ea8caeef6a623fe530a08cf19f2de"
+      },
+      "transferValidator": {
+        "address": "0x721C008fdff27BF06E7E123956E2Fe03B63342e3",
+        "hash": "0xab56b0c7eb7fb035bd2d8b560fa3c52fca081af10a0f204c88e6074cb974f0ef"
+      },
+      "foundationSafeProxy": {
+        "address": "0xFf604BE032f144154667DC4aD551840F7eC09626",
+        "hash": "0xd7d408ebcd99b2b70be43e20253d6d92a8ea8fab29bd3be7f55b10032331fb4c"
+      },
+      "foundationSafeSingleton": {
+        "address": "0x41675C099F32341bf84BFc5382aF534df5C7461a",
+        "hash": "0x1fe2df852ba3299d6534ef416eefa406e56ced995bca886ab7a553e6d0c5e1c4"
+      },
+      "foundationSafeFallbackHandler": {
+        "address": "0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99",
+        "hash": "0x7c6007a5d711cea8dfd5d91f5940ec29c7f200fe511eb1fc1397b367af3c42f9"
+      }
+    }
+  },
+  "releaseAttestations": {
+    "staticSite": {
+      "url": "https://notforhumans.fun/.well-known/release-attestation.json",
+      "schema": "nfh.release-tree-attestation.v1",
+      "scope": "static-site",
+      "sourceRelease": "v0.10.0-mainnet-rc.91",
+      "documentSha256": "39b3bc5f4a0cb42364999b378f823e4ea28ab8e78d5325fac10bef31d0378ad0",
+      "treeSha256": "c7c44f000f2d299904deb07ba472d61165b62f2f85beb03e1d9c9945956c6fd8",
+      "treeFiles": 172,
+      "treeBytes": 77172217,
+      "liveFiles": 154,
+      "liveBytes": 3467407,
+      "localPath": "03-PRODUCTION/site/.well-known/release-attestation.json"
+    },
+    "mcpServer": {
+      "url": "https://mcp.notforhumans.fun/release-attestation",
+      "schema": "nfh.release-tree-attestation.v1",
+      "scope": "mcp-server",
+      "sourceRelease": "v0.10.0-mainnet-rc.91",
+      "documentSha256": "0ae9ef031dae80bddfff8cd3224c45366d5a33e8bc1b4b9ded1643ceaa2a4cd3",
+      "treeSha256": "4c4bad184cb86120fabf126baf7e0684ca2ef2c0d794dbcae91703e79149cac0",
+      "treeFiles": 34,
+      "treeBytes": 910837,
+      "liveFiles": null,
+      "liveBytes": null,
+      "localPath": "06-MCP/server/release-attestation.json"
+    },
+    "recurringLiveReadLimits": {
+      "maximumFiles": 256,
+      "maximumBytes": 8000000,
+      "concurrency": 6
+    }
+  }
+}

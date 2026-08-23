@@ -38,12 +38,24 @@ test('search uses tools/call and preserves exact arguments', async () => {
       assert.equal(body.method, 'tools/call');
       assert.deepEqual(body.params, { name: 'search', arguments: { query: 'trait offers' } });
       assert.equal(init.headers['mcp-protocol-version'], '2025-06-18');
+      assert.equal(init.headers['user-agent'], '@notforhumans/mcp/0.1.0-preview.3');
       assert.equal(init.headers['x-opensea-api-key'], undefined);
       return { structuredContent: { results: [] } };
     }),
   });
   const result = await client.search('trait offers');
   assert.deepEqual(result.structuredContent.results, []);
+});
+
+test('initialize advertises the exact package version', async () => {
+  const client = createClient({
+    fetchImpl: mockFetch(({ body }) => {
+      assert.equal(body.method, 'initialize');
+      assert.deepEqual(body.params.clientInfo, { name: '@notforhumans/mcp', version: '0.1.0-preview.3' });
+      return { protocolVersion: '2025-06-18' };
+    }),
+  });
+  await client.initialize();
 });
 
 test('provider key is sent only when explicitly supplied', async () => {

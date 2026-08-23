@@ -1,7 +1,11 @@
 node_modules/
+__pycache__/
+*.pyc
 .DS_Store
 .env
 *.env
 .secrets/
 server/.well-known/
 erc-8257/registration-bundle.json
+operations/founder-away/founder-away-monitor-report.json
+operations/founder-away/network-pulse.json

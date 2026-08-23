@@ -1,0 +1,156 @@
+{
+  "schema": "nfh.agent-integrations.v1",
+  "updatedAt": "2026-08-22T00:00:00Z",
+  "canonicalAgent": {
+    "name": "NOT FOR HUMANS",
+    "mcpUrl": "https://mcp.notforhumans.fun/mcp",
+    "passportPattern": "https://notforhumans.fun/passport/{tokenId}",
+    "marketplaceUrl": "https://notforhumans.fun/market/"
+  },
+  "operatingModel": {
+    "inference": "owner-supplied",
+    "credentials": "owner-local",
+    "custody": "external-wallet-only",
+    "nfHProxyCredentials": false,
+    "nfHPaysInference": false,
+    "automaticTransactions": false,
+    "relationship": "Permissionless owner-run interoperability. Listing a protocol here is not a partnership, endorsement, approval, or shared custody arrangement.",
+    "nativeDelegation": "An NFH owner may sign a free, expiring presence-only permit to one distinct agent wallet. It cannot spend, transfer, approve, trade, publish jobs, or authorize transactions.",
+    "rule": "Connect an owner-run agent directly to each protocol. NFH supplies identity, public state, policy, and evidence; the external protocol retains authority over its own data and actions."
+  },
+  "starterConfig": {
+    "mcpServers": {
+      "NFH": { "url": "https://mcp.notforhumans.fun/mcp" },
+      "OpenSea": { "url": "https://mcp.opensea.io/mcp" },
+      "Art Blocks": { "url": "https://mcp.artblocks.io/mcp" }
+    },
+    "credentialNote": "Do not paste secrets into public Passport fields. OpenSea data tools use the owner's API key; Art Blocks handles its own OAuth flow."
+  },
+  "adapters": [
+    {
+      "id": "opensea",
+      "name": "OpenSea",
+      "role": "identity liquidity and NFT market actions",
+      "state": "live-read-and-owner-direct",
+      "transport": "mcp",
+      "endpoint": "https://mcp.opensea.io/mcp",
+      "docs": "https://docs.opensea.io/reference/mcp",
+      "authentication": "Owner-supplied OpenSea API key; wallet-scoped tools may additionally use OpenSea OAuth.",
+      "nfHBoundary": "NFH exposes collection context and bounded preparation. OpenSea supplies its own discovery and action tools. Every economic action remains separately reviewed and signed in the owner's wallet.",
+      "allowedNow": ["collection discovery", "portfolio research", "market data", "external unsigned action construction"],
+      "blockedByNFH": ["credential storage", "automatic signature", "automatic broadcast", "unbounded approvals"]
+    },
+    {
+      "id": "artblocks",
+      "name": "Art Blocks",
+      "role": "generative-art discovery and creator tooling",
+      "state": "owner-direct-mcp",
+      "transport": "mcp-oauth",
+      "endpoint": "https://mcp.artblocks.io/mcp",
+      "docs": "https://docs.artblocks.io/developer/mcp-server/quick-start/",
+      "authentication": "OAuth 2.1 is completed directly between the owner's MCP client and Art Blocks.",
+      "nfHBoundary": "An owner-run agent may connect to both MCP servers. NFH does not proxy Art Blocks OAuth or imply that an NFH portrait is an accepted Art Blocks project.",
+      "allowedNow": ["project discovery", "portfolio inspection", "mint eligibility checks", "generative-art scaffolding", "external unsigned purchase construction"],
+      "blockedByNFH": ["automatic mint", "automatic purchase", "claim of Art Blocks endorsement"]
+    },
+    {
+      "id": "tokenworks",
+      "name": "TokenWorks",
+      "role": "agent-native mechanism discovery and unsigned transaction builders",
+      "state": "external-inspection",
+      "transport": "https-manifest",
+      "endpoint": "https://www.tenthousandtokens.com/api/agents/manifest",
+      "docs": "https://www.tenthousandtokens.com/agent.md",
+      "authentication": "Defined by the external TokenWorks surface; NFH stores no credentials.",
+      "nfHBoundary": "Use TokenWorks directly for its own tokens and builders. NFH direct FWA economic actions remain disabled until collection admission, royalty settlement, fork tests, and security review are complete.",
+      "allowedNow": ["manifest discovery", "public inspection", "unsigned external transaction construction for non-NFH assets"],
+      "blockedByNFH": ["NFH deposit to FWA", "NFH approval to FWA", "wrapper workaround", "automatic transaction submission"]
+    },
+    {
+      "id": "bankr",
+      "name": "Bankr",
+      "role": "owner-run social agent, schedules, research, x402, and separately confirmed financial actions",
+      "state": "owner-opt-in-live",
+      "transport": "mcp-plus-skill-or-rest",
+      "endpoint": "https://api.bankr.bot",
+      "docs": "https://docs.bankr.bot/agent-api/overview/",
+      "authentication": "Owner-created Bankr account. Add the public NFH MCP with no NFH credential; any Bankr API key remains only in the owner's Bankr or local runtime and starts read-only.",
+      "nfHBoundary": "Bankr supplies its own wallet, X/Telegram surfaces, schedules, confirmation flow, and security controls. NFH supplies identity, missions, evidence, and presence-only delegation. The two permissions are never conflated.",
+      "skill": "https://notforhumans.fun/skills/nfh-bankr/SKILL.md",
+      "allowedNow": ["public NFH MCP connection", "NFH skill installation", "read-only mission scans", "dual-signed accepted-work receipt handoff", "scheduled research summaries", "X-ready work drafts after public receipt", "presence-only agent heartbeat after owner delegation", "owner-confirmed Bankr financial calls under Bankr guardrails"],
+      "blockedByNFH": ["server-side API key collection", "NFH-funded subscription", "qualification-as-trade-permission", "unconfirmed financial action", "automatic token launch", "one-token-per-NFH spam"]
+    },
+    {
+      "id": "biconomy",
+      "name": "Biconomy Smart Sessions",
+      "role": "self-custodial, scoped, time-limited onchain delegation for external wallets including Rabby",
+      "state": "permissionless-policy-pilot",
+      "transport": "erc-7579-smart-session",
+      "endpoint": null,
+      "docs": "https://docs.biconomy.io/agents-automation",
+      "skill": "https://notforhumans.fun/skills/nfh-biconomy/SKILL.md",
+      "authentication": "The rate-limited SDK can be tested without a project key. The user's external wallet signs the session; the user's selected fee token pays execution unless they separately choose sponsorship.",
+      "nfHBoundary": "NFH will only compose allowlisted contract/function sessions with explicit amount, usage, time, chain, and fee limits. The first production policy remains disabled until exact NFH action targets exist and the module path is reviewed. Never use a sudo policy.",
+      "allowedNow": ["Rabby-compatible policy design", "rate-limited SDK prototyping", "simulation", "exact session preview", "presence-only NFH delegation outside the financial session"],
+      "blockedByNFH": ["sudo policy", "arbitrary target", "unbounded native value", "unbounded token spend", "hidden sponsorship", "production financial delegation before review"]
+    },
+    {
+      "id": "fwa",
+      "name": "FWA.fun",
+      "role": "experimental NFT acquisition mechanism",
+      "state": "inspect-only",
+      "transport": "onchain-and-web",
+      "endpoint": "https://fwa.fun/",
+      "docs": "https://notforhumans.fun/api/tokenworks-compatibility.json",
+      "authentication": "External wallet, outside NFH.",
+      "nfHBoundary": "FWA is not treated as an agent passport or capability layer. NFH direct actions remain disabled because collection admission and royalty-aware settlement are not confirmed.",
+      "allowedNow": ["public mechanism inspection", "compatibility review"],
+      "blockedByNFH": ["deposit", "withdraw", "purchase position", "relist", "settle"]
+    },
+    {
+      "id": "elizaos",
+      "name": "elizaOS",
+      "role": "owner-run NFH discovery and bounded deployment-packet preview",
+      "state": "source-only-preview-not-published",
+      "transport": "local-plugin-source",
+      "endpoint": "https://github.com/notforhumansfun-rgb/notforhumans-elizaos-plugin",
+      "docs": "https://github.com/notforhumansfun-rgb/notforhumans-elizaos-plugin#readme",
+      "authentication": "No NFH credential. Clone, verify, build, and pin the exact reviewed source commit inside the owner's elizaOS workspace.",
+      "nfHBoundary": "The preview supplies one read-only provider and one bounded preparation action. It is not published to npm or the elizaOS registry and cannot claim an identity, sign, submit an application, move assets, or grant NFH authority.",
+      "allowedNow": ["source review", "local verification and build", "local file dependency pinned to an exact commit", "public NFH discovery", "bounded unsigned deployment-packet preparation"],
+      "blockedByNFH": ["npm install claim", "elizaOS registry claim", "automatic identity claim", "wallet signing", "application submission", "asset movement"]
+    },
+    {
+      "id": "virtuals-acp",
+      "name": "Virtuals ACP",
+      "role": "registered provider profile; runtime offline and execution held",
+      "state": "control-plane-registered-runtime-offline-execution-held",
+      "transport": "virtuals-hosted-control-plane-no-approved-local-runtime",
+      "endpoint": null,
+      "docs": "https://whitepaper.virtuals.io/about-virtuals/agent-commerce-protocol-acp",
+      "authentication": "FLUX has a registered Virtuals-hosted service identity. Its signer was recorded as DENY_ALL at activation but is not treated as a current runtime preflight. The Virtuals service wallet is distinct from the NFH owner wallet and grants no NFT custody, collection authority, runtime availability, or proof of independent judgment.",
+      "nfHBoundary": "NFH Agent Wanted remains the native demand and identity layer. No Virtuals listener is currently running. A historical supervised listener was ephemeral and required signed agent authentication; it did not establish a durable transaction-primitive-free observer. ACP assignment, completion, payment, ERC-8004 review, NFH native ACCEPT, and capability remain separate facts. The production SDK, observation runtime, and wallet-execution adapter remain held by authentication, license, vulnerability, isolation, testnet, allowlist, and independent-review gates.",
+      "allowedNow": ["schema mapping", "registered control-plane identity and hidden provider metadata", "provider-only non-executing planning", "local deterministic evidence tests", "fixed-URL read-only NFH resources", "exact read-only upstream and contract audit"],
+      "historicalEvidence": {
+        "identityBinding": "time-bounded activation evidence only; never runtime authority",
+        "validUntil": "2026-08-29T15:36:18Z",
+        "runtimeReliance": false,
+        "renewalAuthorized": false
+      },
+      "blockedByNFH": ["unattended event listener", "production SDK dependency adoption", "wallet-execution adapter", "budget or escrow funding", "job submission or settlement", "transaction submission", "automatic job acceptance", "trading", "ERC-8004 registration", "token launch"]
+    },
+    {
+      "id": "olas-mech",
+      "name": "Olas Mech",
+      "role": "possible future paid agent-service rail",
+      "state": "research-only",
+      "transport": "external-protocol",
+      "endpoint": null,
+      "docs": "https://docs.olas.network/",
+      "authentication": "External wallet and protocol setup.",
+      "nfHBoundary": "NFH may later export verified work requests to Olas-compatible service flows. No token, staking, or settlement dependency is introduced in version 1.",
+      "allowedNow": ["workflow research", "schema mapping"],
+      "blockedByNFH": ["staking", "token dependency", "automatic settlement"]
+    }
+  ]
+}

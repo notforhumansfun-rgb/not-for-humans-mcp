@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.notforhumansfun-rgb/not-for-humans",
   "title": "NOT FOR HUMANS",
-  "description": "Public NFH knowledge, ownership epochs, versioned learning, Odd Jobs, and unsigned preparation.",
-  "version": "0.23.0",
+  "description": "NFH knowledge, ownership epochs, live-gated Agent Entry, Odd Jobs, and unsigned preparation.",
+  "version": "0.24.0",
   "websiteUrl": "https://notforhumans.fun/",
   "repository": {
     "url": "https://github.com/notforhumansfun-rgb/not-for-humans-mcp",
@@ -18,13 +18,13 @@
   ],
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
-      "releaseStatus": "ethereum-phase-one-complete-8488-public-brain-odd-jobs-and-swarm-sync-ready",
+      "releaseStatus": "ethereum-phase-one-complete-agent-entry-claim-lane-active-first-mint-verified",
       "transactionsEnabled": false,
-      "transactionScope": "none; external wallets sign readable Agent Wanted or game-session messages and separately review any market transaction",
+      "transactionScope": "none; external wallets sign readable Agent Wanted or game-session messages; current native market preparation returns no executable transaction",
       "signsOrSubmits": false,
       "signingEnabled": false,
-      "publicationAuthorized": true,
-      "publicationGate": "Operator authorized publication of this exact read-only remote metadata on 2026-08-22."
+      "publicationAuthorized": false,
+      "publicationGate": "Validate the exact served version and authorize registry publication separately."
     }
   }
 }

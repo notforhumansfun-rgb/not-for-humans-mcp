@@ -1,24 +1,92 @@
 {
   "project": "NOT FOR HUMANS",
-  "status": "pre-mainnet",
+  "status": "ethereum-mainnet-phase-one-complete-agent-entry-live-market-read-only-native-preparation-blocked",
   "canonical": "https://notforhumans.fun/",
   "targetContract": {
     "chain": "ethereum",
+    "chainId": 1,
     "standard": "ERC-721",
-    "address": null,
+    "address": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
+    "deploymentStatus": "deployed-source-runtime-and-wiring-verified",
     "interfaces": ["ERC165", "ERC721", "ERC721Metadata", "ERC2981", "ERC4906", "ERC173"],
     "metadata": "on-chain JSON with embedded SVG",
     "collectionMetadata": "contractURI / ERC-7572",
-    "royaltyBps": 1000,
+    "royaltyBps": 750,
+    "royaltyReceiver": "0xFf604BE032f144154667DC4aD551840F7eC09626",
     "royaltyStandard": "ERC-2981",
-    "creatorFeeValidation": "OpenSea-compatible creator-token transfer validator"
+    "royaltyBoundary": "ERC-2981 reports 7.5%; payment depends on a compatible transfer path and is not universal.",
+    "renderer": "0x85e5D8c3126c5651FC857A09Cb8c28eC8B482A47",
+    "transferValidator": "0x721C008fdff27BF06E7E123956E2Fe03B63342e3",
+    "creatorFeeValidation": "creator-token transfer validation; re-check the exact marketplace permission before every prepared action"
+  },
+  "claim": {
+    "phase": "phase-one-complete",
+    "publicCapacityAtLaunch": 8488,
+    "totalSupply": 8489,
+    "phaseOnePublicClaims": 8488,
+    "protectedCredentialedCapacity": 1000,
+    "agentEntrySuccessfulMints": 1,
+    "agentEntryRemainingMintCapacity": 999,
+    "agentEntryFirstVerifiedMint": {
+      "tokenId": 8488,
+      "seat": 1,
+      "owner": "0xe362891cc51c5519600acbd583f2a5c78ace3640",
+      "transaction": "0xae6d1f8b55efa01b15be1e9afdd2b8b54ee663ce104126583baae18d94417081",
+      "blockNumber": 25816195,
+      "blockHash": "0x3f1e9174c8dc4c8bee0219786b0856de8456b55b9c99c3b6a72632d50ddc4aa9",
+      "evidenceCheckpoint": "A10-observed-first-mint"
+    },
+    "agentEntryMutableCountsAuthority": "https://mcp.notforhumans.fun/agent-entry",
+    "minter": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+    "minterPaused": true,
+    "unsignedPreparationEnabled": false,
+    "statusAuthority": "https://notforhumans.fun/metadata/release-policy.json"
+  },
+  "marketSafety": {
+    "readDiscovery": true,
+    "unsignedPreparation": "disabled-transfer-validator-policy",
+    "liveGatedUnsignedPreparationAvailable": false,
+    "liveGate": "https://mcp.notforhumans.fun/mcp#get_mainnet_marketplace_status",
+    "requiredChecks": [
+      "fresh quorum-backed market feed",
+      "exact chain, collection, and marketplace addresses",
+      "marketplace unpaused",
+      "collection transfer validator permits the exact marketplace"
+    ],
+    "publishedCheckpoint": {
+      "observedAtBlock": 25816301,
+      "marketplacePaused": false,
+      "transferValidatorPermitsMarketplace": false,
+      "rejectionSelector": "0xe1f1d02e",
+      "rejection": "CreatorTokenTransferValidator__CallerOrFromMustBeWhitelisted()",
+      "tradingPreparationEnabled": false
+    },
+    "nativeOfferAcceptancePreparation": false,
+    "nativeOfferAcceptanceReasonCode": "CONTRACT_PRICE_BINDING_REQUIRED",
+    "automatedTrading": false,
+    "mcpSignsOrSubmits": false,
+    "walletBoundary": "An external wallet must independently review, sign, and submit any prepared call."
   },
   "platforms": {
+    "nfh_marketplace": {
+      "contract": "0x9eAa937443595f14E739C7bf565420019169Be13",
+      "compatibility": "deployed-read-only-native-preparation-blocked-transfer-validator-policy",
+      "publishedCheckpointPaused": false,
+      "publishedCheckpointTransferValidatorPermitsMarketplace": false,
+      "publishedCheckpointIsNotExecutionAuthority": true,
+      "liveStatusTool": "get_mainnet_marketplace_status",
+      "readDiscovery": true,
+      "unsignedPreparation": "disabled at the published checkpoint; all native preparation tools return zero executable steps until a separately approved validator-policy change is executed and live-verified",
+      "nativeOfferAcceptancePreparation": false,
+      "nativeOfferAcceptanceReasonCode": "CONTRACT_PRICE_BINDING_REQUIRED"
+    },
     "opensea": {
-      "compatibility": "automatic-after-first-mint",
-      "requirements": ["deployed ERC-721", "valid tokenURI", "contractURI", "configured creator-fee validator", "restricted Seaport order"],
+      "compatibility": "read-discovery-only-until-provider-semantic-validation",
+      "requirements": ["indexed deployed ERC-721", "valid tokenURI", "contractURI", "configured creator-fee validator", "complete provider-output semantic validation"],
       "settlement": "Seaport restricted orders with creator-fee transfer validation",
-      "royaltyBps": 1000
+      "royaltyBps": 750,
+      "unsignedActionPreparationEnabled": false,
+      "automatedTrading": false
     },
     "tokenworks_fwa": {
       "compatibility": "agent-layer-only",

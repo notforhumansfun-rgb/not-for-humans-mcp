@@ -16,7 +16,7 @@ The preview address is only for local validation. Never publish or register thos
 
 ## Production gate
 
-Only after the production 2-of-3 Safe exists, the MCP endpoint and source are frozen, and independent review is complete:
+Only after the exact production Safe caller path is selected, the MCP endpoint and source are frozen, independent review is complete, and the registry action is separately authorized:
 
 ```zsh
 NFH_ERC8257_CREATOR_ADDRESS=0x... \
@@ -28,4 +28,4 @@ npm run build -- --publish
 
 `npm run verify:published` repeats the exact-file, UTF-8/BOM, origin, creator, and JCS-hash checks. The MCP deployment script runs that preflight and scans hidden well-known files for excluded public identity strings before uploading anything.
 
-The current focused set maps directly to existing MCP tools: corpus inspection, Census decisions, listing, purchase, trait-offer discovery and preparation, offer acceptance, and transfer preparation. Market outputs remain provider data until the wallet independently validates their target, calldata, NFH asset, consideration, zone, validator, and 10% royalty.
+The current focused set maps directly to existing MCP tools: corpus inspection, Census decisions, listing, purchase, trait-offer discovery and preparation, offer acceptance, and transfer preparation. Market outputs remain provider data until the wallet independently validates their target, calldata, NFH asset, consideration, zone, validator, and 7.5% royalty.

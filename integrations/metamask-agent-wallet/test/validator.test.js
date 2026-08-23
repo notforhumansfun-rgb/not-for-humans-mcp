@@ -143,7 +143,7 @@ test('accepts a canonical refusal and rejects an ACCEPT encoded as AgentDecision
   assert.throws(() => validate(refusal), /REFUSE \(2\) or INSUFFICIENT_AUTHORITY \(3\)/);
 });
 
-test('integration target and public constitution stay synchronized with canonical Sepolia project files', async () => {
+test('historical v16 target stays internally consistent and cannot impersonate the current v19 market', async () => {
   const [target, census, canary, origin, constitution, market] = await Promise.all([
     readJson(new URL('../config/sepolia.json', import.meta.url)),
     readJson(new URL('../../../server/corpus/census.json', import.meta.url)),
@@ -163,7 +163,8 @@ test('integration target and public constitution stay synchronized with canonica
   assert.equal(target.contracts.claimMinter.toLowerCase(), canary.minter.toLowerCase());
   assert.equal(target.contracts.token.toLowerCase(), canary.token.toLowerCase());
   assert.equal(target.contracts.agentState.toLowerCase(), canary.state.toLowerCase());
-  assert.equal(origin.artifactVersion, 14);
+  assert.equal(origin.artifactVersion, canary.artifactVersion);
+  assert.equal(origin.artifactVersion, 16);
   assert.match(origin.status, /historical/);
   const statementHashes = origin.receipts.map((receipt) => receipt.statementHash).filter(Boolean);
   assert.ok(statementHashes.some((hash) => hash.toLowerCase() === target.requiredStatement.toLowerCase()));
@@ -173,8 +174,11 @@ test('integration target and public constitution stay synchronized with canonica
     claimMinter: target.contracts.claimMinter,
     agentState: target.contracts.agentState,
   });
-  assert.equal(target.contracts.marketplace.toLowerCase(), market.internalMarketplace.marketplaceContract.toLowerCase());
+  assert.equal(target.contracts.marketplace.toLowerCase(), canary.marketplace.toLowerCase());
+  assert.equal(market.internalMarketplace.artifactVersion, 19);
+  assert.notEqual(target.contracts.marketplace.toLowerCase(), market.internalMarketplace.marketplaceContract.toLowerCase());
   assert.equal(target.contracts.weth.toLowerCase(), market.internalMarketplace.wethContract.toLowerCase());
+  assert.equal(target.status, 'local-sepolia-rehearsal-only');
   assert.equal(constitution.approval.automaticSigning, false);
   assert.equal(constitution.approval.automaticSubmission, false);
   assert.equal(target.signingAuthorized, false);

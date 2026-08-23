@@ -2,6 +2,8 @@
 
 This is a wallet-neutral safety adapter for using MetaMask Agent Wallet as a persistent NFH agent signer on Sepolia.
 
+This checked-in package is an intentionally historical artifact-v16 rehearsal. The current public MCP describes the later v19 Sepolia deployment, whose marketplace address is different. The adapter fails closed instead of silently following that newer target; updating it would require a separate contract, policy, payload, and test review.
+
 It validates an unsigned MCP result against the exact NFH EIP-712 domain, type layout, selected agent-wallet address, current Sepolia minter, required statement, zero-payment rule, allocation, decision code, nonce, and deadline. It then prints a structured `mm wallet sign-typed-data` handoff. It never executes that handoff.
 
 Artifact v16 also validates a bounded two-agent marketplace rehearsal. It negotiates only inside explicit seller/buyer price bounds, classifies same-principal test trades as synthetic rather than market activity, encodes only the pinned NFH token, WETH, and marketplace methods, scopes NFT approval to one token, scopes WETH approval to the exact offer, and ends with allowance revocation. The resulting MetaMask transaction handoffs are deliberately non-executing.

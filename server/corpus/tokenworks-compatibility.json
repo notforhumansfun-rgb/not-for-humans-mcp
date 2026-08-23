@@ -11,7 +11,7 @@
     "direct_action_preparation_enabled": false
   },
   "royalty_boundary": {
-    "nfh_royalty_bps": 1000,
+    "nfh_royalty_bps": 750,
     "erc2981_reports_terms_only": true,
     "fwa_royalty_aware_settlement_confirmed": false,
     "direct_deposits_enabled": false,

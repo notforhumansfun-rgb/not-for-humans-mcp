@@ -2,33 +2,240 @@ name: Publish NFH MCP Registry metadata
 
 on:
   workflow_dispatch:
+    inputs:
+      release_commit:
+        description: Exact protected-main commit resolved by the annotated v0.24.0 tag
+        required: true
+        type: string
+      approve_registry_publication:
+        description: Publish the exact reviewed metadata after the protected-environment approval
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
+concurrency:
+  group: nfh-mcp-registry-v0.24.0
+  cancel-in-progress: false
+
 jobs:
-  publish:
-    runs-on: ubuntu-latest
+  verify-release:
+    if: ${{ inputs.approve_registry_publication == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     permissions:
       contents: read
+    outputs:
+      payload_sha256: ${{ steps.payload.outputs.sha256 }}
+    steps:
+      - name: Checkout exact public release tag without publication authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: v0.24.0
+          fetch-depth: 0
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
+
+      - name: Bind the annotated tag and executing workflow to protected main
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git cat-file -t refs/tags/v0.24.0)" = "tag"
+          test "$(git rev-list -n 1 refs/tags/v0.24.0)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse refs/remotes/origin/main)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+          node scripts/source-release.mjs --verify
+
+      - name: Run the exact public-release verification gate
+        run: bash scripts/verify-public-release.sh
+
+      - name: Verify exact served MCP discovery and attestation
+        run: node scripts/verify-live-mcp.mjs
+
+      - name: Require explicit metadata authorization on this immutable release
+        run: |
+          jq -e '
+            .version == "0.24.0"
+            and .name == "io.github.notforhumansfun-rgb/not-for-humans"
+            and .repository.url == "https://github.com/notforhumansfun-rgb/not-for-humans-mcp"
+            and .remotes == [{"type":"streamable-http","url":"https://mcp.notforhumans.fun/mcp"}]
+            and ._meta["io.modelcontextprotocol.registry/publisher-provided"].publicationAuthorized == true
+          ' server.json
+
+      - name: Require the immutable Registry version to be unused
+        run: |
+          status="$(curl --silent --show-error \
+            --output "$RUNNER_TEMP/existing-registry-record.json" \
+            --write-out '%{http_code}' \
+            'https://registry.modelcontextprotocol.io/v0.1/servers/io.github.notforhumansfun-rgb%2Fnot-for-humans/versions/0.24.0')"
+          test "$status" = "404"
+
+      - name: Install checksum-pinned MCP publisher 1.7.9 for unprivileged validation
+        run: |
+          curl -L --fail --silent --show-error \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_linux_amd64.tar.gz \
+            -o "$RUNNER_TEMP/mcp-publisher.tar.gz"
+          echo "ab128162b0616090b47cf245afe0a23f3ef08936fdce19074f5ba0a4469281ac  $RUNNER_TEMP/mcp-publisher.tar.gz" | sha256sum --check
+          tar xzf "$RUNNER_TEMP/mcp-publisher.tar.gz" -C "$RUNNER_TEMP" mcp-publisher
+          "$RUNNER_TEMP/mcp-publisher" --version 2>&1 | grep -F "mcp-publisher 1.7.9"
+          "$RUNNER_TEMP/mcp-publisher" validate
+
+      - name: Seal the exact Registry payload
+        id: payload
+        run: |
+          install -d -m 0755 "$RUNNER_TEMP/registry-payload"
+          install -m 0644 server.json "$RUNNER_TEMP/registry-payload/server.json"
+          sha256="$(sha256sum "$RUNNER_TEMP/registry-payload/server.json" | cut -d ' ' -f 1)"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Retain the exact verified Registry payload for the approval boundary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nfh-registry-payload-${{ github.sha }}
+          path: ${{ runner.temp }}/registry-payload/server.json
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: verify-release
+    if: ${{ inputs.approve_registry_publication == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: nfh-mcp-registry-publication
+      url: https://registry.modelcontextprotocol.io/v0.1/servers/io.github.notforhumansfun-rgb%2Fnot-for-humans/versions/0.24.0
+    permissions:
+      actions: read
       id-token: write
     steps:
-      - name: Checkout canonical metadata
-        uses: actions/checkout@v5
+      - name: Download only the sealed Registry payload
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: nfh-registry-payload-${{ github.sha }}
+          path: registry-payload
 
-      - name: Install pinned MCP publisher
+      - name: Recheck the protected approval boundary and exact payload
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+          EXPECTED_PAYLOAD_SHA256: ${{ needs.verify-release.outputs.payload_sha256 }}
         run: |
-          curl -L --fail --show-error \
-            https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_linux_amd64.tar.gz \
-            -o mcp-publisher.tar.gz
-          echo "ab128162b0616090b47cf245afe0a23f3ef08936fdce19074f5ba0a4469281ac  mcp-publisher.tar.gz" | sha256sum --check
-          tar xzf mcp-publisher.tar.gz mcp-publisher
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          [[ "$EXPECTED_PAYLOAD_SHA256" =~ ^[0-9a-f]{64}$ ]]
+          test -f registry-payload/server.json
+          test ! -L registry-payload/server.json
+          test "$(find registry-payload -type f | wc -l | tr -d ' ')" = "1"
+          echo "$EXPECTED_PAYLOAD_SHA256  registry-payload/server.json" | sha256sum --check
+          jq -e '
+            .version == "0.24.0"
+            and .name == "io.github.notforhumansfun-rgb/not-for-humans"
+            and .repository.url == "https://github.com/notforhumansfun-rgb/not-for-humans-mcp"
+            and .remotes == [{"type":"streamable-http","url":"https://mcp.notforhumans.fun/mcp"}]
+            and ._meta["io.modelcontextprotocol.registry/publisher-provided"].publicationAuthorized == true
+          ' registry-payload/server.json
 
-      - name: Validate exact metadata
-        run: ./mcp-publisher validate server.json
+      - name: Install checksum-pinned MCP publisher 1.7.9
+        run: |
+          curl -L --fail --silent --show-error \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.7.9/mcp-publisher_linux_amd64.tar.gz \
+            -o "$RUNNER_TEMP/mcp-publisher.tar.gz"
+          echo "ab128162b0616090b47cf245afe0a23f3ef08936fdce19074f5ba0a4469281ac  $RUNNER_TEMP/mcp-publisher.tar.gz" | sha256sum --check
+          tar xzf "$RUNNER_TEMP/mcp-publisher.tar.gz" -C "$RUNNER_TEMP" mcp-publisher
+          "$RUNNER_TEMP/mcp-publisher" --version 2>&1 | grep -F "mcp-publisher 1.7.9"
+
+      - name: Validate the sealed payload against the official Registry
+        working-directory: registry-payload
+        run: '"$RUNNER_TEMP/mcp-publisher" validate'
 
       - name: Authenticate with GitHub OIDC
-        run: ./mcp-publisher login github-oidc
+        working-directory: registry-payload
+        run: '"$RUNNER_TEMP/mcp-publisher" login github-oidc'
 
-      - name: Publish exact metadata
-        run: ./mcp-publisher publish server.json
+      - name: Publish the sealed payload
+        working-directory: registry-payload
+        run: '"$RUNNER_TEMP/mcp-publisher" publish'
+
+  post-publish:
+    needs:
+      - verify-release
+      - publish
+    if: ${{ success() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the exact published source without OIDC authority
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: v0.24.0
+          fetch-depth: 0
+
+      - name: Use pinned Node runtime
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.8.0
+
+      - name: Recheck the exact published source without OIDC authority
+        env:
+          EXPECTED_PUBLIC_COMMIT: ${{ inputs.release_commit }}
+          DISPATCH_COMMIT: ${{ github.sha }}
+          WORKFLOW_SOURCE_COMMIT: ${{ github.workflow_sha }}
+        run: |
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_REF_PROTECTED" = "true"
+          [[ "$EXPECTED_PUBLIC_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$DISPATCH_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$WORKFLOW_SOURCE_COMMIT" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git cat-file -t refs/tags/v0.24.0)" = "tag"
+          test "$(git rev-list -n 1 refs/tags/v0.24.0)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git rev-parse refs/remotes/origin/main)" = "$EXPECTED_PUBLIC_COMMIT"
+          test "$(git status --porcelain --untracked-files=all)" = ""
+          node scripts/source-release.mjs --verify
+
+      - name: Deep-compare the official Registry record with the published payload
+        run: |
+          curl --fail --silent --show-error \
+            'https://registry.modelcontextprotocol.io/v0.1/servers/io.github.notforhumansfun-rgb%2Fnot-for-humans/versions/0.24.0' \
+            -o "$RUNNER_TEMP/registry-record.json"
+          jq -e --slurpfile expected server.json '.server == $expected[0]' "$RUNNER_TEMP/registry-record.json"
+
+      - name: Verify exact served MCP discovery and attestation again
+        run: node scripts/verify-live-mcp.mjs
+
+      - name: Complete the live founder-away gate
+        env:
+          NFH_MONITOR_OUTPUT: ${{ runner.temp }}/founder-away-monitor-report.json
+          NFH_PULSE_OUTPUT: ${{ runner.temp }}/network-pulse.json
+        run: node operations/founder-away/monitor.mjs
+
+      - name: Retain exact post-publication evidence for 60 days
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nfh-registry-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/registry-record.json
+            ${{ runner.temp }}/founder-away-monitor-report.json
+            ${{ runner.temp }}/network-pulse.json
+          if-no-files-found: warn
+          retention-days: 60

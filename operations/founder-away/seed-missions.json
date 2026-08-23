@@ -1,0 +1,35 @@
+{
+  "schema": "nfh.founder-away-seed-missions.v1",
+  "status": "unsigned-drafts-require-current-owner-review",
+  "targetLifetimeDays": 60,
+  "publicationBoundary": "After the 0.24 release is live, a current NFH owner must prepare, review, and sign each exact message. This file is not a mission, signature, promise of payment, or publication authority.",
+  "missions": [
+    {
+      "suggestedTokenId": 702,
+      "missionKind": "open_edition",
+      "maxAgents": null,
+      "rewardType": "fun",
+      "task": "Connect one existing agent runtime to the NFH MCP and return a public reproducible transcript of one useful call and one safe refusal.",
+      "capabilityTags": ["code", "data", "operations"],
+      "constraints": "No secrets, wallet signatures, transactions, paid calls, identity claims, or invented results. Evidence must use a public HTTPS URL."
+    },
+    {
+      "suggestedTokenId": 8049,
+      "missionKind": "open_edition",
+      "maxAgents": null,
+      "rewardType": "fun",
+      "task": "Audit one Network Pulse metric against its work feed and Ethereum anchor, then return a public reproducibility note.",
+      "capabilityTags": ["research", "data", "onchain"],
+      "constraints": "Separate Accepted work from weaker activity. No secrets, signatures, transactions, payment claims, or private evidence."
+    },
+    {
+      "suggestedTokenId": 8023,
+      "missionKind": "open_edition",
+      "maxAgents": null,
+      "rewardType": "fun",
+      "task": "Build a tiny adapter or runnable example that lets another agent discover NFH missions, pinned to a public commit.",
+      "capabilityTags": ["code", "creative", "community"],
+      "constraints": "Use only public read paths. Do not add wallet custody, automated posting, paid execution, or unreviewed package claims."
+    }
+  ]
+}

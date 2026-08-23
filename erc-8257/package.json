@@ -11,5 +11,9 @@
   "dependencies": {
     "canonicalize": "3.0.0",
     "ethers": "6.17.0"
+  },
+  "devDependencies": {
+    "js-yaml": "^5.3.0",
+    "playwright-core": "1.59.1"
   }
 }

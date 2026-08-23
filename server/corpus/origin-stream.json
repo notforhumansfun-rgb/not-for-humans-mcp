@@ -1,217 +1,375 @@
 {
   "schema": "notforhumans-origin-stream/1",
-  "status": "historical-indexed-artifact-v14",
-  "artifactVersion": 14,
+  "status": "verified-mainnet-token-zero-seed-finalized-plus-historical-sepolia",
+  "artifactVersion": 16,
+  "protocolVersion": "5.2",
+  "contractBuild": "v5.2-sepolia-artifact-integrity-v16-2026-08-08",
   "source": "canonical-chain-indexer",
   "canonicality": {
     "reorgAware": true,
-    "latestBlock": 11444042,
-    "finalizedBlock": 11443957,
+    "latestBlock": 11450201,
+    "finalizedBlock": 11450111,
     "confirmationDepth": 12,
-    "cursorBlock": 11444042,
-    "cursorBlockHash": "0x70ac6145965bf738d152bd45808e9504d845f148f0d9f8cc0ddd1385815e41f1"
+    "cursorBlock": 11450201,
+    "cursorBlockHash": "0xec36e05a577ed5432f5e1bebb51d0b9ebe08f8cb194cddbd9ebf5514a526a7f3"
   },
-  "generatedAt": "2026-08-08T08:18:36.000Z",
+  "generatedAt": "2026-08-09T05:27:36.000Z",
   "network": "sepolia",
   "chainId": 11155111,
   "contracts": {
-    "token": "0xF1f2ea07cA0A4276CcEb6c292714B7D7c28FE04A",
-    "minter": "0xAC25EE6D90140D0C15d7fDE1FfcB1D456D0BCf4e",
-    "state": "0x809813A4f8c9078143EAcF93AbEE72Ee8D306Ece"
+    "token": "0x85B63BaEFcc41341f4b218cD5F5F53F7a4090173",
+    "minter": "0x4316C6fde3DEd7329a0fbD1f1ebb6EaBaF05e3c5",
+    "state": "0x08b53375B342007636b5349352b417A0325B2460"
   },
   "counts": {
-    "total": 4,
-    "ACCEPT": 2,
+    "total": 5,
+    "ACCEPT": 3,
     "REFUSE": 1,
     "INSUFFICIENT_AUTHORITY": 1
   },
+  "mainnetCanonicality": {
+    "reorgAware": true,
+    "confirmationDepth": 12,
+    "checkpointBlock": 25815840,
+    "checkpointBlockHash": "0x2155b5af1621c4fc67fb0f3385fb870af7ec2908eff5548b8d4def6c92032def",
+    "checkpointTimestamp": "2026-08-23T05:43:59Z",
+    "seedFinalizationPending": false,
+    "seedFinalized": true,
+    "seedTargetBlock": 25782445,
+    "seedRound": 1,
+    "seedEntropyCommitment": "0x0c0ce5db6845910224312d4a372c765850ed82a770052bf85175bbf1ac1369bc",
+    "seed": "0xa5ae00bc12c65b9819ccb3a0b09a7d26dcfaf3475f81dedad49e9d9e7cbaa071"
+  },
+  "mainnetNetwork": "ethereum",
+  "mainnetChainId": 1,
+  "mainnetContracts": {
+    "token": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
+    "minter": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+    "state": "0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878"
+  },
+  "mainnetCounts": {
+    "total": 1,
+    "ACCEPT": 1,
+    "REFUSE": 0,
+    "INSUFFICIENT_AUTHORITY": 0
+  },
+  "mainnetReceipts": [
+    {
+      "schema": "notforhumans-origin-receipt/1",
+      "id": "1-e9ebd2eadd58-139",
+      "source": "canonical-chain-reconciliation",
+      "decision": "ACCEPT",
+      "decisionCode": 1,
+      "allocation": "PUBLIC",
+      "allocationCode": 0,
+      "tokenId": "0",
+      "agent": "0xC57Ca2cE0650895Cd717EA7f0e78987EC74396E6",
+      "operator": "0xC57Ca2cE0650895Cd717EA7f0e78987EC74396E6",
+      "recipient": "0xC57Ca2cE0650895Cd717EA7f0e78987EC74396E6",
+      "owner": "0xC57Ca2cE0650895Cd717EA7f0e78987EC74396E6",
+      "manifestHash": "0x723d07df6765b9e3f4b95f298a86a12b2f523602a5a53be020eaae545287968c",
+      "statementHash": "0x48ce377cf2b88b7935e82afe3c90b7b3e6c8348a5b8d0c8f61a0d1298bdafbca",
+      "reasonHash": null,
+      "digest": "0xf3e316e3bb1e4fb5ae97252721faeaa6d7a7c380957dff5f049729cb3210a09a",
+      "contracts": {
+        "token": "0xD66351858E0eFC5d9Bf2F541839797A763DF6223",
+        "minter": "0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5",
+        "state": "0xc7f28C66A891B6EB4d4fB0d0185160Af5A21d878"
+      },
+      "submission": {
+        "mode": "direct-agent-wallet",
+        "transactionValueWei": "0",
+        "pollingId": "1c04ca3d-a413-442d-8d86-288251d253f2"
+      },
+      "verification": {
+        "transactionStatus": 1,
+        "ownerOfVerified": true,
+        "nonceConsumed": true,
+        "walletClaimMinted": 1,
+        "totalSupply": 1,
+        "confirmationsAtCheckpoint": 12
+      },
+      "seed": {
+        "observationBoundary": "Historical state captured around the original claim receipt. The current finalized state is recorded separately in currentState.",
+        "targetBlock": "25782008",
+        "entropyCommitment": "0x0c0ce5db6845910224312d4a372c765850ed82a770052bf85175bbf1ac1369bc",
+        "round": "0",
+        "events": [
+          {
+            "event": "SeedCommitted",
+            "blockNumber": 25781944,
+            "blockHash": "0xf06b4940801b79100066a4be008c829a9dd52acee6d064b1b8aebcd3d84384e4",
+            "transactionHash": "0xe9ebd2eadd58e5aea7c8c5ab2fc57d75fba68e8df2ac6396de2cc3eb9545b8c5",
+            "logIndex": 138,
+            "status": "confirmed"
+          }
+        ],
+        "status": "historical-commitment-awaiting-finalization-at-receipt",
+        "currentState": {
+          "status": "finalized",
+          "targetBlock": "25782445",
+          "entropyCommitment": "0x0c0ce5db6845910224312d4a372c765850ed82a770052bf85175bbf1ac1369bc",
+          "round": "1",
+          "seed": "0xa5ae00bc12c65b9819ccb3a0b09a7d26dcfaf3475f81dedad49e9d9e7cbaa071",
+          "verifiedAtBlock": 25815840,
+          "verifiedAtBlockHash": "0x2155b5af1621c4fc67fb0f3385fb870af7ec2908eff5548b8d4def6c92032def"
+        }
+      },
+      "chain": {
+        "network": "ethereum",
+        "chainId": 1,
+        "blockNumber": 25781944,
+        "blockHash": "0xf06b4940801b79100066a4be008c829a9dd52acee6d064b1b8aebcd3d84384e4",
+        "transactionHash": "0xe9ebd2eadd58e5aea7c8c5ab2fc57d75fba68e8df2ac6396de2cc3eb9545b8c5",
+        "transactionUrl": "https://etherscan.io/tx/0xe9ebd2eadd58e5aea7c8c5ab2fc57d75fba68e8df2ac6396de2cc3eb9545b8c5",
+        "logIndex": 139,
+        "status": "confirmed"
+      },
+      "claimedUrl": "https://notforhumans.fun/claimed/0/0xe9ebd2eadd58e5aea7c8c5ab2fc57d75fba68e8df2ac6396de2cc3eb9545b8c5/0xc57ca2ce0650895cd717ea7f0e78987ec74396e6",
+      "shareAsset": "/pfp/0",
+      "display": {
+        "subject": "NFH #0",
+        "agent": "0xC57Ca2…4396E6",
+        "transaction": "0xe9ebd2…45b8c5"
+      }
+    }
+  ],
   "receipts": [
     {
       "schema": "notforhumans-origin-receipt/1",
-      "id": "11155111-e3c3e307545b-186",
+      "id": "11155111-1a6b5dd7aa09-159",
+      "source": "canonical-chain-indexer",
+      "decision": "ACCEPT",
+      "decisionCode": 1,
+      "allocation": "PUBLIC",
+      "allocationCode": 0,
+      "tokenId": "2",
+      "agent": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
+      "operator": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
+      "recipient": "0x449e8c70F69b418c45Cb4176a6b0D01C1A9b1C57",
+      "manifestHash": "0x7f75c04f88e048f31f76dac72c4208c0297b06e8e7b4dda5c6c2176568ef9cb4",
+      "statementHash": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
+      "reasonHash": null,
+      "digest": "0xbe1aa891e09dd3b7a1c9bf421400a277d9f6af5b9cf111f06575579925ab83e8",
+      "seed": {
+        "targetBlock": "11447312",
+        "entropyCommitment": "0xb2274868ecdb69b88a93533d72623483eae6c3ce08ef6aac35d7b02674ccdf04",
+        "round": "0",
+        "events": [
+          {
+            "event": "SeedCommitted",
+            "blockNumber": 11447248,
+            "blockHash": "0xac5bf0db6376836ca7e540e3f6feb1411706094c1b314816ee95282adff0d597",
+            "transactionHash": "0x1a6b5dd7aa095a9304ccbecca4a2876478ca269f464f1ac469834c2cfb30b531",
+            "logIndex": 158,
+            "status": "finalized"
+          }
+        ],
+        "status": "finalized"
+      },
+      "chain": {
+        "network": "sepolia",
+        "chainId": 11155111,
+        "blockNumber": 11447248,
+        "blockHash": "0xac5bf0db6376836ca7e540e3f6feb1411706094c1b314816ee95282adff0d597",
+        "transactionHash": "0x1a6b5dd7aa095a9304ccbecca4a2876478ca269f464f1ac469834c2cfb30b531",
+        "transactionUrl": "https://sepolia.etherscan.io/tx/0x1a6b5dd7aa095a9304ccbecca4a2876478ca269f464f1ac469834c2cfb30b531",
+        "logIndex": 159,
+        "status": "finalized"
+      },
+      "shareAsset": "/assets/origin/11155111-1a6b5dd7aa09-159.svg",
+      "display": {
+        "subject": "NFH #2",
+        "agent": "0x449e8c…9b1C57",
+        "transaction": "0x1a6b5d…30b531"
+      }
+    },
+    {
+      "schema": "notforhumans-origin-receipt/1",
+      "id": "11155111-c5538eef077f-160",
       "source": "canonical-chain-indexer",
       "decision": "ACCEPT",
       "decisionCode": 1,
       "allocation": "FOUNDING",
       "allocationCode": 1,
       "tokenId": "1",
-      "agent": "0x03520dcf5c28f58b560DF9e197F9a87BDB51d189",
+      "agent": "0x62958A20E775F51657a979DD4706AB17c226a78B",
       "operator": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
-      "recipient": "0x2be1572757651A580f7e66bEF12F50ee6162ec0e",
-      "manifestHash": "0xcea1e77a08b3e8aa7e46ed0372ff46b78e8a7a63e665aa6af3889f9720ae6352",
+      "recipient": "0x3b67d5A7F9be710266B9540Fa2Bfa92349DeB15F",
+      "manifestHash": "0x7fd79991601605341d18a50dfb91e8cc0902ebb27598b598d939820fc804ebaa",
       "statementHash": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
       "reasonHash": null,
-      "digest": "0x2a39969d96f5b7fae54ffd6540944bdc887e85f6083571fad9e3e7a3e383c383",
+      "digest": "0x2c5e61a77554192fe8a6a2017fdbf218c3c96a7843fb6c1ca5ba6f11dffabc5e",
       "seed": {
-        "targetBlock": "11443848",
-        "entropyCommitment": "0x74d12a51c8edbb92c29af25126844429483544203683faf9fb9b120459d08c37",
+        "targetBlock": "11446948",
+        "entropyCommitment": "0x443a00aae139c5faa0bb5b6a77cb6004db315b89b8623610b84591659b58978b",
         "round": "0",
-        "seed": "0x67666979f09dca1c22697ae3d8eaeae0dfc9245ecf55de25cfa382bd512dc150",
-        "finalizedTransactionHash": "0x7add1fe043c36a76eb86dc2bc29a29443e9f5c140e22bb5b5091cb2717ece481",
+        "seed": "0xe073e14c24624997abdc524c27d5e4e6e31b7fcf90cae725ca66dc1026e50296",
+        "finalizedTransactionHash": "0x9928a53164b7d35ceece6dd0162fb9ba0b39d541c1872285fde6bc519c7ee2ed",
         "events": [
           {
             "event": "SeedCommitted",
-            "blockNumber": 11443784,
-            "blockHash": "0x0a30455837894eca72d257e1a01021a7b43405fa04ebf9eb30764dd64e44aab9",
-            "transactionHash": "0xe3c3e307545b25a80221c1610cefd5da8183482c46f97a850e51d51320f2913a",
-            "logIndex": 185,
+            "blockNumber": 11446884,
+            "blockHash": "0x82cdf1ab989d5a9f93e17d2d3110c8eaf2122b5342d87e265dbecc41b9a837c8",
+            "transactionHash": "0xc5538eef077f8aa4d8edaa90c99e5854151f544cde113187690332f129b1eac1",
+            "logIndex": 159,
             "status": "finalized"
           },
           {
             "event": "SeedFinalized",
-            "blockNumber": 11443960,
-            "blockHash": "0x33afa1ba19c7c0a6e00a295ee96932a040a7d1537c28b53062eed4d8df0d2f78",
-            "transactionHash": "0x7add1fe043c36a76eb86dc2bc29a29443e9f5c140e22bb5b5091cb2717ece481",
-            "logIndex": 270,
-            "status": "confirmed"
+            "blockNumber": 11447052,
+            "blockHash": "0x717b54fe2ba5249d61af61999ab050bd1a56f2cec3e4c9b412546ba9c937300b",
+            "transactionHash": "0x9928a53164b7d35ceece6dd0162fb9ba0b39d541c1872285fde6bc519c7ee2ed",
+            "logIndex": 250,
+            "status": "finalized"
           }
         ],
-        "status": "confirmed"
+        "status": "finalized"
       },
       "chain": {
         "network": "sepolia",
         "chainId": 11155111,
-        "blockNumber": 11443784,
-        "blockHash": "0x0a30455837894eca72d257e1a01021a7b43405fa04ebf9eb30764dd64e44aab9",
-        "transactionHash": "0xe3c3e307545b25a80221c1610cefd5da8183482c46f97a850e51d51320f2913a",
-        "transactionUrl": "https://sepolia.etherscan.io/tx/0xe3c3e307545b25a80221c1610cefd5da8183482c46f97a850e51d51320f2913a",
-        "logIndex": 186,
-        "status": "confirmed"
+        "blockNumber": 11446884,
+        "blockHash": "0x82cdf1ab989d5a9f93e17d2d3110c8eaf2122b5342d87e265dbecc41b9a837c8",
+        "transactionHash": "0xc5538eef077f8aa4d8edaa90c99e5854151f544cde113187690332f129b1eac1",
+        "transactionUrl": "https://sepolia.etherscan.io/tx/0xc5538eef077f8aa4d8edaa90c99e5854151f544cde113187690332f129b1eac1",
+        "logIndex": 160,
+        "status": "finalized"
       },
-      "shareAsset": "/assets/origin/11155111-e3c3e307545b-186.svg",
+      "shareAsset": "/assets/origin/11155111-c5538eef077f-160.svg",
       "display": {
         "subject": "NFH #1",
-        "agent": "0x03520d…51d189",
-        "transaction": "0xe3c3e3…f2913a"
+        "agent": "0x62958A…26a78B",
+        "transaction": "0xc5538e…b1eac1"
       }
     },
     {
       "schema": "notforhumans-origin-receipt/1",
-      "id": "11155111-062e0794a162-318",
+      "id": "11155111-62a9dfb755a8-232",
       "source": "canonical-chain-indexer",
       "decision": "INSUFFICIENT_AUTHORITY",
       "decisionCode": 3,
       "allocation": "FOUNDING",
       "allocationCode": 1,
       "tokenId": null,
-      "agent": "0x7af3c0934AbA38c0533FfFdac150B90144d4293E",
+      "agent": "0x4BeE1adC3722f61A8D109DF8F9Bf94BacaaFcF02",
       "operator": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
       "recipient": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
       "manifestHash": null,
       "statementHash": null,
       "reasonHash": "0x62cabfdd0a085d93c4e9f189bb3baca44e48d7b891a831acf934b6d514c3d263",
-      "digest": "0x5f464f9f0545f0d2b135d105783a70666fb44e78fdc61770bfb396cbfd88e0c7",
+      "digest": "0xa0887ffdf71c4c3b11c7b0ac200af564548dab1ee168ca91191f6b9130cda097",
       "seed": null,
       "chain": {
         "network": "sepolia",
         "chainId": 11155111,
-        "blockNumber": 11443781,
-        "blockHash": "0x241acba0835e989e9e9d2e8ad6135bfff797e14e0c88162f4b16c84395b21fef",
-        "transactionHash": "0x062e0794a1620a5479474ac63eddf15ad5ea03b32ea804508d61e04eba3ceec1",
-        "transactionUrl": "https://sepolia.etherscan.io/tx/0x062e0794a1620a5479474ac63eddf15ad5ea03b32ea804508d61e04eba3ceec1",
-        "logIndex": 318,
+        "blockNumber": 11446881,
+        "blockHash": "0x2306a7ea848a4c02dfa98a632e026c84c53a12debd5a510478119fd6ca4bf5d8",
+        "transactionHash": "0x62a9dfb755a8a388e6714fe54149ff1ada2a56a083875b511d65869953ae85b1",
+        "transactionUrl": "https://sepolia.etherscan.io/tx/0x62a9dfb755a8a388e6714fe54149ff1ada2a56a083875b511d65869953ae85b1",
+        "logIndex": 232,
         "status": "finalized"
       },
-      "shareAsset": "/assets/origin/11155111-062e0794a162-318.svg",
+      "shareAsset": "/assets/origin/11155111-62a9dfb755a8-232.svg",
       "display": {
-        "subject": "0x7af3c0…d4293E",
-        "agent": "0x7af3c0…d4293E",
-        "transaction": "0x062e07…3ceec1"
+        "subject": "0x4BeE1a…aFcF02",
+        "agent": "0x4BeE1a…aFcF02",
+        "transaction": "0x62a9df…ae85b1"
       }
     },
     {
       "schema": "notforhumans-origin-receipt/1",
-      "id": "11155111-9bfdb43ac54f-201",
+      "id": "11155111-6c4e24ab9969-202",
       "source": "canonical-chain-indexer",
       "decision": "REFUSE",
       "decisionCode": 2,
       "allocation": "FOUNDING",
       "allocationCode": 1,
       "tokenId": null,
-      "agent": "0x3Ba3d2B8F1AeBBd2E6f3C806f6e81a6379E81424",
+      "agent": "0xbb944194f7018D0a49Ec74Eef375DEb27B5eD884",
       "operator": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
       "recipient": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
       "manifestHash": null,
       "statementHash": null,
       "reasonHash": "0x1c52cdb934121a351c20afacceb7f5918e6fcc9bd7d59ad3078cfe4f11c8f875",
-      "digest": "0x5a90ff23a1eb7c07d2d410946f934b3134e36f9e249f962085fef80f8827792c",
+      "digest": "0x75f61dbe5a1f22b046254b7020afdff1a7cebc934f7305c1121180d17d67e177",
       "seed": null,
       "chain": {
         "network": "sepolia",
         "chainId": 11155111,
-        "blockNumber": 11443778,
-        "blockHash": "0xb0e57e74246177f5c6868da910948ae7275fc46d124a3663c1482bbb04bc70b5",
-        "transactionHash": "0x9bfdb43ac54fd8f26e64de2aeab32b067b8b2d6ed54b7f46f81fe71b2fdb6e0c",
-        "transactionUrl": "https://sepolia.etherscan.io/tx/0x9bfdb43ac54fd8f26e64de2aeab32b067b8b2d6ed54b7f46f81fe71b2fdb6e0c",
-        "logIndex": 201,
+        "blockNumber": 11446878,
+        "blockHash": "0x8708f00d7f84ab7a1d475c0abb6955c28773149001b6e7b33ffdb5f5c9a9118f",
+        "transactionHash": "0x6c4e24ab996949760dab8c6c3d3e6f700065f487737de7f33aa9f078bfeb4633",
+        "transactionUrl": "https://sepolia.etherscan.io/tx/0x6c4e24ab996949760dab8c6c3d3e6f700065f487737de7f33aa9f078bfeb4633",
+        "logIndex": 202,
         "status": "finalized"
       },
-      "shareAsset": "/assets/origin/11155111-9bfdb43ac54f-201.svg",
+      "shareAsset": "/assets/origin/11155111-6c4e24ab9969-202.svg",
       "display": {
-        "subject": "0x3Ba3d2…E81424",
-        "agent": "0x3Ba3d2…E81424",
-        "transaction": "0x9bfdb4…db6e0c"
+        "subject": "0xbb9441…5eD884",
+        "agent": "0xbb9441…5eD884",
+        "transaction": "0x6c4e24…eb4633"
       }
     },
     {
       "schema": "notforhumans-origin-receipt/1",
-      "id": "11155111-25fa572a678a-156",
+      "id": "11155111-93a8fb485608-3",
       "source": "canonical-chain-indexer",
       "decision": "ACCEPT",
       "decisionCode": 1,
       "allocation": "FOUNDING",
       "allocationCode": 1,
       "tokenId": "0",
-      "agent": "0xF086073D92Fc64dE031e2E8E38Ee7abABeDC0C1a",
+      "agent": "0xA6a0e39a4894eed126381E7e96EB1744dCF5B007",
       "operator": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
       "recipient": "0x5BF80654E01a7BD7254DE5528811611aE23825f3",
-      "manifestHash": "0xb07d450b48719db491c2e6062e238c5c5cd47cac2b045a4fc5ebb1db738bf251",
+      "manifestHash": "0x8dbe95994191eb7103c170a57a5ebc5624038f97885893939db87b1f04adc00f",
       "statementHash": "0xe61e98dbe87e063a09e385987f12f1ddf00db0b9680bfe7612e2a007e9b84bdb",
       "reasonHash": null,
-      "digest": "0x83156d6de052de733dcc6b3cd4779d1f370533561ea7dd328a12aa64ff9dc990",
+      "digest": "0x29db04e9ce19e064c5024c114a8bd28562b0f30cb3b2f4efda3207a485d1bf04",
       "seed": {
-        "targetBlock": "11443839",
-        "entropyCommitment": "0x816e4b0c6cdd65bc68e017b0e48c10387819d747fba265b9af679a886484caf9",
+        "targetBlock": "11446933",
+        "entropyCommitment": "0x2c09eb32638659f8530f82809b16392d2390c29e9a0ae4369ce18d1f11a3bb6e",
         "round": "0",
-        "seed": "0x0ef95937e6242b04c5751422e2c276f13e5333e6ea7a7f6a7a08a3b864712d01",
-        "finalizedTransactionHash": "0x30d57d196c5d9e569b038b4a85db6749e089df597ad0259c41381e2da980416f",
+        "seed": "0xefc4ee2608b70b33a36a2d6f934db7943a1c628622dd5ffff95e7d8101ddc80c",
+        "finalizedTransactionHash": "0xb08877d8c57bde6d0e64e26a6550af1153a3bbfc399bb125a0f8b7790172bb07",
         "events": [
           {
             "event": "SeedCommitted",
-            "blockNumber": 11443775,
-            "blockHash": "0xfa10afa4969e5b51672e2c7f07fb0eb2deaf4c3b99f0667ec4c6dffb269fb2f9",
-            "transactionHash": "0x25fa572a678a908cc9484140dc5fd47a748dd30649ebf5e500384a9cbd3f1f41",
-            "logIndex": 155,
+            "blockNumber": 11446869,
+            "blockHash": "0x8364a1cd04a883b9ec5679ae03fce659b98ed304c748c01c9e6aff4dabafa15b",
+            "transactionHash": "0x93a8fb4856089f471d9d61c330e0a05aa6e336d38ba6d38e6f0037ef58ca0cc4",
+            "logIndex": 2,
             "status": "finalized"
           },
           {
             "event": "SeedFinalized",
-            "blockNumber": 11443959,
-            "blockHash": "0x2d62c95856243ea026e1d6eaa21801e42bc3770c02462dd5aae4ff40fc938edf",
-            "transactionHash": "0x30d57d196c5d9e569b038b4a85db6749e089df597ad0259c41381e2da980416f",
-            "logIndex": 131,
-            "status": "confirmed"
+            "blockNumber": 11447051,
+            "blockHash": "0x812951648d21595b8e1036b45a65a7250ce4589ba21a4426b7bd7a9975e2fb1c",
+            "transactionHash": "0xb08877d8c57bde6d0e64e26a6550af1153a3bbfc399bb125a0f8b7790172bb07",
+            "logIndex": 178,
+            "status": "finalized"
           }
         ],
-        "status": "confirmed"
+        "status": "finalized"
       },
       "chain": {
         "network": "sepolia",
         "chainId": 11155111,
-        "blockNumber": 11443775,
-        "blockHash": "0xfa10afa4969e5b51672e2c7f07fb0eb2deaf4c3b99f0667ec4c6dffb269fb2f9",
-        "transactionHash": "0x25fa572a678a908cc9484140dc5fd47a748dd30649ebf5e500384a9cbd3f1f41",
-        "transactionUrl": "https://sepolia.etherscan.io/tx/0x25fa572a678a908cc9484140dc5fd47a748dd30649ebf5e500384a9cbd3f1f41",
-        "logIndex": 156,
-        "status": "confirmed"
+        "blockNumber": 11446869,
+        "blockHash": "0x8364a1cd04a883b9ec5679ae03fce659b98ed304c748c01c9e6aff4dabafa15b",
+        "transactionHash": "0x93a8fb4856089f471d9d61c330e0a05aa6e336d38ba6d38e6f0037ef58ca0cc4",
+        "transactionUrl": "https://sepolia.etherscan.io/tx/0x93a8fb4856089f471d9d61c330e0a05aa6e336d38ba6d38e6f0037ef58ca0cc4",
+        "logIndex": 3,
+        "status": "finalized"
       },
-      "shareAsset": "/assets/origin/11155111-25fa572a678a-156.svg",
+      "shareAsset": "/assets/origin/11155111-93a8fb485608-3.svg",
       "display": {
         "subject": "NFH #0",
-        "agent": "0xF08607…DC0C1a",
-        "transaction": "0x25fa57…3f1f41"
+        "agent": "0xA6a0e3…F5B007",
+        "transaction": "0x93a8fb…ca0cc4"
       }
     }
   ],
-  "warning": "Observed events may be reorganized. Confirmed events have the configured confirmation depth. Finalized is used only when the RPC exposes Ethereum's finalized block tag."
+  "warning": "mainnetReceipts contains only canonical Ethereum receipts. receipts preserves historical Sepolia rehearsal evidence. Token IDs are chain-local and must never be joined across those arrays. Observed events may be reorganized. Confirmed events have the configured confirmation depth. Finalized is used only when the RPC exposes Ethereum's finalized block tag."
 }

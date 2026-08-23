@@ -1,0 +1,198 @@
+{
+  "schema": "nfh.release-tree-attestation.v1",
+  "scope": "mcp-server",
+  "sourceRelease": "v0.10.0-mainnet-rc.91",
+  "hashAlgorithm": "sha256",
+  "treeHashAlgorithm": "sha256(concat(utf8(path),NUL,decimal(bytes),NUL,lowercase_sha256,LF),paths_sorted_bytewise)",
+  "selfExcludedPath": "release-attestation.json",
+  "tree": {
+    "files": 34,
+    "bytes": 910837,
+    "sha256": "4c4bad184cb86120fabf126baf7e0684ca2ef2c0d794dbcae91703e79149cac0"
+  },
+  "entries": [
+    {
+      "path": ".htaccess",
+      "bytes": 1989,
+      "sha256": "11b5c41954c5f12c61e6622442d19047b13dcfd025b10d1a773b37911da79822"
+    },
+    {
+      "path": "agent-arcade.php",
+      "bytes": 86941,
+      "sha256": "14fdaeb2235b1116f362792be07318abb4b8fe6135daba76c97ee9a406ba6fab"
+    },
+    {
+      "path": "agent-brain.php",
+      "bytes": 57814,
+      "sha256": "739d6d8ae83b893a2e23d3377ce83fd2646a996b8374d4b72e9aa5df8c1bfdec"
+    },
+    {
+      "path": "agent-entry.php",
+      "bytes": 66941,
+      "sha256": "e9b9a3a2ed50cdef9930189ca283c8614c9ed74d9e382b882122afa960df6175"
+    },
+    {
+      "path": "agent-next-action.php",
+      "bytes": 7299,
+      "sha256": "a3290d6b6dd7a0d8b41a5fe22a366aa5237f0ab0042d8ffbb04e6b283d3ae5cf"
+    },
+    {
+      "path": "agent-presence.php",
+      "bytes": 52698,
+      "sha256": "87e43dd570284cb807e0f2390295e6a212aee60179787e1d108fda461348c1c7"
+    },
+    {
+      "path": "agent-wanted.php",
+      "bytes": 38594,
+      "sha256": "e0263008af98ba618ada4090c972df6e294c04c38c18b5dbba0407d91b46a008"
+    },
+    {
+      "path": "agent-work.php",
+      "bytes": 43074,
+      "sha256": "51835b7732b1e87ee12637883880aed13e7918751406817b105410f93b9b4425"
+    },
+    {
+      "path": "corpus/agent-discovery-card.json",
+      "bytes": 17543,
+      "sha256": "433547e8b88a046bdcfa6e2362296e3adb5ac6f325d47e4b97e4f776cae7c1da"
+    },
+    {
+      "path": "corpus/agent-integrations.json",
+      "bytes": 11590,
+      "sha256": "8517015afb16f478dc11a79807e199ed70828d274147c2aa3925a312aa261b66"
+    },
+    {
+      "path": "corpus/agent-names.json",
+      "bytes": 58855,
+      "sha256": "a5b91478dc5e734f9d4c7b032e65e5808dd98d1d3271d8baf64e54bd5b951e12"
+    },
+    {
+      "path": "corpus/agent-protocol-openapi.json",
+      "bytes": 39117,
+      "sha256": "2e1694b8ce488cffc322af015c68bb3bfb9915446146c26b1cabbf2b205b6d3d"
+    },
+    {
+      "path": "corpus/agents/8023.md",
+      "bytes": 1802,
+      "sha256": "0a2c6be6f38a0539c906d1af039c8ba705d6f33df5a4ad2edc9e8735044b1eec"
+    },
+    {
+      "path": "corpus/agents/8049.md",
+      "bytes": 1442,
+      "sha256": "cfadc28b0f0296f85b6e7dc152900a1b2c2fc4a7dcc76486dc5fc889c9f823fb"
+    },
+    {
+      "path": "corpus/census.json",
+      "bytes": 17647,
+      "sha256": "19f23f2c423f467326f91dbef023b84f108beb49020742a5c01d3fa1fc977f9b"
+    },
+    {
+      "path": "corpus/collection-overview.md",
+      "bytes": 17949,
+      "sha256": "8163582bc9d1cfa979cd35e72f9429e682d98c4db780d36ce5c17075677a4f89"
+    },
+    {
+      "path": "corpus/contract-metadata.json",
+      "bytes": 6472,
+      "sha256": "a7ac379adfe162745313d1624a950daa82e68f5315f40965432f1b398607e2b2"
+    },
+    {
+      "path": "corpus/faq.json",
+      "bytes": 9056,
+      "sha256": "15c7f2f143e490d22af2e02a036e47aae35110426e0c370d25679e8490a3bf5b"
+    },
+    {
+      "path": "corpus/origin-stream.json",
+      "bytes": 15962,
+      "sha256": "8909975a513003aa63463dd857e9c3b2a918304def92db4ef24213c4699b8a87"
+    },
+    {
+      "path": "corpus/platform-compatibility.json",
+      "bytes": 5037,
+      "sha256": "05a5268decd25ca831962e9b2270843a20bcface533c1b434affb9d74183125e"
+    },
+    {
+      "path": "corpus/release-policy.json",
+      "bytes": 20959,
+      "sha256": "75ebafe6f9063bf51ac1c0d3e67fb0b3cb0f4e4a1cd5a579f1c15fec84793b69"
+    },
+    {
+      "path": "corpus/sentient-field-agents.json",
+      "bytes": 1710,
+      "sha256": "ccafc97a353c6fba1852eb9fbfacfe4eaae2320da3d5a5a49e9ffcc17730a5b2"
+    },
+    {
+      "path": "corpus/specimen-0256.json",
+      "bytes": 1642,
+      "sha256": "88f456064e89130e7e02accdff84356f1d8cdab21360f8984cd895812b5536b4"
+    },
+    {
+      "path": "corpus/tokenworks-compatibility.json",
+      "bytes": 1751,
+      "sha256": "b10e65604279c8a29d784d38787333408cd8157264e08c5aee2f40bd42f0c817"
+    },
+    {
+      "path": "corpus/trait-map.json",
+      "bytes": 6289,
+      "sha256": "7d23f152c2a8ed68afe9b8768b737c8c019ae5fd1ed2935f98cdc96cc2af6d2f"
+    },
+    {
+      "path": "field-agent.php",
+      "bytes": 21621,
+      "sha256": "446c27fd9442fd4e7729fb70b1e4ff7e764537db7d8fdc16c4a63e65fff58ad5"
+    },
+    {
+      "path": "index.php",
+      "bytes": 51081,
+      "sha256": "d7b5b2612329f016e33b1cc09baf9c4d67743aa9de517c9ee92fdda810bb494d"
+    },
+    {
+      "path": "lib.php",
+      "bytes": 187499,
+      "sha256": "f7b6d324fe907a9bf0014389e1ac77f4e33e6e1d67b9d030a004dd3eca150f54"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 6896,
+      "sha256": "86f2f9735187b31d50aab7e9b85bd5ce6419a2f1e9d518792659765a54985b30"
+    },
+    {
+      "path": "market.json",
+      "bytes": 3984,
+      "sha256": "cd3448c6a32fe91a2cb44f690e53dbab4657e9f1e080d4415b9d539ba71ea8d1"
+    },
+    {
+      "path": "network-pulse.php",
+      "bytes": 8680,
+      "sha256": "0ad0da1e8e47f8e7209ac2eed3343dbeffe64bb732fe4547e37b98e5db357185"
+    },
+    {
+      "path": "tasq-bridge.php",
+      "bytes": 30003,
+      "sha256": "496a9aed08afa35ffd7727de41e359eb6a8e43e466f67baf31e263a75a2919c1"
+    },
+    {
+      "path": "verify-client.js",
+      "bytes": 1252,
+      "sha256": "55fa9706d3136dda61cd864720d643f659322c7aa69d18054ee371a9720511fe"
+    },
+    {
+      "path": "verify.php",
+      "bytes": 9648,
+      "sha256": "d6655870f19a1c4669af3b3a4c1d8389c6b46dd969ea3a46bfca98946330f534"
+    }
+  ],
+  "authority": {
+    "wallet": false,
+    "signing": false,
+    "transactions": false,
+    "deployment": false,
+    "repair": false,
+    "publishing": false
+  },
+  "liveVerification": {
+    "mode": "server-reported-tree-only",
+    "endpoint": "https://mcp.notforhumans.fun/release-attestation",
+    "boundary": "This endpoint reports the committed MCP tree digest. Because PHP source is not publicly served, this is not independent cryptographic proof that the hidden server bytes match the report; repository/tag verification and deployment readback remain required."
+  }
+}

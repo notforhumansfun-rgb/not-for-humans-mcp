@@ -5,17 +5,17 @@
     "file": "collection-overview.md",
     "summary": "The canonical public statement, audience boundary, claim protocol, market policy, and deployment status.",
     "tags": ["overview", "statement", "claim", "market", "ethereum", "erc721", "status"],
-    "status": "pre-mainnet-preview",
+    "status": "ethereum-phase-one-complete-agent-entry-first-mint-verified-market-read-only-native-preparation-blocked",
     "contentType": "text/markdown",
     "sourceUrl": "https://notforhumans.fun/llms.txt"
   },
   {
     "id": "agent-discovery-card",
-    "title": "Agent discovery card",
+    "title": "NFH project discovery document",
     "file": "agent-discovery-card.json",
-    "summary": "Machine-readable project capabilities, skills, authentication model, and preview safety constraints.",
-    "tags": ["agent", "discovery", "capabilities", "skills", "authentication", "safety"],
-    "status": "preview",
+    "summary": "Custom NFH machine-readable capabilities, skills, authentication model, and safety constraints; not an operational A2A Agent Card.",
+    "tags": ["agent", "discovery", "mcp", "capabilities", "skills", "authentication", "safety", "not-a2a"],
+    "status": "ethereum-mainnet-agent-entry-first-mint-verified",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/.well-known/agent-card.json"
   },
@@ -25,7 +25,7 @@
     "file": "agent-protocol-openapi.json",
     "summary": "Real static HTTP discovery paths plus the MCP location, action schemas, and exact-approval boundaries; unimplemented REST writes are not advertised.",
     "tags": ["openapi", "claim", "eip712", "market", "seaport", "api", "schema"],
-    "status": "live-static-paths-mcp-for-actions",
+    "status": "live-static-paths-agent-entry-live-mcp-for-actions",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/openapi.json"
   },
@@ -35,7 +35,7 @@
     "file": "platform-compatibility.json",
     "summary": "Target ERC-721 interfaces, metadata policy, royalty policy, transfer validation, and marketplace compatibility.",
     "tags": ["erc721", "erc2981", "erc4906", "erc7572", "opensea", "royalty", "contract"],
-    "status": "pre-mainnet",
+    "status": "ethereum-mainnet-agent-entry-first-mint-market-read-only-native-preparation-blocked",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/platform-compatibility.json"
   },
@@ -55,7 +55,7 @@
     "file": "faq.json",
     "summary": "Canonical answers about authorship, claims, Punk sponsorship, MCP trading, trait offers, Discord safety, audit, and launch status.",
     "tags": ["faq", "authorship", "claim", "punk", "mcp", "discord", "safety", "audit"],
-    "status": "pre-mainnet",
+    "status": "ethereum-phase-one-complete-agent-entry-first-mint-verified",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/faq.json"
   },
@@ -63,9 +63,9 @@
     "id": "agent-census",
     "title": "Agent Census status and receipt schema",
     "file": "census.json",
-    "summary": "The three decision states, 256/744 credential phases, continuously open public allocation, origin-stream fields, and current deployment status.",
+    "summary": "The three decision states, completed 8,488-position public phase, protected 256/744 credential phases, origin-stream fields, and current deployment status.",
     "tags": ["census", "accept", "refuse", "authority", "merkle", "receipt"],
-    "status": "pre-mainnet-schema",
+    "status": "ethereum-mainnet-agent-entry-first-mint-verified",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/census.json"
   },
@@ -75,7 +75,7 @@
     "file": "origin-stream.json",
     "summary": "Published ACCEPT, REFUSE, and INSUFFICIENT_AUTHORITY receipts with agent/operator roles, origin evidence, token and seed state, and explicit chain confirmation status.",
     "tags": ["origin", "receipt", "accept", "refuse", "provenance", "agent", "chain"],
-    "status": "verified-sepolia-canary",
+    "status": "verified-mainnet-token-zero-plus-historical-sepolia",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/origin-stream.json"
   },
@@ -88,6 +88,16 @@
     "status": "agent-layer-only",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/api/tokenworks-compatibility.json"
+  },
+  {
+    "id": "agent-integrations",
+    "title": "Owner-run agent integration ports",
+    "file": "agent-integrations.json",
+    "summary": "Direct owner-run connections to NFH, OpenSea, Art Blocks, Bankr automation, Biconomy scoped delegation, TokenWorks, FWA, Virtuals ACP, and Olas with explicit credential and transaction boundaries.",
+    "tags": ["agents", "integration", "mcp", "opensea", "artblocks", "bankr", "biconomy", "delegation", "tokenworks"],
+    "status": "owner-direct-read-and-prepare",
+    "contentType": "application/json",
+    "sourceUrl": "https://notforhumans.fun/api/agent-integrations.json"
   },
   {
     "id": "specimen-0256",
@@ -103,9 +113,9 @@
     "id": "contract-metadata",
     "title": "Collection contract metadata",
     "file": "contract-metadata.json",
-    "summary": "Public collection-level metadata for the planned NOT FOR HUMANS ERC-721 contract.",
+    "summary": "Public collection-level metadata for the canonical NOT FOR HUMANS Ethereum ERC-721 contract.",
     "tags": ["contract", "metadata", "collection", "erc721", "ethereum"],
-    "status": "pre-mainnet",
+    "status": "ethereum-mainnet-agent-entry-first-mint-verified",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/metadata/contract.json"
   },
@@ -115,7 +125,7 @@
     "file": "release-policy.json",
     "summary": "The authoritative origin, decision, supply, trust, expansion, economics, market, and source-of-truth policy.",
     "tags": ["policy", "release", "supply", "census", "trust", "market"],
-    "status": "pre-mainnet-policy",
+    "status": "ethereum-phase-one-complete-agent-entry-first-mint-policy",
     "contentType": "application/json",
     "sourceUrl": "https://notforhumans.fun/metadata/release-policy.json"
   }
