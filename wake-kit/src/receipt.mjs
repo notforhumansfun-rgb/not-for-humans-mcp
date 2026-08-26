@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
-import { WAKE_PACKET_SCHEMA } from './wake.mjs';
+import { getCanonicalVerifiedIdentity, validateTokenId, WAKE_PACKET_SCHEMA } from './wake.mjs';
+import { getHolderPresence } from './presence.mjs';
 
 export const RECEIPT_SCHEMA = 'nfh.local-work-receipt.v1';
 
@@ -29,31 +30,54 @@ function sourceUrls(values = []) {
   });
 }
 
-export function createReceipt({ packet, resultBytes, resultPath, summary, sources }, options = {}) {
+export async function createReceipt({ packet, resultBytes, resultPath, summary, sources }, options = {}) {
   if (!packet || packet.schema !== WAKE_PACKET_SCHEMA) throw new Error('packet must be an NFH wake packet.');
+  const tokenId = validateTokenId(packet.tokenId);
   if (packet.holderGate?.status !== 'HOLDER_VERIFIED_AT_WAKE'
     || packet.holderGate?.signatureVerified !== true
-    || packet.holderGate?.tokenId !== packet.tokenId) {
+    || packet.holderGate?.tokenId !== tokenId) {
     throw new Error('packet must contain a verified NFH holder gate.');
   }
   const bytes = Buffer.isBuffer(resultBytes) ? resultBytes : Buffer.from(resultBytes || '');
   if (bytes.length === 0) throw new Error('result must not be empty.');
   if (bytes.length > 1_000_000) throw new Error('result must be 1 MB or smaller.');
 
+  const identity = await getCanonicalVerifiedIdentity(tokenId, {
+    endpoint: options.endpoint,
+    fetchImpl: options.fetchImpl,
+  });
+  if (typeof packet.holderGate.owner !== 'string'
+    || packet.holderGate.owner.toLowerCase() !== identity.owner) {
+    throw new Error('The packet holder does not match the current NFH owner.');
+  }
+  const holderGate = await getHolderPresence(tokenId, identity.owner, {
+    fetchImpl: options.fetchImpl,
+    now: options.now,
+  });
+  const now = options.now instanceof Date ? options.now.getTime() : (options.now ?? Date.now());
+  const createdAt = options.createdAt || new Date(now).toISOString();
+  const created = Date.parse(createdAt);
+  if (!Number.isFinite(created)
+    || created < Date.parse(holderGate.ownershipVerifiedAt)
+    || created >= Date.parse(holderGate.expiresAt)
+    || created > now + 60_000) {
+    throw new Error('Receipt evidence must be created inside the active holder-proof window.');
+  }
+
   return {
     schema: RECEIPT_SCHEMA,
     status: 'SELF_REPORTED_UNVERIFIED',
     acceptedWork: false,
-    createdAt: options.createdAt || new Date().toISOString(),
-    tokenId: packet.tokenId,
+    createdAt,
+    tokenId,
     holderGate: {
-      status: packet.holderGate.status,
-      owner: packet.holderGate.owner,
-      method: packet.holderGate.method,
-      ownershipVerifiedAt: packet.holderGate.ownershipVerifiedAt,
-      expiresAt: packet.holderGate.expiresAt,
-      sourceUrl: packet.holderGate.sourceUrl,
-      note: 'Ownership was verified when the mission was created; recheck ownerOf for current ownership.',
+      status: holderGate.status,
+      owner: holderGate.owner,
+      method: holderGate.method,
+      ownershipVerifiedAt: holderGate.ownershipVerifiedAt,
+      expiresAt: holderGate.expiresAt,
+      sourceUrl: holderGate.sourceUrl,
+      note: 'Canonical ownership and owner heartbeat were revalidated when this local receipt was created.',
     },
     task: packet.task,
     summary: summaryText(summary),

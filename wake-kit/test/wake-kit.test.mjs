@@ -144,7 +144,56 @@ test('wake packet rejects an unverified identity', async () => {
   );
 });
 
-test('receipt hashes result bytes and stays explicitly unverified', () => {
+test('wake packet rejects a substituted MCP endpoint for holder verification', async () => {
+  await assert.rejects(
+    createWakePacket(
+      { tokenId: 1003, task: 'Perform one bounded public research task.' },
+      {
+        endpoint: 'https://attacker.example/mcp',
+        fetchImpl: toolFetch,
+        now: Date.parse('2026-08-21T12:01:00.000Z'),
+      },
+    ),
+    /canonical NFH MCP endpoint/,
+  );
+});
+
+test('wake packet fails closed when canonical ownership changes during creation', async () => {
+  let identityReads = 0;
+  await assert.rejects(
+    createWakePacket(
+      { tokenId: 1003, task: 'Perform one bounded public research task.' },
+      {
+        fetchImpl: async (endpoint, init) => {
+          if (init.method === 'GET') return toolFetch(endpoint, init);
+          const request = JSON.parse(init.body);
+          if (request.params.name !== 'get_agent_pfp') return toolFetch(endpoint, init);
+          identityReads += 1;
+          const owner = identityReads === 1
+            ? '0x1111111111111111111111111111111111111111'
+            : '0x2222222222222222222222222222222222222222';
+          return response({
+            result: {
+              structuredContent: {
+                tokenId: 1003,
+                pfpUrl: 'https://notforhumans.fun/pfp/1003',
+                claimed: true,
+                claimVerified: true,
+                owner,
+                seedFinalized: true,
+                seedHash: `0x${'12'.repeat(32)}`,
+              },
+            },
+          });
+        },
+        now: Date.parse('2026-08-21T12:01:00.000Z'),
+      },
+    ),
+    /owner changed/,
+  );
+});
+
+test('receipt hashes result bytes and stays explicitly unverified', async () => {
   const packet = {
     schema: WAKE_PACKET_SCHEMA,
     tokenId: 1003,
@@ -160,17 +209,53 @@ test('receipt hashes result bytes and stays explicitly unverified', () => {
       sourceUrl: 'https://mcp.notforhumans.fun/agent-presence/1003',
     },
   };
-  const receipt = createReceipt({
+  const receipt = await createReceipt({
     packet,
     resultBytes: Buffer.from('one result\n'),
     resultPath: '/tmp/result.md',
     summary: 'Mapped three integrations with source links.',
     sources: ['https://modelcontextprotocol.io/'],
-  }, { createdAt: '2026-08-21T12:05:00.000Z' });
+  }, {
+    createdAt: '2026-08-21T12:05:00.000Z',
+    now: Date.parse('2026-08-21T12:05:00.000Z'),
+    fetchImpl: toolFetch,
+  });
 
   assert.equal(receipt.status, 'SELF_REPORTED_UNVERIFIED');
   assert.equal(receipt.acceptedWork, false);
   assert.equal(receipt.authority.signed, false);
   assert.equal(receipt.holderGate.status, 'HOLDER_VERIFIED_AT_WAKE');
   assert.equal(receipt.artifact.sha256, '4ee64bb7837ca25a1a0c3613483eda1fe97f4f0cf7f61b6d2d7974c57257c67e');
+});
+
+test('receipt rejects a self-authored holder gate without fresh canonical proof', async () => {
+  const packet = {
+    schema: WAKE_PACKET_SCHEMA,
+    tokenId: 1003,
+    task: 'Map three useful MCP integration paths.',
+    holderGate: {
+      status: 'HOLDER_VERIFIED_AT_WAKE',
+      tokenId: 1003,
+      owner: '0x2222222222222222222222222222222222222222',
+      method: 'owner-signed-agent-presence-plus-live-ownerOf',
+      signatureVerified: true,
+      ownershipVerifiedAt: '2026-08-21T12:00:00.000Z',
+      expiresAt: '2026-08-21T12:30:00.000Z',
+      sourceUrl: 'https://mcp.notforhumans.fun/agent-presence/1003',
+    },
+  };
+
+  await assert.rejects(
+    createReceipt({
+      packet,
+      resultBytes: Buffer.from('forged result\n'),
+      resultPath: '/tmp/result.md',
+      summary: 'Claimed work without a real holder signature.',
+      sources: [],
+    }, {
+      now: Date.parse('2026-08-21T12:05:00.000Z'),
+      fetchImpl: toolFetch,
+    }),
+    /current NFH owner/,
+  );
 });

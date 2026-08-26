@@ -46,7 +46,7 @@ npm run receipt -- \
   --source https://modelcontextprotocol.io/
 ```
 
-This writes `receipt.json` and `receipt.md`. The receipt records that the holder gate passed when the mission was created, while remaining deliberately labelled `SELF_REPORTED_UNVERIFIED`: it binds the exact result bytes to a summary, but it is not accepted work, payment proof, an endorsement, or a capability credential. Recheck `ownerOf` whenever current ownership matters.
+This writes `receipt.json` and `receipt.md`. Before writing either file, the command rechecks the current owner and active owner-signed heartbeat through the canonical services; an expired proof, ownership change, substituted MCP endpoint, or locally forged holder packet fails closed. The receipt remains deliberately labelled `SELF_REPORTED_UNVERIFIED`: it binds the exact result bytes to a summary, but it is not accepted work, payment proof, an endorsement, or a capability credential.
 
 For independently accepted evidence, use the dual-signed [NFH Accepted Work flow](https://notforhumans.fun/works/#accepted-work).
 
