@@ -57,7 +57,7 @@ async function receipt(values) {
   const resultPath = resolve(values.result);
   const packet = JSON.parse(await readFile(packetPath, 'utf8'));
   const resultBytes = await readFile(resultPath);
-  const record = createReceipt({
+  const record = await createReceipt({
     packet,
     resultBytes,
     resultPath,

@@ -1,7 +1,47 @@
-import { callMcpTool, DEFAULT_MCP_ENDPOINT } from './mcp.mjs';
+import { callMcpTool, DEFAULT_MCP_ENDPOINT, validateEndpoint } from './mcp.mjs';
 import { getHolderPresence } from './presence.mjs';
 
 export const WAKE_PACKET_SCHEMA = 'nfh.wake-packet.v1';
+
+function canonicalMcpEndpoint(endpoint = DEFAULT_MCP_ENDPOINT) {
+  const normalized = validateEndpoint(endpoint);
+  if (normalized !== validateEndpoint(DEFAULT_MCP_ENDPOINT)) {
+    throw new Error('Holder verification must use the canonical NFH MCP endpoint.');
+  }
+  return DEFAULT_MCP_ENDPOINT;
+}
+
+function verifiedIdentity(identity, tokenId) {
+  if (identity.tokenId !== tokenId) throw new Error('The MCP returned a different token ID than requested.');
+  if (identity.claimed !== true || identity.claimVerified !== true) {
+    throw new Error('The MCP could not verify this NFH as claimed.');
+  }
+  if (identity.pfpUrl !== `https://notforhumans.fun/pfp/${tokenId}`
+    || !/^0x[a-fA-F0-9]{40}$/.test(identity.owner || '')) {
+    throw new Error('The MCP returned an invalid canonical identity record.');
+  }
+  return { ...identity, owner: identity.owner.toLowerCase() };
+}
+
+export async function getCanonicalVerifiedIdentity(tokenId, options = {}) {
+  const endpoint = canonicalMcpEndpoint(options.endpoint);
+  const identity = await callMcpTool('get_agent_pfp', { tokenId }, {
+    endpoint,
+    fetchImpl: options.fetchImpl,
+  });
+  return verifiedIdentity(identity, tokenId);
+}
+
+function verifiedCreationTime(value, holderGate, now) {
+  const createdAt = value || new Date(now).toISOString();
+  const created = Date.parse(createdAt);
+  const verified = Date.parse(holderGate.ownershipVerifiedAt);
+  const expires = Date.parse(holderGate.expiresAt);
+  if (!Number.isFinite(created) || created < verified || created >= expires || created > now + 60_000) {
+    throw new Error('Wake evidence must be created inside the active holder-proof window.');
+  }
+  return createdAt;
+}
 
 function publicText(value, label, minimum, maximum) {
   if (typeof value !== 'string') throw new Error(`${label} must be text.`);
@@ -24,19 +64,10 @@ export function validateTokenId(value) {
 export async function createWakePacket(input, options = {}) {
   const tokenId = validateTokenId(input.tokenId);
   const task = publicText(input.task, 'task', 8, 280);
-  const endpoint = options.endpoint || DEFAULT_MCP_ENDPOINT;
+  const endpoint = canonicalMcpEndpoint(options.endpoint);
   const toolOptions = { endpoint, fetchImpl: options.fetchImpl };
 
-  const identity = await callMcpTool('get_agent_pfp', { tokenId }, toolOptions);
-
-  if (identity.tokenId !== tokenId) throw new Error('The MCP returned a different token ID than requested.');
-  if (identity.claimed !== true || identity.claimVerified !== true) {
-    throw new Error('The MCP could not verify this NFH as claimed.');
-  }
-  if (identity.pfpUrl !== `https://notforhumans.fun/pfp/${tokenId}`
-    || !/^0x[a-fA-F0-9]{40}$/.test(identity.owner || '')) {
-    throw new Error('The MCP returned an invalid canonical identity record.');
-  }
+  const identity = await getCanonicalVerifiedIdentity(tokenId, toolOptions);
   const [holderGate, nextAction] = await Promise.all([
     getHolderPresence(tokenId, identity.owner, {
       presenceBase: options.presenceBase,
@@ -56,7 +87,21 @@ export async function createWakePacket(input, options = {}) {
     throw new Error('The MCP next-action authority boundary was missing or unsafe.');
   }
 
-  const createdAt = options.createdAt || new Date().toISOString();
+  // Re-read both canonical sources immediately before constructing evidence so
+  // an ownership change during the earlier requests fails closed.
+  const finalIdentity = await getCanonicalVerifiedIdentity(tokenId, toolOptions);
+  if (finalIdentity.owner !== identity.owner) {
+    throw new Error('The current NFH owner changed while the wake packet was being created.');
+  }
+  const finalHolderGate = await getHolderPresence(tokenId, finalIdentity.owner, {
+    fetchImpl: options.fetchImpl,
+    now: options.now,
+  });
+  if (finalHolderGate.owner !== holderGate.owner) {
+    throw new Error('The NFH holder proof changed while the wake packet was being created.');
+  }
+  const now = options.now instanceof Date ? options.now.getTime() : (options.now ?? Date.now());
+  const createdAt = verifiedCreationTime(options.createdAt, finalHolderGate, now);
   return {
     schema: WAKE_PACKET_SCHEMA,
     createdAt,
@@ -64,14 +109,14 @@ export async function createWakePacket(input, options = {}) {
     task,
     identity: {
       label: `NFH #${tokenId}`,
-      pfpUrl: identity.pfpUrl,
-      owner: identity.owner,
+      pfpUrl: finalIdentity.pfpUrl,
+      owner: finalIdentity.owner,
       ownershipVerifiedAtWake: true,
-      seedFinalized: identity.seedFinalized === true,
-      seedHash: identity.seedHash || null,
+      seedFinalized: finalIdentity.seedFinalized === true,
+      seedHash: finalIdentity.seedHash || null,
       sourceTool: 'get_agent_pfp',
     },
-    holderGate,
+    holderGate: finalHolderGate,
     networkState: {
       state: nextAction.state,
       recommendedAction: nextAction.recommendedAction,
