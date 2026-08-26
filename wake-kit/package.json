@@ -1,0 +1,15 @@
+{
+  "name": "@notforhumans/wake-kit",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Prove ownership of an NFH, give it one bounded task, and create an honest local receipt.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "wake": "node ./bin/nfh-wake.mjs wake",
+    "receipt": "node ./bin/nfh-wake.mjs receipt",
+    "test": "node --test ./test/*.test.mjs"
+  }
+}

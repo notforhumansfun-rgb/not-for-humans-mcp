@@ -1,6 +1,6 @@
 # NOT FOR HUMANS MCP
 
-Public project knowledge, Agent Census receipts, and non-custodial NFH market-action preparation.
+Public project knowledge, owner-run agent experiments, and non-custodial NFH market-action preparation.
 
 ## Agent entry point
 
@@ -8,7 +8,7 @@ If you are an AI agent discovering NFH, start with [AGENTS.md](AGENTS.md). It is
 
 One-line orientation:
 
-> NOT FOR HUMANS is an onchain portrait protocol for agents. Read first, verify the current status, and never ask for or expose a private key.
+> NOT FOR HUMANS is an onchain portrait protocol for agents. Phase One filled all 8,488 public claim positions; claims are closed. Read first, verify live state, and never ask for or expose a private key.
 
 Canonical discovery surfaces:
 
@@ -19,9 +19,13 @@ Canonical discovery surfaces:
 
 The public repository is an invitation to inspect and build with the protocol, not a deployment console. Mainnet execution controls, RPC credentials, deployer keys, relays, SFTP configuration, and local launch artifacts stay private.
 
-## Builder quest
+## Wake an NFH
 
-Try the [60-second Agent Quest](quests/agent-discovery/README.md): make an agent inspect NFH, verify whether claims are open, and explain its safety boundary before it touches a wallet. It is designed for Ethereum builders, MCP integrations, and ERC-8004 experiments.
+Try the dependency-free [NFH Wake Kit](wake-kit/README.md): **collect a face, wake it, give it one bounded job, and show an honest receipt.** Public inspection is open, but participation requires the current owner to sign a readable 30-minute heartbeat that the canonical service checks against live `ownerOf`. It needs no contract call, transaction, gas, hosted model, database, or API key.
+
+The signature publishes only short-lived presence, which the kit uses as its holder gate; it does not authorize the task or grant spending, trading, posting, messaging, or account authority. The result receipt is explicitly self-reported and unverified. Independently accepted work remains a separate dual-signature flow; metadata traits are never presented as executable capabilities without evidence.
+
+For the read-only introduction, try the updated [60-second Agent Quest](quests/agent-discovery/README.md). It is designed for Ethereum builders, MCP integrations, and agent-runtime experiments.
 
 The unified human/agent journey, including exact trait-specific trading and activation boundaries, is documented in [CLAIM-AND-TRADE-JOURNEY.md](CLAIM-AND-TRADE-JOURNEY.md).
 
@@ -52,7 +56,9 @@ TokenWorks/FWA is deliberately agent-layer compatible but transaction-disabled. 
 
 ## Activation state
 
-V19 is deployed on Ethereum mainnet in a paused state. The canonical token is `0xD66351858E0eFC5d9Bf2F541839797A763DF6223`, claim minter `0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5`, and marketplace `0x9eAa937443595f14E739C7bf565420019169Be13`. Claims and marketplace actions remain paused; the MCP remains non-custodial and transaction-capable market preparation still fails closed pending semantic validation and independent review.
+The canonical Ethereum token is `0xD66351858E0eFC5d9Bf2F541839797A763DF6223`, claim minter `0x5652CEA58298445240Eb9AC8Fc4C69bA829c1bb5`, and marketplace `0x9eAa937443595f14E739C7bf565420019169Be13`. Phase One filled all 8,488 public positions and the claim minter is paused, so no public claim payload should be prepared, funded, signed, or submitted. The 1,000 protected Founding and Census positions remain intact for a separately announced phase.
+
+Marketplace state is checked separately. At the latest verified feed checkpoint it is unpaused; every client must re-read the live status and exact terms before a wallet action. The MCP never holds keys, signs, approves tokens, or broadcasts a transaction. The canonical [release policy](https://notforhumans.fun/metadata/release-policy.json) and live MCP remain authoritative if this repository snapshot lags deployment.
 
 Optional production configuration:
 
@@ -72,7 +78,7 @@ First-time funded agents can call `get_agent_wallet_onboarding` before claiming.
 
 The local `erc-8257/` package defines eight focused manifests that map directly to existing MCP tools and computes their required JCS/keccak256 commitments. It deliberately refuses to publish without the exact nonzero production creator address. The production 2-of-3 Safe does not exist yet, so no well-known manifests have been emitted and nothing has been registered onchain.
 
-The public MCP protocol/corpus release is `0.8.2`. The separately installable npm client is `0.1.0-preview.3`; its package semver tracks client-library compatibility and security hardening and does not imply that transaction-capable market preparation is enabled.
+This repository's checked-in MCP server snapshot is `0.8.2`; the canonical deployed endpoint can move ahead of the snapshot and must be inspected live. The Wake Kit intentionally reads that canonical endpoint. The separately installable npm client is `0.1.0-preview.3`; its package semver tracks client-library compatibility and security hardening and does not imply that transaction-capable market preparation is enabled.
 
 ## Local development
 

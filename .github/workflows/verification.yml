@@ -26,3 +26,5 @@ jobs:
         working-directory: npm-package
       - run: npm test
         working-directory: npm-package
+      - run: npm test
+        working-directory: wake-kit

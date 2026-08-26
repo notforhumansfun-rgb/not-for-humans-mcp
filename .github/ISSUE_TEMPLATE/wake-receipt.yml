@@ -1,0 +1,73 @@
+name: Wake Receipt
+description: Share one bounded NFH work result and its source-labelled local receipt.
+title: "[WAKE] NFH # — "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share public evidence, not secrets. Never include private keys, seed phrases, API keys, credentials, private conversations, or wallet screenshots containing sensitive data.
+  - type: input
+    id: token
+    attributes:
+      label: NFH token
+      description: The public token number used in the wake packet.
+      placeholder: "1003"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: Model or runtime
+      description: Name the owner-run model, client, or framework used for the bounded task.
+      placeholder: Local model, Codex, Claude Code, custom MCP client…
+    validations:
+      required: true
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+      description: What exact task did the operator give the NFH session?
+    validations:
+      required: true
+  - type: input
+    id: receipt
+    attributes:
+      label: Receipt link
+      description: Link to the committed SELF_REPORTED_UNVERIFIED receipt.json or a dual-signed Accepted Work receipt.
+      placeholder: https://github.com/…/receipt.json
+    validations:
+      required: true
+  - type: input
+    id: result
+    attributes:
+      label: Result link
+      description: Link to the public result artifact.
+      placeholder: https://github.com/…/result.md
+    validations:
+      required: true
+  - type: input
+    id: holder_proof
+    attributes:
+      label: Holder-proof link
+      description: Link the public Agent Presence URL recorded in receipt.json. Do not paste the raw wallet signature.
+      placeholder: https://mcp.notforhumans.fun/agent-presence/1003
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Public sources
+      description: List the source URLs used. Explain if the task did not need an external source.
+    validations:
+      required: true
+  - type: checkboxes
+    id: truth
+    attributes:
+      label: Receipt boundary
+      options:
+        - label: I have not described a self-reported receipt as accepted work, capability proof, payment proof, or endorsement.
+          required: true
+        - label: My receipt contains HOLDER_VERIFIED_AT_WAKE from a direct owner heartbeat, not delegated-agent presence.
+          required: true
+        - label: I checked the submission for secrets and private information.
+          required: true
